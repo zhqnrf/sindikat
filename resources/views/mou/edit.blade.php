@@ -1,15 +1,13 @@
 @extends('layouts.app')
 
-@section('title', 'Tambah MOU')
-@section('page-title', 'Tambah Data MOU') {{-- Tetap di sini jika layout Anda membutuhkannya --}}
+@section('title', 'Edit Data MOU')
+@section('page-title', 'Edit Data MOU') {{-- Tetap di sini jika layout Anda membutuhkannya --}}
 
 @section('content')
     {{-- 
       =====================================================
-      STYLE KUSTOM ANDA (DARI CONTOH 'Tambah Mahasiswa')
+      STYLE KUSTOM STANDAR (Maroon Header & Pill Button)
       =====================================================
-      Saya memodifikasi sedikit dengan menghapus '.room-info-box' 
-      karena tidak relevan untuk form MOU ini.
     --}}
     <style>
         :root {
@@ -54,9 +52,6 @@
             border-bottom-left-radius: 10px;
         }
 
-        /* CSS ini WAJIBkan .form-control ada di dalam .input-group
-              karena border-left-nya dihilangkan.
-            */
         .form-control,
         .form-select {
             border-left: none;
@@ -128,25 +123,25 @@
 
     {{-- 
       =====================================================
-      STRUKTUR HTML BARU MENGIKUTI STYLE DI ATAS
+      STRUKTUR HTML BARU MENGIKUTI STYLE STANDAR
       =====================================================
     --}}
     <div class="row justify-content-center animate-up">
-        <div class="col-md-9 col-lg-8"> {{-- Sedikit lebih lebar dari form mhs --}}
+        <div class="col-md-9 col-lg-8">
             <div class="form-card">
 
                 {{-- CARD HEADER --}}
                 <div class="card-header-custom">
                     <h4 class="mb-0 fw-bold">
-                        <i class="bi bi-file-earmark-plus-fill me-2"></i> Form Tambah MOU
+                        <i class="bi bi-pencil-square me-2"></i> Form Edit MOU
                     </h4>
-                    <p class="mb-0 small opacity-75">Isi detail Memorandum of Understanding di bawah ini.</p>
+                    <p class="mb-0 small opacity-75">Perbarui detail Memorandum of Understanding.</p>
                 </div>
 
                 {{-- CARD BODY --}}
                 <div class="card-body p-4 p-md-5">
 
-                    {{-- ERROR VALIDASI (Menggunakan style dari 'Mahasiswa') --}}
+                    {{-- ERROR VALIDASI --}}
                     @if ($errors->any())
                         <div class="alert alert-danger rounded-3 shadow-sm mb-4">
                             <h6 class="alert-heading fw-bold">Whoops! Ada masalah.</h6>
@@ -158,8 +153,9 @@
                         </div>
                     @endif
 
-                    <form action="{{ route('mou.store') }}" method="POST" enctype="multipart/form-data">
+                    <form action="{{ route('mou.update', $mou->id) }}" method="POST" enctype="multipart/form-data">
                         @csrf
+                        @method('PUT') {{-- PENTING untuk method UPDATE --}}
 
                         {{-- SEKSI 1 --}}
                         <h6 class="text-muted text-uppercase fw-bold mb-3" style="font-size: 0.75rem; letter-spacing: 1px;">
@@ -171,9 +167,8 @@
                             <div class="input-group">
                                 <span class="input-group-text"><i class="bi bi-building"></i></span>
                                 <input type="text" class="form-control @error('nama_universitas') is-invalid @enderror"
-                                    name="nama_universitas" value="{{ old('nama_universitas') }}"
-                                    placeholder="Contoh: Universitas Teknologi Cemerlang" required>
-                                {{-- Feedback validasi dipindah ke luar .input-group --}}
+                                    name="nama_universitas" value="{{ old('nama_universitas', $mou->nama_universitas) }}"
+                                    required>
                             </div>
                             @error('nama_universitas')
                                 <div class="invalid-feedback d-block">{{ $message }}</div>
@@ -186,7 +181,8 @@
                                 <div class="input-group">
                                     <span class="input-group-text"><i class="bi bi-calendar-plus"></i></span>
                                     <input type="date" class="form-control @error('tanggal_masuk') is-invalid @enderror"
-                                        name="tanggal_masuk" value="{{ old('tanggal_masuk') }}" required>
+                                        name="tanggal_masuk"
+                                        value="{{ old('tanggal_masuk', $mou->tanggal_masuk->format('Y-m-d')) }}" required>
                                 </div>
                                 @error('tanggal_masuk')
                                     <div class="invalid-feedback d-block">{{ $message }}</div>
@@ -197,7 +193,8 @@
                                 <div class="input-group">
                                     <span class="input-group-text"><i class="bi bi-calendar-check"></i></span>
                                     <input type="date" class="form-control @error('tanggal_keluar') is-invalid @enderror"
-                                        name="tanggal_keluar" value="{{ old('tanggal_keluar') }}" required>
+                                        name="tanggal_keluar"
+                                        value="{{ old('tanggal_keluar', $mou->tanggal_keluar->format('Y-m-d')) }}" required>
                                 </div>
                                 @error('tanggal_keluar')
                                     <div class="invalid-feedback d-block">{{ $message }}</div>
@@ -209,30 +206,40 @@
 
                         {{-- SEKSI 2 --}}
                         <h6 class="text-muted text-uppercase fw-bold mb-3" style="font-size: 0.75rem; letter-spacing: 1px;">
-                            Upload Dokumen
+                            Upload Dokumen (Opsional)
                         </h6>
 
                         <div class="mb-3">
-                            <label class="form-label">Upload File MOU <span class="text-danger">*</span></label>
+                            <label class="form-label">Upload File MOU <span class="text-info">(Opsional)</span></label>
                             <div class="input-group">
                                 <span class="input-group-text"><i class="bi bi-file-earmark-pdf-fill"></i></span>
                                 <input type="file" class="form-control @error('file_mou') is-invalid @enderror"
-                                    name="file_mou" required>
+                                    name="file_mou">
                             </div>
-                            <small class="form-text text-muted ms-1">Format: PDF/DOCX. Maksimal 5MB.</small>
+                            <small class="form-text text-muted ms-1">
+                                File saat ini: <a href="{{ Storage::url($mou->file_mou) }}" target="_blank">Lihat File</a>
+                                <br>
+                                Kosongkan jika tidak ingin mengubah file. (PDF/DOCX, Maks 5MB)
+                            </small>
                             @error('file_mou')
                                 <div class="invalid-feedback d-block">{{ $message }}</div>
                             @enderror
                         </div>
 
                         <div class="mb-3">
-                            <label class="form-label">Upload Surat Keterangan <span class="text-danger">*</span></label>
+                            <label class="form-label">Upload Surat Keterangan <span
+                                    class="text-info">(Opsional)</span></label>
                             <div class="input-group">
                                 <span class="input-group-text"><i class="bi bi-file-earmark-image-fill"></i></span>
                                 <input type="file" class="form-control @error('surat_keterangan') is-invalid @enderror"
-                                    name="surat_keterangan" required>
+                                    name="surat_keterangan">
                             </div>
-                            <small class="form-text text-muted ms-1">Format: PDF/JPG/PNG. Maksimal 5MB.</small>
+                            <small class="form-text text-muted ms-1">
+                                File saat ini: <a href="{{ Storage::url($mou->surat_keterangan) }}" target="_blank">Lihat
+                                    Surat</a>
+                                <br>
+                                Kosongkan jika tidak ingin mengubah file. (PDF/JPG/PNG, Maks 5MB)
+                            </small>
                             @error('surat_keterangan')
                                 <div class="invalid-feedback d-block">{{ $message }}</div>
                             @enderror
@@ -248,11 +255,10 @@
                         <div class="mb-3">
                             <label class="form-label">Keterangan</label>
                             <div class="input-group">
-                                {{-- Ikon untuk textarea ditaruh di atas agar align --}}
                                 <span class="input-group-text align-items-start pt-3"><i
                                         class="bi bi-pencil-square"></i></span>
                                 <textarea class="form-control @error('keterangan') is-invalid @enderror" name="keterangan" rows="4"
-                                    placeholder="Tambahkan catatan jika perlu...">{{ old('keterangan') }}</textarea>
+                                    placeholder="Tambahkan catatan jika perlu...">{{ old('keterangan', $mou->keterangan) }}</textarea>
                             </div>
                             @error('keterangan')
                                 <div class="invalid-feedback d-block">{{ $message }}</div>
@@ -265,7 +271,7 @@
                                 <i class="bi bi-arrow-left me-2"></i> Kembali
                             </a>
                             <button type="submit" class="btn btn-maroon">
-                                Simpan Data <i class="bi bi-check-lg ms-2"></i>
+                                Simpan Perubahan <i class="bi bi-check-lg ms-2"></i>
                             </button>
                         </div>
                     </form>
@@ -274,4 +280,39 @@
             </div>
         </div>
     </div>
+
+    {{-- Script untuk SweetAlert (dari kode Anda) --}}
+    @if (session('success'))
+        <script>
+            document.addEventListener('DOMContentLoaded', function() {
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Berhasil!',
+                    text: '{{ session('success') }}',
+                    showConfirmButton: false,
+                    timer: 1800,
+                    toast: true,
+                    position: 'top-end'
+                });
+            });
+        </script>
+    @endif
+
+    @if (session('error'))
+        <script>
+            document.addEventListener('DOMContentLoaded', function() {
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Perhatian!',
+                    text: '{{ session('error') }}',
+                    showConfirmButton: true
+                });
+            });
+        </script>
+    @endif
+@endsection
+
+@section('scripts')
+    {{-- Pastikan SweetAlert di-load, jika belum ada di layout utama --}}
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 @endsection

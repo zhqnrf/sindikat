@@ -78,6 +78,7 @@ Route::middleware('auth')->group(function () {
         Route::get('/', [MouController::class, 'index'])->name('index');
         Route::get('/create', [MouController::class, 'create'])->name('create');
         Route::post('/', [MouController::class, 'store'])->name('store');
+        Route::post('/import', [MouController::class, 'importExcel'])->name('import_excel');
         Route::get('/{mou}', [MouController::class, 'show'])->name('show');
         Route::get('/{mou}/edit', [MouController::class, 'edit'])->name('edit');
         Route::put('/{mou}', [MouController::class, 'update'])->name('update');

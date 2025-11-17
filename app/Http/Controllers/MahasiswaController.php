@@ -7,7 +7,9 @@ use App\Models\Ruangan;
 use App\Models\RuanganKetersediaan;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-use Barryvdh\DomPDF\Facade\Pdf; // <-- Cukup satu kali di sini
+use Carbon\CarbonPeriod;
+use Illuminate\Support\Facades\File;
+use Barryvdh\DomPDF\Facade\Pdf; 
 use Carbon\Carbon;
 
 class MahasiswaController extends Controller
@@ -466,31 +468,121 @@ class MahasiswaController extends Controller
         return response()->json($data);
     }
 
-    /**
-     * [METHOD BARU]
-     * Generate Sertifikat PDF untuk Mahasiswa (via Admin).
-     */
-    public function generateSertifikat($id)
+public function showSertifikatSummary($id)
     {
         $mahasiswa = Mahasiswa::findOrFail($id);
         
-        // (Asumsi model Mahasiswa sudah punya getAbsensiPercentageAttribute)
-        $percentage = $mahasiswa->absensi_percentage; 
-        $totalHadir = $mahasiswa->absensis()->where('type', 'hadir')->count();
+        $startDate = $mahasiswa->tanggal_mulai;
+        $endDate = $mahasiswa->tanggal_berakhir;
+        $totalExpectedDays = 0;
+        
+        if ($startDate && $endDate) {
+            $period = CarbonPeriod::create($startDate, $endDate);
+            foreach ($period as $date) {
+                if ($mahasiswa->weekend_aktif) {
+                    $totalExpectedDays++;
+                } 
+                elseif (!$date->isWeekend()) {
+                    $totalExpectedDays++;
+                }
+            }
+        }
+
+        $totalActualDays = $mahasiswa->absensis()
+            ->select(DB::raw('DATE(created_at) as date'))
+            ->distinct()
+            ->count();
+            
+        $participationRate = 0;
+        if ($totalExpectedDays > 0) {
+            $participationRate = round(($totalActualDays / $totalExpectedDays) * 100, 1);
+        }
+        
+        $totalAlpaDays = $totalExpectedDays - $totalActualDays;
+        $totalAlpaDays = max(0, $totalAlpaDays);
+
+        return view('mahasiswa.sertifikat', compact(
+            'mahasiswa',
+            'totalExpectedDays',
+            'totalActualDays',
+            'totalAlpaDays',
+            'participationRate'
+        ));
+    }
+
+
+    /**
+     * [METHOD DIUBAH]
+     * Generate Sertifikat PDF untuk Mahasiswa (via Admin).
+     */
+    public function generateSertifikat(Request $request, $id) // <-- [DIUBAH] Tambahkan Request $request
+    {
+        $mahasiswa = Mahasiswa::findOrFail($id);
+        $percentage = 0;
+        $totalActualDays = 0;
+
+        // --- [LOGIKA BARU] Cek input override ---
+        // Cek apakah admin mengisi field 'override_percentage' dan nilainya valid
+        if ($request->filled('override_percentage') && is_numeric($request->override_percentage)) {
+            
+            // 1. Jika di-override, gunakan nilai manual
+            $percentage = (float) $request->override_percentage;
+            
+            // Kita tetap hitung total hadir untuk data di PDF (jika perlu)
+            $totalActualDays = $mahasiswa->absensis()
+                ->select(DB::raw('DATE(created_at) as date'))
+                ->distinct()
+                ->count();
+
+        } else {
+            
+            // 2. Jika tidak, hitung otomatis (logika yang sama dari summary)
+            $startDate = $mahasiswa->tanggal_mulai;
+            $endDate = $mahasiswa->tanggal_berakhir;
+            $totalExpectedDays = 0;
+            
+            if ($startDate && $endDate) {
+                $period = CarbonPeriod::create($startDate, $endDate);
+                foreach ($period as $date) {
+                    if ($mahasiswa->weekend_aktif) {
+                        $totalExpectedDays++;
+                    } 
+                    elseif (!$date->isWeekend()) {
+                        $totalExpectedDays++;
+                    }
+                }
+            }
+
+            $totalActualDays = $mahasiswa->absensis()
+                ->select(DB::raw('DATE(created_at) as date'))
+                ->distinct()
+                ->count();
+                
+            if ($totalExpectedDays > 0) {
+                $percentage = round(($totalActualDays / $totalExpectedDays) * 100, 1); 
+            }
+        }
+        
+        // --- Logika Background (dari langkah sebelumnya) ---
+        $path = public_path('background.png');
+        $base64 = ''; 
+        if (File::exists($path)) {
+            $type = pathinfo($path, PATHINFO_EXTENSION);
+            $fileData = File::get($path);
+            $base64 = 'data:image/' . $type . ';base64,' . base64_encode($fileData);
+        }
+        // --- Akhir Logika Background ---
 
         $data = [
             'mahasiswa' => $mahasiswa,
-            'percentage' => $percentage,
-            'total_hadir' => $totalHadir,
+            'percentage' => $percentage,       // Persentase (otomatis atau override)
+            'total_hadir' => $totalActualDays, // Total hari hadir
             'tanggal_terbit' => Carbon::now()->isoFormat('D MMMM YYYY'),
+            'bg_base64' => $base64,
         ];
 
-        // Load view template sertifikat
-        $pdf = Pdf::loadView('sertifikat.template', $data); // <-- Error terjadi di sini
-        
+        $pdf = Pdf::loadView('sertifikat.template', $data);
         $pdf->setPaper('a4', 'landscape');
-
-        // Stream (tampilkan di browser)
         $fileName = 'Sertifikat - ' . $mahasiswa->nm_mahasiswa . '.pdf';
         return $pdf->stream($fileName);
     }

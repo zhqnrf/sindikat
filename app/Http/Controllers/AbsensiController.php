@@ -8,7 +8,9 @@ use App\Models\Ruangan;
 use Illuminate\Http\Request;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\File;
-use Barryvdh\DomPDF\Facade\Pdf; // <-- Cukup satu kali di sini
+use Barryvdh\DomPDF\Facade\Pdf;
+use Carbon\CarbonPeriod;
+use Illuminate\Support\Facades\DB;
 
 class AbsensiController extends Controller
 {
@@ -258,44 +260,65 @@ class AbsensiController extends Controller
         return null;
     }
 
-    public function generateSertifikatPublik($token)
+public function generateSertifikatPublik($token)
     {
         $mahasiswa = Mahasiswa::where('share_token', $token)->firstOrFail();
 
-        // [PENTING] Validasi: Jangan izinkan download jika belum selesai
         if (now()->lt($mahasiswa->tanggal_berakhir)) {
-            return abort(403, 'Sertifikat belum dapat diunduh hingga masa magang Anda berakhir.');
+            return abort(403, 'Sertifikat belum dapat diunduh.');
         }
 
-        // --- Logika Generate PDF (Sama seperti di MahasiswaController) ---
+        // --- [LOGIKA PERHITUNGAN YANG DIPERBAIKI] ---
+        $startDate = $mahasiswa->tanggal_mulai;
+        $endDate = $mahasiswa->tanggal_berakhir;
+        $totalExpectedDays = 0;
+        
+        if ($startDate && $endDate) {
+            $period = CarbonPeriod::create($startDate, $endDate);
+            foreach ($period as $date) {
+                if ($mahasiswa->weekend_aktif) {
+                    $totalExpectedDays++;
+                } 
+                elseif (!$date->isWeekend()) {
+                    $totalExpectedDays++;
+                }
+            }
+        }
 
-        $percentage = $mahasiswa->absensi_percentage;
-        $totalHadir = $mahasiswa->absensis()->where('type', 'hadir')->count();
+        $totalActualDays = $mahasiswa->absensis()
+            ->select(DB::raw('DATE(created_at) as date'))
+            ->distinct()
+            ->count();
+            
+        $percentage = 0;
+        if ($totalExpectedDays > 0) {
+            $percentage = round(($totalActualDays / $totalExpectedDays) * 100, 1); 
+        }
+        // --- [AKHIR PERBAIKAN] ---
 
-        // Ambil path background
-        // Ganti 'background.png' jika nama file Anda berbeda
-        $path = public_path('background.png');
-        $base64 = ''; // Default string kosong
 
+        // --- Logika Background ---
+        $path = public_path('background.png'); 
+        $base64 = ''; 
         if (File::exists($path)) {
             $type = pathinfo($path, PATHINFO_EXTENSION);
             $fileData = File::get($path);
             $base64 = 'data:image/' . $type . ';base64,' . base64_encode($fileData);
         }
+        // --- Akhir Logika Background ---
 
         $data = [
             'mahasiswa' => $mahasiswa,
-            'percentage' => $percentage,
-            'total_hadir' => $totalHadir,
+            'percentage' => $percentage, // Persentase otomatis yang sudah benar
+            'total_hadir' => $totalActualDays,
             'tanggal_terbit' => Carbon::now()->isoFormat('D MMMM YYYY'),
-            'bg_base64' => $base64, // Kirim base64 ke view
+            'bg_base64' => $base64, 
         ];
 
         $pdf = Pdf::loadView('sertifikat.template', $data);
         $pdf->setPaper('a4', 'landscape');
-
-        // Perbedaan utama: gunakan 'download()' agar langsung mengunduh file
+        
         $fileName = 'Sertifikat - ' . $mahasiswa->nm_mahasiswa . '.pdf';
-        return $pdf->download($fileName);
+        return $pdf->download($fileName); 
     }
 }

@@ -327,7 +327,7 @@
                         <th>Ruangan</th>
                         <th class="text-center">Sisa Waktu</th>
                         <th class="text-center">Status</th>
-                        <th class="text-center" width="20%">Aksi</th> 
+                        <th class="text-center" width="20%">Aksi</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -381,13 +381,11 @@
                                 <a href="{{ route('mahasiswa.edit', $m->id) }}" class="action-btn" title="Edit">
                                     <i class="bi bi-pencil-square"></i>
                                 </a>
-                                
-                                <a href="{{ route('mahasiswa.sertifikat', $m->id) }}" 
-                                   class="action-btn" 
-                                   title="Preview Sertifikat" 
-                                   target="_blank">
-                                    <i class="bi bi-file-earmark-pdf-fill"></i>
-                                </a>
+
+                                <a href="{{ route('mahasiswa.sertifikat.summary', $m->id) }}" class="action-btn"
+                                    title="Ringkasan Sertifikat">
+                                    <i class="bi bi-bar-chart-line-fill"></i> </a>
+
                                 <form action="{{ route('mahasiswa.destroy', $m->id) }}" method="POST"
                                     class="d-inline delete-form" style="margin-left: 2px;">
                                     @csrf @method('DELETE')

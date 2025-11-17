@@ -13,12 +13,6 @@
             --text-muted: #64748b;
             --card-radius: 16px;
             --transition: 0.3s ease;
-            
-            /* [BARU] Warna untuk box sertifikat */
-            --success-bg: #d1fae5;
-            --success-border: #065f46;
-            --warning-bg: #fffbeb;
-            --warning-border: #f59e0b;
         }
 
         /* --- Card Styling --- */
@@ -89,19 +83,6 @@
             border-radius: 12px;
             padding: 1.5rem;
             margin-top: 2rem;
-        }
-        
-        /* [BARU] Style untuk box sertifikat */
-        .certificate-box {
-            background-color: var(--success-bg);
-            border: 1px solid var(--success-border);
-            border-radius: 12px;
-            padding: 1.5rem;
-            margin-top: 1.5rem;
-        }
-        .certificate-box-pending {
-            background-color: var(--warning-bg);
-            border: 1px solid var(--warning-border);
         }
 
         .link-wrapper {
@@ -189,11 +170,10 @@
                             <div class="info-group">
                                 <div class="info-label"><i class="bi bi-calendar-range me-1"></i> Sisa Masa Magang</div>
                                 <div class="info-value">
-                                    {{-- Menggunakan accessor sisa_hari dari Model --}}
-                                    @if ($mahasiswa->sisa_hari == 'Selesai')
-                                        <span class="text-danger fw-bold">Selesai</span>
+                                    @if ($mahasiswa->sisa_hari > 0)
+                                        <span class="text-primary fw-bold">{{ $mahasiswa->sisa_hari }} Hari</span>
                                     @else
-                                        <span class="text-primary fw-bold">{{ $mahasiswa->sisa_hari }}</span>
+                                        <span class="text-danger fw-bold">Berakhir</span>
                                     @endif
                                 </div>
                             </div>
@@ -221,49 +201,12 @@
                                id="absensiLink">
                                 {{ route('absensi.card', $mahasiswa->share_token) }}
                             </a>
-                            <button class="btn btn-sm btn-light border" onclick="copyLink('absensiLink')" title="Salin Link">
+                            <button class="btn btn-sm btn-light border" onclick="copyLink()" title="Salin Link">
                                 <i class="bi bi-clipboard"></i>
                             </button>
                         </div>
                     </div>
-                    
-                    @if (now()->gt($mahasiswa->tanggal_berakhir))
-                        <div class="certificate-box">
-                            <h6 class="fw-bold mb-3 text-dark d-flex align-items-center">
-                                <i class="bi bi-patch-check-fill me-2" style="color: var(--success-border);"></i> Sertifikat & Penilaian
-                            </h6>
 
-                            <div class="info-group text-center mb-3">
-                                <div class="info-label">Tingkat Kehadiran Akhir</div>
-                                <div class="info-value display-6 fw-bold" style="color: var(--success-border);">
-                                    {{ $mahasiswa->absensi_percentage }}%
-                                </div>
-                            </div>
-
-                            <a href="{{ route('mahasiswa.sertifikat', $mahasiswa->id) }}" target="_blank" class="btn btn-success w-100 fw-bold mb-3">
-                                <i class="bi bi-eye-fill me-2"></i> Preview Sertifikat (Admin)
-                            </a>
-
-                            <label class="small text-muted mb-1">Link Download (untuk Mahasiswa):</label>
-                            <div class="link-wrapper">
-                                <span class="link-text flex-grow-1" id="sertifikatLink">
-                                    {{ route('sertifikat.download', $mahasiswa->share_token) }}
-                                </span>
-                                <button class="btn btn-sm btn-light border" onclick="copyLink('sertifikatLink')" title="Salin Link">
-                                    <i class="bi bi-clipboard"></i>
-                                </button>
-                            </div>
-                        </div>
-                    @else
-                        <div class="share-box mt-3 certificate-box-pending">
-                            <h6 class="fw-bold mb-0 text-dark d-flex align-items:center;">
-                                <i class="bi bi-clock-history me-2" style="color: var(--warning-border);"></i> Sertifikat Belum Tersedia
-                            </h6>
-                            <small class="text-muted">
-                                Sertifikat akan dapat di-preview dan diunduh setelah masa magang berakhir.
-                            </small>
-                        </div>
-                    @endif
                     <div class="d-flex justify-content-between mt-4">
                         <a href="{{ route('mahasiswa.index') }}" class="btn btn-light border rounded-pill px-4">
                             <i class="bi bi-arrow-left me-2"></i> Kembali
@@ -278,9 +221,8 @@
     </div>
 
     <script>
-        // [DIUBAH] Fungsi copy dibuat lebih dinamis
-        function copyLink(elementId) {
-            const linkText = document.getElementById(elementId).innerText;
+        function copyLink() {
+            const linkText = document.getElementById('absensiLink').innerText;
             
             if (navigator.clipboard && window.isSecureContext) {
                 navigator.clipboard.writeText(linkText).then(() => {
@@ -296,11 +238,6 @@
         function fallbackCopy(text) {
             const textArea = document.createElement("textarea");
             textArea.value = text;
-            // Hindari scroll jump
-            textArea.style.top = "0";
-            textArea.style.left = "0";
-            textArea.style.position = "fixed";
-
             document.body.appendChild(textArea);
             textArea.focus();
             textArea.select();

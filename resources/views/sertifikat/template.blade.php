@@ -1,13 +1,11 @@
 <!DOCTYPE html>
 <html>
-
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     <title>Sertifikat Penyelesaian Magang</title>
     <style>
         @page {
             margin: 0;
-            /* Hapus margin bawaan browser */
             size: A4 landscape;
         }
 
@@ -20,16 +18,17 @@
 
         .certificate-container {
             width: 100%;
-            height: 100%;
+            /* [DIHAPUS] height: 100%; (Ini adalah penyebab utama) */
             padding: 40px;
-            /* Ganti dengan path ke gambar background sertifikat Anda jika ada */
-            /* background-image: url('path/to/your/background.jpg'); */
+            background-image: url('{{ public_path('icon.png') }}');
             background-size: cover;
             background-repeat: no-repeat;
             border: 20px solid #7c1316;
-            /* Contoh border tebal */
             box-sizing: border-box;
             position: relative;
+            
+            /* [TAMBAHAN] Membantu DomPDF agar tidak memotong container ini */
+            page-break-inside: avoid; 
         }
 
         .text-center {
@@ -40,7 +39,7 @@
             font-size: 32px;
             font-weight: bold;
             color: #7c1316;
-            margin-top: 50px;
+            margin-top: 20px; /* [DIUBAH] Mengurangi margin */
         }
 
         .sub-header {
@@ -52,7 +51,7 @@
         .presented-to {
             font-size: 18px;
             color: #555;
-            margin-top: 60px;
+            margin-top: 30px; /* [DIUBAH] Mengurangi margin */
             margin-bottom: 10px;
         }
 
@@ -66,40 +65,37 @@
         .student-details {
             font-size: 18px;
             color: #444;
-            margin-bottom: 40px;
+            margin-bottom: 25px; /* [DIUBAH] Mengurangi margin */
         }
 
         .content-body {
             font-size: 20px;
             line-height: 1.6;
-            margin-top: 30px;
+            margin-top: 20px; /* [DIUBAH] Mengurangi margin */
         }
 
+        /* [DIUBAH] Mengganti layout float dengan table */
         .footer-signatures {
-            margin-top: 80px;
+            margin-top: 40px; /* [DIUBAH] Mengurangi margin */
             width: 100%;
+            /* [TAMBAHAN] Pastikan tabel tidak terpotong */
+            page-break-inside: avoid; 
         }
 
         .signature-block {
-            width: 40%;
-            display: inline-block;
+            width: 50%; /* [DIUBAH] Menggunakan 50% untuk sel tabel */
             text-align: center;
+            vertical-align: top;
+            padding: 0 20px; /* Memberi jarak antar kolom */
+            box-sizing: border-box;
         }
 
-        .signature-block.left {
-            float: left;
-            margin-left: 5%;
-        }
-
-        .signature-block.right {
-            float: right;
-            margin-right: 5%;
-        }
+        /* [DIHAPUS] CSS float .left dan .right tidak diperlukan lagi */
 
         .signature-line {
             border-bottom: 1px solid #000;
             width: 80%;
-            margin: 60px auto 5px auto;
+            margin: 40px auto 5px auto; /* [DIUBAH] Mengurangi margin */
         }
     </style>
 </head>
@@ -134,21 +130,22 @@
             <strong>{{ $percentage }}% partisipasi</strong>.
         </div>
 
-        <div class="footer-signatures">
-            <div class="signature-block left">
-                <div>[Jabatan]</div>
-                <div class="signature-line"></div>
-                <div><strong>[Nama Pembimbing]</strong></div>
-            </div>
-            <div class="signature-block right">
-                <div>Kediri, {{ $tanggal_terbit }}</div>
-                <div>[Jabatan, misal: Pimpinan]</div>
-                <div class="signature-line"></div>
-                <div><strong>[Nama Pimpinan]</strong></div>
-            </div>
-        </div>
+        <table class="footer-signatures" cellpadding="0" cellspacing="0">
+            <tr>
+                <td class="signature-block">
+                    <div>[Jabatan]</div>
+                    <div class="signature-line"></div>
+                    <div><strong>[Nama Pembimbing]</strong></div>
+                </td>
+                <td class="signature-block">
+                    <div>Kediri, {{ $tanggal_terbit }}</div>
+                    <div>[Jabatan, misal: Pimpinan]</div>
+                    <div class="signature-line"></div>
+                    <div><strong>[Nama Pimpinan]</strong></div>
+                </td>
+            </tr>
+        </table>
 
     </div>
 </body>
-
 </html>

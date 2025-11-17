@@ -67,6 +67,8 @@ Route::middleware('auth')->group(function () {
         Route::get('/search/universitas', [MahasiswaController::class, 'searchUniversitas'])->name('search.universitas');
         Route::get('/links', [MahasiswaController::class, 'copyLinks'])->name('links');
         Route::post('/', [MahasiswaController::class, 'store'])->name('store');
+        Route::get('/{id}/sertifikat/summary', [MahasiswaController::class, 'showSertifikatSummary'])
+            ->name('sertifikat.summary');
         Route::get('/{mahasiswa}', [MahasiswaController::class, 'show'])->name('show');
         Route::get('/{mahasiswa}/edit', [MahasiswaController::class, 'edit'])->name('edit');
         Route::put('/{mahasiswa}', [MahasiswaController::class, 'update'])->name('update');

@@ -47,7 +47,7 @@
         .input-group-text {
             background-color: #f8f9fa;
             border-right: none;
-            color: var(--custom-maroon);
+            color: var(--custom-marBoon);
             border-top-left-radius: 10px;
             border-bottom-left-radius: 10px;
         }
@@ -62,6 +62,14 @@
             box-shadow: none !important;
             transition: border-color 0.2s;
             font-family: inherit;
+        }
+
+        /* Khusus untuk input file di section pelatihan */
+        .pelatihan-item .form-control[type="file"] {
+            border-left: 1px solid #dee2e6;
+            border-radius: 6px;
+            padding: 0.6rem; /* Sesuaikan padding */
+            font-size: 0.85rem;
         }
 
         .form-control:focus,
@@ -174,11 +182,12 @@
             font-size: 1rem;
         }
 
+        /* --- CSS DIPERBARUI DARI SOURCE --- */
         .pelatihan-item {
             display: flex;
             gap: 0.5rem;
             margin-bottom: 0.8rem;
-            align-items: flex-end;
+            align-items: flex-start; /* Diubah ke flex-start */
         }
 
         .pelatihan-item input[name*="pelatihan_dasar"] {
@@ -189,23 +198,51 @@
             flex: 0 0 120px;
         }
 
+        /* Menggunakan style input internal dari .pelatihan-item input */
         .pelatihan-item input {
             padding: 0.7rem;
             border: 1px solid #dee2e6;
             border-radius: 6px;
             font-size: 0.9rem;
         }
-
         .pelatihan-item input:focus {
-            border-color: var(--custom-maroon-light);
-            box-shadow: 0 0 0 0.2rem rgba(124, 19, 22, 0.1);
+             border-color: var(--custom-maroon-light);
+             box-shadow: 0 0 0 0.2rem rgba(124, 19, 22, 0.1);
         }
+
+        /* TAMBAHAN: Wrapper untuk grup PDF */
+        .pdf-upload-group {
+            flex: 1.5;
+            display: flex;
+            flex-direction: column;
+            gap: 0.35rem;
+        }
+        .existing-file-link {
+            font-size: 0.8rem;
+            padding: 0.2rem 0.4rem;
+            background: #f4f4f4;
+            border-radius: 4px;
+        }
+        .existing-file-link a {
+            text-decoration: none;
+            font-weight: 500;
+        }
+        .existing-file-link i {
+            color: var(--custom-maroon);
+        }
+
+        .pelatihan-item .btn-remove {
+            margin-top: 5px; /* Sedikit ke bawah agar sejajar */
+        }
+        /* --- AKHIR CSS DIPERBARUI --- */
+
 
         .btn-remove {
             background: #fee2e2;
             color: #991b1b;
             border: none;
-            height: calc(1.4rem + 0.75rem * 2 + 2px);
+            /* height: calc(1.4rem + 0.75rem * 2 + 2px); */ /* Dibuat auto */
+            height: 40px;
             width: 50px;
             border-radius: 6px;
             cursor: pointer;
@@ -260,14 +297,14 @@
 
                     <div class="info-box">
                         <i class="fas fa-info-circle"></i>
-                        Perbarui data pelatihan dasar. Anda bisa mengubah pelatihan dan data per tahun.
+                        Perbarui data pelatihan dasar. Upload file PDF baru akan menggantikan file yang lama.
                     </div>
 
-                    <form action="{{ route('pelatihan.update', $pelatihan->id) }}" method="POST">
+                    <form action="{{ route('pelatihan.update', $pelatihan->id) }}" method="POST" enctype="multipart/form-data">
                         @csrf
                         @method('PUT')
 
-                        {{-- ... (Field Nama, Jabatan, PNS, Unit) ... --}}
+                        {{-- ... (Field Nama, Jabatan, PNS, Unit tetap sama) ... --}}
                         <div class="form-row-custom">
                             <div class="form-group">
                                 <label for="nama" class="form-label">
@@ -372,58 +409,67 @@
                                 <div style="display: flex; gap: 1rem; font-weight: 600; font-size: 0.9rem; padding: 0.5rem; color: var(--text-dark);">
                                     <div style="flex: 2;">Nama Pelatihan</div>
                                     <div style="flex: 0 0 120px;">Tahun</div>
-                                    <div style="flex: 0 0 50px;"></div> </div>
+                                    <div style="flex: 1.5;">Upload PDF (Ganti/Baru)</div>
+                                    <div style="flex: 0 0 50px;"></div>
+                                </div>
                             </div>
                             <div id="pelatihanContainer">
 
                                 @php
-                                    // Cek dulu data 'old' (jika validasi gagal)
                                     $old_pelatihan = old('pelatihan_dasar');
                                     $old_tahun = old('pelatihan_tahun_simple');
+                                    $old_existing_file = old('pelatihan_existing_file'); // Ambil file lama dari old
 
                                     $pelatihan_items = [];
 
                                     if ($old_pelatihan) {
-                                        // Jika ada data 'old', bangun ulang dari data 'old'
                                         foreach ($old_pelatihan as $index => $nama) {
                                             $pelatihan_items[] = [
                                                 'nama' => $nama,
-                                                'tahun' => $old_tahun[$index] ?? ''
+                                                'tahun' => $old_tahun[$index] ?? '',
+                                                'file' => $old_existing_file[$index] ?? null // Ambil file dari old
                                             ];
                                         }
                                     } elseif ($pelatihan->pelatihan_dasar) {
-                                        // Jika tidak ada data 'old', ambil dari database
                                         $pelatihan_items = $pelatihan->pelatihan_dasar;
                                     }
 
-                                    // Jika $pelatihan_items masih kosong, tambahkan satu baris kosong
                                     if (empty($pelatihan_items)) {
-                                        $pelatihan_items[] = ['nama' => '', 'tahun' => ''];
+                                        $pelatihan_items[] = ['nama' => '', 'tahun' => '', 'file' => null];
                                     }
                                 @endphp
 
-                                {{-- =============================================== --}}
-                                {{-- === INI BAGIAN YANG DIPERBAIKI (LOOP) === --}}
-                                {{-- =============================================== --}}
                                 @foreach ($pelatihan_items as $index => $item)
                                     <div class="pelatihan-item">
                                         <input type="text" class="form-control" name="pelatihan_dasar[]"
-                                            placeholder="Contoh: Workshop Excel, Pelatihan Leadership"
+                                            placeholder="Contoh: Workshop Excel"
                                             value="{{ $item['nama'] ?? '' }}">
 
                                         <input type="number" class="form-control" name="pelatihan_tahun_simple[]"
                                             placeholder="Tahun" min="1990" max="2099"
                                             value="{{ $item['tahun'] ?? '' }}">
 
-                                        {{-- Tombol sampah sekarang muncul di SEMUA baris --}}
+                                        <div class="pdf-upload-group">
+                                            <input type="file" class="form-control" name="pelatihan_file[]" accept=".pdf">
+
+                                            @php
+                                                $filePath = $item['file'] ?? null;
+                                            @endphp
+
+                                            <input type="hidden" name="pelatihan_existing_file[]" value="{{ $filePath }}">
+
+                                            @if($filePath)
+                                                <div class="existing-file-link">
+                                                    <i class="fas fa-file-pdf"></i>
+                                                    <a href="{{ Storage::url($filePath) }}" target="_blank">Lihat File Saat Ini</a>
+                                                </div>
+                                            @endif
+                                        </div>
                                         <button type="button" class="btn-remove" onclick="removePelatihan(this)">
                                             <i class="fas fa-trash"></i>
                                         </button>
                                     </div>
                                 @endforeach
-                                {{-- =============================================== --}}
-                                {{-- ============ AKHIR PERBAIKAN ================ --}}
-                                {{-- =============================================== --}}
                             </div>
                             <button type="button" class="btn-add-pelatihan mt-2" onclick="addPelatihan()">
                                 <i class="fas fa-plus"></i> Tambah Pelatihan
@@ -452,11 +498,19 @@
             const container = document.getElementById('pelatihanContainer');
             const item = document.createElement('div');
             item.className = 'pelatihan-item';
+
+            // PERUBAHAN 5: innerHTML di addPelatihan diperbarui
             item.innerHTML = `
                 <input type="text" class="form-control" name="pelatihan_dasar[]"
                     placeholder="Contoh: Workshop Excel, Pelatihan Leadership">
                 <input type="number" class="form-control" name="pelatihan_tahun_simple[]"
                     placeholder="Tahun" min="1990" max="2099">
+
+                <div class="pdf-upload-group">
+                    <input type="file" class="form-control" name="pelatihan_file[]" accept=".pdf">
+                    <input type="hidden" name="pelatihan_existing_file[]" value="">
+                </div>
+
                 <button type="button" class="btn-remove" onclick="removePelatihan(this)">
                     <i class="fas fa-trash"></i>
                 </button>
@@ -470,7 +524,19 @@
             if (pelatihans.length > 1) {
                 button.parentElement.remove();
             } else {
-                alert('Minimal harus ada 1 pelatihan dasar');
+                // Ganti alert dengan membersihkan input
+                const firstItemInputs = pelatihans[0].querySelectorAll('input[type="text"], input[type="number"], input[type="file"]');
+                firstItemInputs.forEach(input => input.value = '');
+                // Hapus link file jika ada
+                const existingLink = pelatihans[0].querySelector('.existing-file-link');
+                if (existingLink) {
+                    existingLink.remove();
+                }
+                // Hapus value dari hidden input
+                const hiddenInput = pelatihans[0].querySelector('input[type="hidden"]');
+                if (hiddenInput) {
+                    hiddenInput.value = '';
+                }
             }
         }
 

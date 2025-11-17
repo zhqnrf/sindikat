@@ -63,6 +63,12 @@
             font-family: inherit;
         }
 
+        /* Khusus untuk input file di section pelatihan */
+        .pelatihan-item .form-control[type="file"] {
+            border-left: 1px solid #dee2e6;
+            border-radius: 6px;
+        }
+
         .form-control:focus,
         .form-select:focus,
         textarea.form-control:focus {
@@ -167,11 +173,12 @@
             font-size: 1rem;
         }
 
+        /* --- CSS DIPERBARUI DARI SOURCE --- */
         .pelatihan-item {
             display: flex;
             gap: 0.5rem;
             margin-bottom: 0.8rem;
-            align-items: flex-end;
+            align-items: flex-start; /* Diubah ke flex-start */
         }
 
         .pelatihan-item input[name*="pelatihan_dasar"] {
@@ -182,17 +189,53 @@
             flex: 0 0 120px;
         }
 
-        .pelatihan-item input {
-            padding: 0.7rem;
+        /* TAMBAHAN: Style untuk input file */
+        .pelatihan-item input[name*="pelatihan_file"] {
+            flex: 1.5; /* Beri ruang lebih */
+            font-size: 0.85rem;
+            padding: 0.6rem; /* Sesuaikan padding */
+            /* Menggunakan style form-control internal */
             border: 1px solid #dee2e6;
             border-radius: 6px;
-            font-size: 0.9rem;
         }
 
-        .pelatihan-item input:focus {
+        .pelatihan-item input[name*="pelatihan_file"]:focus {
             border-color: var(--custom-maroon-light);
             box-shadow: 0 0 0 0.2rem rgba(124, 19, 22, 0.1);
         }
+
+        .pelatihan-item .btn-remove {
+             margin-top: 5px; /* Sedikit ke bawah agar sejajar */
+             /* Pastikan btn-remove punya style */
+             background: #e74c3c;
+             color: white;
+             border: none;
+             border-radius: 5px;
+             width: 38px;
+             height: 38px;
+             line-height: 38px;
+             text-align: center;
+             padding: 0;
+        }
+        .pelatihan-item .btn-remove:hover {
+            background: #c0392b;
+        }
+
+        .btn-add-pelatihan {
+            /* Style untuk tombol tambah */
+            background: var(--custom-maroon);
+            color: white;
+            border: none;
+            border-radius: 5px;
+            padding: 0.5rem 1rem;
+            font-size: 0.9rem;
+            transition: var(--transition);
+        }
+        .btn-add-pelatihan:hover {
+            background: var(--custom-maroon-light);
+        }
+        /* --- AKHIR CSS DIPERBARUI --- */
+
     </style>
 
     <div class="row justify-content-center">
@@ -219,10 +262,10 @@
 
                     <div class="info-box">
                         <i class="fas fa-info-circle"></i>
-                        Isi data pelatihan dasar dengan lengkap. Anda bisa menambahkan multiple pelatihan dan data per tahun.
+                        Isi data pelatihan dasar dengan lengkap. Anda bisa menambahkan multiple pelatihan, tahun, dan mengupload file PDF (Maks 2MB).
                     </div>
 
-                    <form action="{{ route('pelatihan.store') }}" method="POST">
+                    <form action="{{ route('pelatihan.store') }}" method="POST" enctype="multipart/form-data">
                         @csrf
 
                         <div class="form-row-custom">
@@ -316,7 +359,6 @@
                             @enderror
                         </div>
 
-                        <!-- Pelatihan Dasar Section -->
                         <div class="pelatihan-dasar-section">
                             <div class="pelatihan-dasar-title">
                                 <i class="fas fa-graduation-cap"></i>
@@ -326,6 +368,7 @@
                                 <div style="display: flex; gap: 1rem; font-weight: 600; font-size: 0.9rem; padding: 0.5rem; color: var(--text-dark);">
                                     <div style="flex: 2;">Nama Pelatihan</div>
                                     <div style="flex: 0 0 120px;">Tahun</div>
+                                    <div style="flex: 1.5;">Upload PDF</div>
                                     <div style="flex: 0 0 50px;"></div>
                                 </div>
                             </div>
@@ -345,6 +388,9 @@
                                             value="{{ $pelatihan }}">
                                         <input type="number" class="form-control" name="pelatihan_tahun_simple[]"
                                             placeholder="Tahun" value="{{ $tahunArray[$index] ?? '' }}" min="1990" max="2099">
+
+                                        <input type="file" class="form-control" name="pelatihan_file[]" accept=".pdf">
+
                                         @if ($index > 0)
                                             <button type="button" class="btn-remove" onclick="removePelatihan(this)">
                                                 <i class="fas fa-trash"></i>
@@ -379,11 +425,16 @@
             const container = document.getElementById('pelatihanContainer');
             const item = document.createElement('div');
             item.className = 'pelatihan-item';
+
+            // PERUBAHAN 4: Menambahkan input file di script JS
             item.innerHTML = `
                 <input type="text" class="form-control" name="pelatihan_dasar[]"
                     placeholder="Contoh: Workshop Excel, Pelatihan Leadership">
                 <input type="number" class="form-control" name="pelatihan_tahun_simple[]"
                     placeholder="Tahun" min="1990" max="2099">
+
+                <input type="file" class="form-control" name="pelatihan_file[]" accept=".pdf">
+
                 <button type="button" class="btn-remove" onclick="removePelatihan(this)">
                     <i class="fas fa-trash"></i>
                 </button>
@@ -397,7 +448,9 @@
             if (pelatihans.length > 1) {
                 button.parentElement.remove();
             } else {
-                alert('Minimal harus ada 1 pelatihan dasar');
+                // Ganti alert dengan membersihkan input jika hanya tersisa satu
+                const firstItemInputs = pelatihans[0].querySelectorAll('input');
+                firstItemInputs.forEach(input => input.value = '');
             }
         }
 

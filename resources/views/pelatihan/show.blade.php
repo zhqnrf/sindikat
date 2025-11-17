@@ -175,6 +175,26 @@
             border-bottom: 1px solid #e9ecef;
             margin: 1.5rem 0;
         }
+
+        /* --- CSS TAMBAHAN DARI SOURCE --- */
+        .pdf-link-show {
+            text-decoration: none;
+            font-weight: 500;
+            color: #1e3a8a;
+            font-size: 0.85rem;
+            background: #e0e7ff;
+            padding: 0.3rem 0.6rem;
+            border-radius: 6px;
+            transition: 0.2s;
+        }
+        .pdf-link-show:hover {
+            background: #c7d2fe;
+            color: #1e40af;
+        }
+        .pdf-link-show i {
+            margin-right: 0.3rem;
+        }
+        /* --- AKHIR CSS TAMBAHAN --- */
     </style>
 
     <div class="header-section">
@@ -255,8 +275,17 @@
             </h2>
         </div>
         <div class="detail-card-body">
+
             @php
                 $daftarPelatihan = $pelatihan->pelatihan_dasar ?? [];
+                // TAMBAHAN: Sortir berdasarkan tahun (DESC)
+                if (is_array($daftarPelatihan)) {
+                    usort($daftarPelatihan, function($a, $b) {
+                        $tahunA = is_array($a) ? ($a['tahun'] ?? 0) : ($a->tahun ?? 0);
+                        $tahunB = is_array($b) ? ($b['tahun'] ?? 0) : ($b->tahun ?? 0);
+                        return $tahunB <=> $tahunA;
+                    });
+                }
             @endphp
 
             @if (is_array($daftarPelatihan) && count($daftarPelatihan) > 0)
@@ -266,12 +295,22 @@
                         @php
                             $nama = is_object($item) ? ($item->nama ?? null) : ($item['nama'] ?? null);
                             $tahun = is_object($item) ? ($item->tahun ?? null) : ($item['tahun'] ?? null);
+                            // --- TAMBAHAN: Ambil path file ---
+                            $file = is_object($item) ? ($item->file ?? null) : ($item['file'] ?? null);
                         @endphp
 
                         @if ($nama)
                             <div class="pelatihan-badge">
                                 <span>{{ $nama }}</span>
-                                <span class="pelatihan-badge-tahun">{{ $tahun ?? '-' }}</span>
+
+                                <div class="d-flex align-items-center gap-3">
+                                    @if($file)
+                                    <a href="{{ Storage::url($file) }}" target="_blank" class="pdf-link-show" title="Lihat PDF">
+                                        <i class="fas fa-file-pdf"></i> Lihat PDF
+                                    </a>
+                                    @endif
+                                    <span class="pelatihan-badge-tahun">{{ $tahun ?? '-' }}</span>
+                                </div>
                             </div>
                         @endif
                     @endforeach
@@ -282,7 +321,7 @@
                     Belum ada data pelatihan dasar
                 </div>
             @endif
-        </div>
+            </div>
     </div>
 
 

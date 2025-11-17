@@ -103,21 +103,22 @@
             border-bottom: 1px solid #f0f0f0;
         }
 
+        /* --- CSS DIPERBARUI DARI SOURCE --- */
         .pelatihan-list-wrapper {
             display: flex;
             flex-direction: column;
             gap: 0.5rem;
-            max-width: 350px;
+            max-width: 400px; /* Diperlebar dari 350px */
         }
 
         .pelatihan-list-item {
             background-color: #f8f9fa;
             border: 1px solid #e9ecef;
             border-radius: 6px;
-            padding: 0.3rem 0.6rem;
+            padding: 0.3rem 0.4rem; /* Disesuaikan */
             font-size: 0.85rem;
             display: flex;
-            justify-content: space-between;
+            justify-content: flex-start; /* Diubah dari space-between */
             align-items: center;
             cursor: pointer;
             transition: transform 0.2s ease, box-shadow 0.2s ease;
@@ -134,7 +135,8 @@
             overflow: hidden;
             text-overflow: ellipsis;
             white-space: nowrap;
-            padding-right: 10px;
+            padding-right: 5px; /* Disesuaikan */
+            flex-grow: 1; /* Ditambahkan */
         }
         .pelatihan-list-item .tahun {
             font-weight: 600;
@@ -144,6 +146,23 @@
             border-radius: 4px;
             flex-shrink: 0;
         }
+
+        /* TAMBAHAN: Style untuk link PDF di tabel */
+        .pelatihan-list-item .pdf-link {
+            flex-shrink: 0;
+            margin-right: 0.5rem;
+            opacity: 0.7;
+            transition: opacity 0.2s;
+        }
+        .pelatihan-list-item .pdf-link:hover {
+            opacity: 1;
+        }
+        .pelatihan-list-item .pdf-link i {
+            color: var(--custom-maroon);
+            font-size: 1.1rem;
+        }
+        /* --- AKHIR CSS DIPERBARUI --- */
+
 
         .table-hover tbody tr:hover {
             background-color: #fff5f6;
@@ -311,19 +330,29 @@
                                             @php
                                                 $nama = is_object($item) ? ($item->nama ?? null) : ($item['nama'] ?? null);
                                                 $tahun = is_object($item) ? ($item->tahun ?? null) : ($item['tahun'] ?? null);
+                                                // --- TAMBAHAN: Ambil path file ---
+                                                $file = is_object($item) ? ($item->file ?? null) : ($item['file'] ?? null);
                                             @endphp
 
                                             @if ($nama)
                                                 <div class="pelatihan-list-item"
-                                                     tabindex="0"
-                                                     data-bs-toggle="popover"
-                                                     data-bs-trigger="focus"
-                                                     data-bs-placement="top"
-                                                     title="Nama Pelatihan"
-                                                     data-bs-content="{{ $nama }}">
+                                                    tabindex="0"
+                                                    data-bs-toggle="popover"
+                                                    data-bs-trigger="focus"
+                                                    data-bs-placement="top"
+                                                    title="Nama Pelatihan"
+                                                    data-bs-content="{{ $nama }}">
 
-                                                    <span class="nama">{{ Str::limit($nama, 35) }}</span>
-                                                    <span class="tahun">{{ $tahun ?? '-' }}</span>
+                                                    <span class="nama">{{ Str::limit($nama, 30) }}</span>
+
+                                                    <div class="d-flex align-items-center">
+                                                        @if($file)
+                                                        <a href="{{ Storage::url($file) }}" target="_blank" class="pdf-link" title="Lihat PDF">
+                                                            <i class="fas fa-file-pdf"></i>
+                                                        </a>
+                                                        @endif
+                                                        <span class="tahun">{{ $tahun ?? '-' }}</span>
+                                                    </div>
                                                 </div>
                                             @endif
                                         @endforeach
@@ -331,7 +360,7 @@
                                         <span class="text-muted font-italic">-</span>
                                     @endif
                                 </div>
-                            </td>
+                                </td>
 
                             <td class="text-center">
                                 <a href="{{ route('pelatihan.show', $pelatihan->id) }}" class="action-btn" title="Detail">

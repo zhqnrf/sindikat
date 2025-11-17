@@ -85,6 +85,8 @@ Route::middleware('auth')->group(function () {
         Route::delete('/{mou}', [MouController::class, 'destroy'])->name('destroy');
     });
 
+    //Admin
+    Route::get('/mahasiswa/{id}/sertifikat', [MahasiswaController::class, 'generateSertifikat'])->name('mahasiswa.sertifikat');
     // Admin: view today's absensi with filters
     Route::get('/absensi', [AbsensiController::class, 'index'])->name('absensi.index');
 });
@@ -92,6 +94,9 @@ Route::middleware('auth')->group(function () {
 Route::get('/test-419', function () {
     throw new \Illuminate\Session\TokenMismatchException;
 });
+
+Route::get('/sertifikat/download/{token}', [AbsensiController::class, 'generateSertifikatPublik'])
+    ->name('sertifikat.download');
 
 // Public attendance (absensi) routes using share tokens — no auth required
 Route::get('/absensi/{token}', [AbsensiController::class, 'card'])->name('absensi.card');

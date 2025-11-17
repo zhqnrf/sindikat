@@ -7,6 +7,8 @@ use App\Models\Ruangan;
 use App\Models\RuanganKetersediaan;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Barryvdh\DomPDF\Facade\Pdf; // <-- Cukup satu kali di sini
+use Carbon\Carbon;
 
 class MahasiswaController extends Controller
 {
@@ -131,10 +133,11 @@ class MahasiswaController extends Controller
                     'status' => in_array($status, ['aktif', 'nonaktif']) ? $status : 'aktif',
                     'ruangan_id' => $ruanganId,
                     'nm_ruangan' => $nmRuangan,
+                    // Tambahkan weekend_aktif jika ada di excel
+                    // 'weekend_aktif' => $row['Weekend Aktif'] ?? false, 
                 ];
 
                 // 3. CEK DATA LAMA (RE-WRITE LOGIC)
-                // Kita anggap unik jika Nama + Univ sama
                 $mahasiswa = Mahasiswa::where('nm_mahasiswa', $name)
                     ->where('univ_asal', $univ)
                     ->first();
@@ -154,9 +157,8 @@ class MahasiswaController extends Controller
                         if ($oldRuanganId) {
                             $oldSnap = RuanganKetersediaan::firstOrCreate(
                                 ['ruangan_id' => $oldRuanganId, 'tanggal' => $today],
-                                ['tersedia' => 0] // Default dummy, nanti di increment
+                                ['tersedia' => 0] 
                             );
-                            // Pastikan sinkron data asli, tapi logic sederhananya increment
                             $oldSnap->increment('tersedia');
                         }
 
@@ -174,15 +176,11 @@ class MahasiswaController extends Controller
                             ['ruangan_id' => $newRuanganId, 'tanggal' => $today],
                             ['tersedia' => $tersedia]
                         );
-
-                        // Jika baru dibuat (firstOrCreate), nilainya sudah benar. 
-                        // Jika sudah ada, kita decrement.
+                        
                         if (!$newSnap->wasRecentlyCreated) {
                             $newSnap->decrement('tersedia');
                         }
                     }
-
-                    // Lakukan Update
                     $mahasiswa->update($dataToSave);
                 }
                 // ==========================
@@ -210,10 +208,8 @@ class MahasiswaController extends Controller
                             $snapshot->decrement('tersedia');
                         }
                     }
-
                     Mahasiswa::create($dataToSave);
                 }
-
                 $processed++;
             }
 
@@ -237,23 +233,25 @@ class MahasiswaController extends Controller
             'ruangan_id' => 'nullable|exists:ruangans,id',
             'tanggal_mulai' => 'required|date',
             'tanggal_berakhir' => 'required|date|after:tanggal_mulai',
+            'weekend_aktif' => 'nullable|boolean', // <-- Validasi
         ]);
 
         // Set status to aktif by default
         $data['status'] = 'aktif';
 
+        // Handle input boolean dari checkbox
+        $data['weekend_aktif'] = $request->boolean('weekend_aktif');
+
         if (!empty($data['ruangan_id'])) {
             $ruangan = Ruangan::find($data['ruangan_id']);
 
-            // Hitung tersedia dari jumlah mahasiswa aktual
             $terisi = Mahasiswa::where('ruangan_id', $ruangan->id)->count();
             $tersedia = $ruangan->kuota_ruangan - $terisi;
 
             if ($tersedia <= 0) {
                 return back()->withErrors(['ruangan_id' => 'Kuota ruangan penuh. Tidak dapat menambahkan mahasiswa.'])->withInput();
             }
-
-            // Update atau buat snapshot untuk tracking
+            
             $today = now()->toDateString();
             $snapshot = RuanganKetersediaan::where('ruangan_id', $ruangan->id)
                 ->where('tanggal', $today)
@@ -298,15 +296,15 @@ class MahasiswaController extends Controller
                 'tanggal_mulai' => 'required|date',
                 'tanggal_berakhir' => 'required|date|after:tanggal_mulai',
                 'status' => 'required|in:aktif,nonaktif',
+                'weekend_aktif' => 'nullable|boolean', // <-- Validasi
             ]);
+
+            // Handle input boolean dari checkbox
+            $data['weekend_aktif'] = $request->boolean('weekend_aktif');
 
             $oldRuanganId = $mahasiswa->ruangan_id;
             $newRuanganId = $data['ruangan_id'] ?? null;
-
-            /* -------------------------------
-         | 1. Jika status berubah aktif → nonaktif
-         |    Kembalikan kuota & keluarkan dari ruangan
-         --------------------------------*/
+            
             if ($mahasiswa->status === 'aktif' && $data['status'] === 'nonaktif' && $oldRuanganId) {
                 $old = Ruangan::find($oldRuanganId);
 
@@ -315,31 +313,22 @@ class MahasiswaController extends Controller
                     ['tersedia' => $old->kuota_ruangan]
                 );
 
-                $snap->increment('tersedia'); // kembalikan kuota
+                $snap->increment('tersedia'); 
 
-                // kosongkan ruangan mahasiswa
                 $data['ruangan_id'] = null;
                 $data['nm_ruangan'] = null;
 
                 $mahasiswa->update($data);
                 return redirect()->route('mahasiswa.index')->with('success', 'Mahasiswa dinonaktifkan & dikeluarkan dari ruangan.');
             }
-
-            /* -----------------------------------------
-         | 2. Jika status tetap aktif dan ruangan tidak berubah
-         ------------------------------------------*/
+            
             if ($newRuanganId == $oldRuanganId) {
                 $mahasiswa->update($data);
                 return redirect()->route('mahasiswa.index')->with('success', 'Mahasiswa diperbarui.');
             }
-
-            /* -----------------------------------------
-         | 3. Jika pindah ruangan (aktif → aktif atau nonaktif → aktif)
-         ------------------------------------------*/
-
+            
             $today = now()->toDateString();
-
-            // Kembalikan kuota ruangan lama
+            
             if ($oldRuanganId) {
                 $old = Ruangan::find($oldRuanganId);
                 $snap = RuanganKetersediaan::where('ruangan_id', $old->id)
@@ -350,20 +339,17 @@ class MahasiswaController extends Controller
                     $snap->increment('tersedia');
                 }
             }
-
-            // Kurangi kuota ruangan baru
+            
             if ($newRuanganId) {
                 $new = Ruangan::find($newRuanganId);
-
-                // Hitung tersedia dari jumlah mahasiswa aktual
+                
                 $terisi = Mahasiswa::where('ruangan_id', $new->id)->count();
                 $tersedia = $new->kuota_ruangan - $terisi;
 
                 if ($tersedia <= 0) {
                     return back()->withErrors(['ruangan_id' => 'Ruangan tujuan penuh. Tidak dapat memindahkan mahasiswa.'])->withInput();
                 }
-
-                // Update atau buat snapshot
+                
                 $snap = RuanganKetersediaan::where('ruangan_id', $new->id)
                     ->where('tanggal', $today)
                     ->first();
@@ -417,11 +403,10 @@ class MahasiswaController extends Controller
         if (!$ruangan) {
             return response()->json(['error' => 'Ruangan tidak ditemukan'], 404);
         }
-
-        // SELALU hitung dari jumlah mahasiswa aktual - snapshot hanya untuk tracking history
+        
         $terisi = Mahasiswa::where('ruangan_id', $ruangan->id)->count();
         $tersedia = $ruangan->kuota_ruangan - $terisi;
-        $tersedia = max(0, $tersedia); // Jangan negatif
+        $tersedia = max(0, $tersedia); 
 
         return response()->json([
             'nm_ruangan' => $ruangan->nm_ruangan,
@@ -456,17 +441,14 @@ class MahasiswaController extends Controller
     {
         $query = Mahasiswa::query();
 
-        // Filter Universitas
         if ($request->has('univ_asal') && !empty($request->univ_asal)) {
             $query->where('univ_asal', $request->univ_asal);
         }
-
-        // (BARU) Filter Ruangan
+        
         if ($request->has('ruangan_id') && !empty($request->ruangan_id)) {
             $query->where('ruangan_id', $request->ruangan_id);
         }
-
-        // Search Name
+        
         if ($request->has('search') && !empty($request->search)) {
             $query->where('nm_mahasiswa', 'like', '%' . $request->search . '%');
         }
@@ -482,5 +464,34 @@ class MahasiswaController extends Controller
         });
 
         return response()->json($data);
+    }
+
+    /**
+     * [METHOD BARU]
+     * Generate Sertifikat PDF untuk Mahasiswa (via Admin).
+     */
+    public function generateSertifikat($id)
+    {
+        $mahasiswa = Mahasiswa::findOrFail($id);
+        
+        // (Asumsi model Mahasiswa sudah punya getAbsensiPercentageAttribute)
+        $percentage = $mahasiswa->absensi_percentage; 
+        $totalHadir = $mahasiswa->absensis()->where('type', 'hadir')->count();
+
+        $data = [
+            'mahasiswa' => $mahasiswa,
+            'percentage' => $percentage,
+            'total_hadir' => $totalHadir,
+            'tanggal_terbit' => Carbon::now()->isoFormat('D MMMM YYYY'),
+        ];
+
+        // Load view template sertifikat
+        $pdf = Pdf::loadView('sertifikat.template', $data); // <-- Error terjadi di sini
+        
+        $pdf->setPaper('a4', 'landscape');
+
+        // Stream (tampilkan di browser)
+        $fileName = 'Sertifikat - ' . $mahasiswa->nm_mahasiswa . '.pdf';
+        return $pdf->stream($fileName);
     }
 }

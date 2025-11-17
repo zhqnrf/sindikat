@@ -22,6 +22,7 @@ class CreateMahasiswasTable extends Migration
             $table->unsignedBigInteger('ruangan_id')->nullable();
             $table->date('tanggal_mulai')->nullable();
             $table->date('tanggal_berakhir')->nullable();
+            $table->boolean('weekend_aktif')->default(false);
             $table->enum('status', ['aktif', 'nonaktif'])->default('aktif');
             $table->string('share_token')->unique();
             $table->timestamps();

@@ -7,6 +7,8 @@ use App\Models\Mahasiswa;
 use App\Models\Ruangan;
 use Illuminate\Http\Request;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\File;
+use Barryvdh\DomPDF\Facade\Pdf; // <-- Cukup satu kali di sini
 
 class AbsensiController extends Controller
 {
@@ -254,5 +256,46 @@ class AbsensiController extends Controller
 
         // Sabtu / Minggu => tidak ada rule khusus
         return null;
+    }
+
+    public function generateSertifikatPublik($token)
+    {
+        $mahasiswa = Mahasiswa::where('share_token', $token)->firstOrFail();
+
+        // [PENTING] Validasi: Jangan izinkan download jika belum selesai
+        if (now()->lt($mahasiswa->tanggal_berakhir)) {
+            return abort(403, 'Sertifikat belum dapat diunduh hingga masa magang Anda berakhir.');
+        }
+
+        // --- Logika Generate PDF (Sama seperti di MahasiswaController) ---
+
+        $percentage = $mahasiswa->absensi_percentage;
+        $totalHadir = $mahasiswa->absensis()->where('type', 'hadir')->count();
+
+        // Ambil path background
+        // Ganti 'background.png' jika nama file Anda berbeda
+        $path = public_path('background.png');
+        $base64 = ''; // Default string kosong
+
+        if (File::exists($path)) {
+            $type = pathinfo($path, PATHINFO_EXTENSION);
+            $fileData = File::get($path);
+            $base64 = 'data:image/' . $type . ';base64,' . base64_encode($fileData);
+        }
+
+        $data = [
+            'mahasiswa' => $mahasiswa,
+            'percentage' => $percentage,
+            'total_hadir' => $totalHadir,
+            'tanggal_terbit' => Carbon::now()->isoFormat('D MMMM YYYY'),
+            'bg_base64' => $base64, // Kirim base64 ke view
+        ];
+
+        $pdf = Pdf::loadView('sertifikat.template', $data);
+        $pdf->setPaper('a4', 'landscape');
+
+        // Perbedaan utama: gunakan 'download()' agar langsung mengunduh file
+        $fileName = 'Sertifikat - ' . $mahasiswa->nm_mahasiswa . '.pdf';
+        return $pdf->download($fileName);
     }
 }

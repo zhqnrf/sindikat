@@ -228,7 +228,7 @@
                                 <div class="input-group">
                                     <span class="input-group-text"><i class="bi bi-calendar-plus"></i></span>
                                     <input type="date" name="tanggal_mulai" class="form-control"
-                                        value="{{ old('tanggal_mulai', $mahasiswa->tanggal_mulai) }}" required>
+                                        value="{{ old('tanggal_mulai', $mahasiswa->tanggal_mulai->format('Y-m-d')) }}" required>
                                 </div>
                             </div>
                             <div class="col-md-6 mb-3">
@@ -236,7 +236,7 @@
                                 <div class="input-group">
                                     <span class="input-group-text"><i class="bi bi-calendar-check"></i></span>
                                     <input type="date" name="tanggal_berakhir" class="form-control"
-                                        value="{{ old('tanggal_berakhir', $mahasiswa->tanggal_berakhir) }}" required>
+                                        value="{{ old('tanggal_berakhir', $mahasiswa->tanggal_berakhir->format('Y-m-d')) }}" required>
                                 </div>
                             </div>
                         </div>
@@ -246,14 +246,30 @@
                             <div class="input-group">
                                 <span class="input-group-text"><i class="bi bi-toggle-on"></i></span>
                                 <select name="status" class="form-select">
-                                    <option value="aktif" {{ $mahasiswa->status === 'aktif' ? 'selected' : '' }}>🟢 Aktif
+                                    <option value="aktif" {{ old('status', $mahasiswa->status) === 'aktif' ? 'selected' : '' }}>🟢 Aktif
                                     </option>
-                                    <option value="nonaktif" {{ $mahasiswa->status === 'nonaktif' ? 'selected' : '' }}>🔴
+                                    <option value="nonaktif" {{ old('status', $mahasiswa->status) === 'nonaktif' ? 'selected' : '' }}>🔴
                                         Nonaktif</option>
                                 </select>
                             </div>
                         </div>
 
+                        <div class="form-group mb-4" style="padding-top: 10px;">
+                            <div class="form-check form-switch" style="padding-left: 2.5em;">
+                                <input class="form-check-input" type="checkbox" role="switch" name="weekend_aktif" 
+                                       value="1" id="weekend_aktif" 
+                                       {{-- Logika untuk 'edit': cek 'old' dulu, baru data asli --}}
+                                       {{ old('weekend_aktif', $mahasiswa->weekend_aktif) ? 'checked' : '' }} 
+                                       style="height: 1.25em; width: 2.25em; cursor: pointer;">
+                                <label class="form-check-label" for="weekend_aktif" 
+                                       style="padding-top: 0.2em; font-weight: 600; color: var(--text-dark); cursor: pointer;">
+                                    Aktifkan Absensi Weekend
+                                </label>
+                            </div>
+                            <small class="form-text text-muted" style="padding-left: 2.5em;">
+                                Jika dicentang, Sabtu & Minggu akan dihitung sebagai hari magang.
+                            </small>
+                        </div>
                         <div class="d-flex justify-content-between align-items-center pt-3">
                             <a href="{{ route('mahasiswa.index') }}" class="btn btn-light-custom shadow-sm">
                                 <i class="bi bi-arrow-left me-2"></i> Kembali
@@ -286,7 +302,8 @@
                     return;
                 }
 
-                fetch(`/mahasiswa/ruangan-info/${ruanganId}`)
+                // [FIX] Mengubah URL fetch agar konsisten dengan route API
+                fetch(`/api/ruangan-info/${ruanganId}`) 
                     .then(response => response.json())
                     .then(data => {
                         document.getElementById('info-nama').textContent = data.nm_ruangan;

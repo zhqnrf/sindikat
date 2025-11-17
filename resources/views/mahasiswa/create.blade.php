@@ -239,7 +239,21 @@
                                 </div>
                             </div>
                         </div>
-
+                        
+                        <div class="form-group mb-4" style="padding-top: 10px;">
+                            <div class="form-check form-switch" style="padding-left: 2.5em;">
+                                <input class="form-check-input" type="checkbox" role="switch" name="weekend_aktif" 
+                                       value="1" id="weekend_aktif" {{ old('weekend_aktif') ? 'checked' : '' }} 
+                                       style="height: 1.25em; width: 2.25em; cursor: pointer;">
+                                <label class="form-check-label" for="weekend_aktif" 
+                                       style="padding-top: 0.2em; font-weight: 600; color: var(--text-dark); cursor: pointer;">
+                                    Aktifkan Absensi Weekend
+                                </label>
+                            </div>
+                            <small class="form-text text-muted" style="padding-left: 2.5em;">
+                                Jika dicentang, Sabtu & Minggu akan dihitung sebagai hari magang.
+                            </small>
+                        </div>
                         <div class="d-flex justify-content-between align-items-center pt-3">
                             <a href="{{ route('mahasiswa.index') }}" class="btn btn-light-custom shadow-sm">
                                 <i class="bi bi-arrow-left me-2"></i> Kembali
@@ -272,8 +286,8 @@
                 }
 
                 // Fetch kuota tersedia real-time
-                // Pastikan route ini ada di web.php: Route::get('/mahasiswa/ruangan-info/{id}', ...)
-                fetch(`/mahasiswa/ruangan-info/${ruanganId}`)
+                // Pastikan route ini ada di web.php: Route::get('/api/ruangan-info/{id}', ...)
+                fetch(`/api/ruangan-info/${ruanganId}`) // <-- Sesuaikan route jika perlu
                     .then(response => response.json())
                     .then(data => {
                         // Isi Data
@@ -324,6 +338,11 @@
                     alert('Ruangan yang dipilih sudah penuh. Silakan pilih ruangan lain.');
                 }
             });
+
+            // [PENTING] Trigger event 'change' jika halaman di-load dengan data 'old'
+            if (ruanganSelect.value) {
+                ruanganSelect.dispatchEvent(new Event('change'));
+            }
         });
     </script>
 @endsection

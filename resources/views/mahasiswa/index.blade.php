@@ -24,8 +24,6 @@
             box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03);
             margin-bottom: 2rem;
             border-left: 5px solid var(--custom-maroon);
-
-            /* FIX Z-INDEX: Agar dropdown muncul paling atas */
             position: relative;
             z-index: 1050;
             overflow: visible;
@@ -40,7 +38,6 @@
             border: 1px solid #f0f0f0;
             position: relative;
             z-index: 50;
-            /* Lebih rendah dari header */
         }
 
         .filter-header {
@@ -330,7 +327,7 @@
                         <th>Ruangan</th>
                         <th class="text-center">Sisa Waktu</th>
                         <th class="text-center">Status</th>
-                        <th class="text-center" width="15%">Aksi</th>
+                        <th class="text-center" width="20%">Aksi</th> 
                     </tr>
                 </thead>
                 <tbody>
@@ -357,9 +354,13 @@
                             </td>
                             <td class="text-center">
                                 @if ($m->tanggal_berakhir)
-                                    @if ($m->sisa_hari > 0)
+                                    {{-- Logika sisa_hari dari model --}}
+                                    @if ($m->sisa_hari == 'Selesai')
+                                        <span class="badge badge-pill-soft bg-soft-danger">Selesai</span>
+                                    @elseif (is_numeric(explode(' ', $m->sisa_hari)[0]) && explode(' ', $m->sisa_hari)[0] > 0)
                                         <span class="badge badge-pill-soft bg-soft-info">{{ $m->sisa_hari }}</span>
                                     @else
+                                        {{-- Fallback jika 0 hari atau format lain --}}
                                         <span class="badge badge-pill-soft bg-soft-danger">Berakhir</span>
                                     @endif
                                 @else
@@ -380,8 +381,15 @@
                                 <a href="{{ route('mahasiswa.edit', $m->id) }}" class="action-btn" title="Edit">
                                     <i class="bi bi-pencil-square"></i>
                                 </a>
+                                
+                                <a href="{{ route('mahasiswa.sertifikat', $m->id) }}" 
+                                   class="action-btn" 
+                                   title="Preview Sertifikat" 
+                                   target="_blank">
+                                    <i class="bi bi-file-earmark-pdf-fill"></i>
+                                </a>
                                 <form action="{{ route('mahasiswa.destroy', $m->id) }}" method="POST"
-                                    class="d-inline delete-form">
+                                    class="d-inline delete-form" style="margin-left: 2px;">
                                     @csrf @method('DELETE')
                                     <button type="button" class="action-btn delete btn-delete" title="Hapus">
                                         <i class="bi bi-trash"></i>
@@ -476,7 +484,6 @@
         window.addEventListener('click', function(e) {
             var menu = document.getElementById('toolsDropdownMenu');
             var btn = document.getElementById('toolsBtn');
-            // Tutup jika klik di luar menu DAN bukan tombol tools
             if (menu.style.display === 'block' && !menu.contains(e.target) && !btn.contains(e.target)) {
                 menu.style.display = 'none';
             }
@@ -504,7 +511,6 @@
                     }
                     const message = data.map(m => `${m.nama}: ${m.link}`).join('\n');
 
-                    // Coba pakai API modern dulu
                     if (navigator.clipboard && window.isSecureContext) {
                         navigator.clipboard.writeText(message).then(() => {
                             showToast(`Berhasil menyalin ${data.length} link!`, "success");
@@ -513,7 +519,6 @@
                             fallbackCopyTextToClipboard(message);
                         });
                     } else {
-                        // Pakai Fallback jika HTTP biasa
                         fallbackCopyTextToClipboard(message);
                     }
                 })
@@ -523,20 +528,15 @@
                 });
         }
 
-        // Fungsi Fallback untuk Browser lama / HTTP
         function fallbackCopyTextToClipboard(text) {
             var textArea = document.createElement("textarea");
             textArea.value = text;
-
-            // Pastikan elemen tidak terlihat tapi ada di DOM
             textArea.style.top = "0";
             textArea.style.left = "0";
             textArea.style.position = "fixed";
-
             document.body.appendChild(textArea);
             textArea.focus();
             textArea.select();
-
             try {
                 var successful = document.execCommand('copy');
                 if (successful) {
@@ -548,7 +548,6 @@
                 console.error('Fallback error', err);
                 showToast("Gagal menyalin link.", "error");
             }
-
             document.body.removeChild(textArea);
         }
 
@@ -556,7 +555,6 @@
         function importMahasiswa(input) {
             const file = input.files[0];
             if (!file) return;
-
             const reader = new FileReader();
             reader.onload = function(e) {
                 try {
@@ -577,17 +575,12 @@
                         return;
                     }
 
-                    // Normalisasi Tanggal
                     json.forEach(row => {
-                        // Helper untuk memastikan format YYYY-MM-DD
                         const norm = val => {
                             if (!val) return null;
                             if (val instanceof Date) return val.toISOString().split('T')[0];
-                            // Jika string/text excel
                             return val.toString().trim();
                         };
-
-                        // Mapping nama kolom (Case Insensitive sederhana)
                         row['Tanggal Mulai'] = norm(row['Tanggal Mulai'] || row['tanggal mulai']);
                         row['Tanggal Berakhir'] = norm(row['Tanggal Berakhir'] || row['tanggal berakhir']);
                     });
@@ -612,10 +605,9 @@
                                 setTimeout(() => location.reload(), 1500);
                             } else {
                                 console.error(res);
-                                // Tampilkan error detail jika ada array errors
                                 let msg = res.message;
                                 if (res.errors && Array.isArray(res.errors)) {
-                                    msg += ": " + res.errors[0]; // Ambil error pertama
+                                    msg += ": " + res.errors[0];
                                 }
                                 showToast('Gagal: ' + msg, 'error');
                             }
@@ -624,22 +616,19 @@
                             console.error(err);
                             showToast('Terjadi kesalahan server (Cek Console).', 'error');
                         });
-
                 } catch (error) {
                     console.error(error);
                     showToast('Gagal membaca file Excel.', 'error');
                 }
             };
             reader.readAsArrayBuffer(file);
-            input.value = ''; // Reset input agar bisa pilih file yang sama
+            input.value = '';
         }
 
         // --- 4. EXPORT & TEMPLATE (FIXED PAGINATION ISSUE) ---
         function exportMahasiswa() {
             try {
-                // Ambil data raw dari PHP (Pagination Object)
                 const rawData = @json($mahasiswas);
-                // Ambil array datanya saja
                 const dataList = rawData.data ? rawData.data : rawData;
 
                 if (!dataList || dataList.length === 0) {

@@ -21,6 +21,7 @@ class Pelatihan extends Model
         'is_pns',
         'nip',
         'golongan',
+        'pangkat',
         'pelatihan_dasar',
     ];
 

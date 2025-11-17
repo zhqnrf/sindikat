@@ -258,13 +258,14 @@
                         <div class="mt-2" style="font-size: 0.9rem; padding-top: 10px;">
                             <div><strong>NIP:</strong> {{ $pelatihan->nip ?? 'Tidak diisi' }}</div>
                             <div><strong>Golongan:</strong> {{ $pelatihan->golongan ?? 'Tidak diisi' }}</div>
+                            <div><strong>Pangkat:</strong> {{ $pelatihan->pangkat ?? 'Tidak diisi' }}</div>
                         </div>
                     @else
                         <span class="pelatihan-badge" style="background-color: #f3f4f6; color: #4b5563; display: inline-block; width: auto;">Non-PNS</span>
                     @endif
                 </div>
             </div>
-        </div>
+            </div>
     </div>
 
     <div class="detail-card">
@@ -295,7 +296,7 @@
                         @php
                             $nama = is_object($item) ? ($item->nama ?? null) : ($item['nama'] ?? null);
                             $tahun = is_object($item) ? ($item->tahun ?? null) : ($item['tahun'] ?? null);
-                            // --- TAMBAHAN: Ambil path file ---
+                            // --- Ambil path file (tetap ada) ---
                             $file = is_object($item) ? ($item->file ?? null) : ($item['file'] ?? null);
                         @endphp
 
@@ -321,7 +322,7 @@
                     Belum ada data pelatihan dasar
                 </div>
             @endif
-            </div>
+        </div>
     </div>
 
 

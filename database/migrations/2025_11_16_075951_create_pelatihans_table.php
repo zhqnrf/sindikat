@@ -20,6 +20,7 @@ class CreatePelatihansTable extends Migration
             $table->string('unit')->nullable();
             $table->boolean('is_pns')->default(false);
             $table->string('nip')->nullable();
+             $table->string('pangkat')->nullable();
             $table->string('golongan')->nullable();
             $table->text('pelatihan_dasar')->nullable();
             $table->timestamps();

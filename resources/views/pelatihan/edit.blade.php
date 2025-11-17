@@ -72,6 +72,12 @@
             font-size: 0.85rem;
         }
 
+        /* Khusus untuk NIP/Gol/Pangkat */
+        #pnsFields .form-control {
+            border-left: 1px solid #dee2e6;
+            border-radius: 6px;
+        }
+
         .form-control:focus,
         .form-select:focus,
         textarea.form-control:focus {
@@ -366,11 +372,12 @@
                             <div class="form-group" id="pnsFields" style="display: none;">
                                 <label class="form-label">
                                     <i class="fas fa-key"></i>
-                                    NIP &amp; Golongan
+                                    NIP, Golongan & Pangkat
                                 </label>
                                 <div style="display: flex; gap: 0.5rem;">
                                     <input type="text" id="nip" name="nip" class="form-control @error('nip') is-invalid @enderror" placeholder="NIP" value="{{ old('nip', $pelatihan->nip ?? '') }}">
                                     <input type="text" id="golongan" name="golongan" class="form-control @error('golongan') is-invalid @enderror" placeholder="Golongan" value="{{ old('golongan', $pelatihan->golongan ?? '') }}">
+                                    <input type="text" id="pangkat" name="pangkat" class="form-control @error('pangkat') is-invalid @enderror" placeholder="Pangkat" value="{{ old('pangkat', $pelatihan->pangkat ?? '') }}">
                                 </div>
                                 @error('nip')
                                     <div class="error-message">{{ $message }}</div>
@@ -378,8 +385,11 @@
                                 @error('golongan')
                                     <div class="error-message">{{ $message }}</div>
                                 @enderror
+                                @error('pangkat')
+                                    <div class="error-message">{{ $message }}</div>
+                                @enderror
                             </div>
-                        </div>
+                            </div>
 
                         <div class="form-group">
                             <label for="unit" class="form-label">
@@ -499,7 +509,7 @@
             const item = document.createElement('div');
             item.className = 'pelatihan-item';
 
-            // PERUBAHAN 5: innerHTML di addPelatihan diperbarui
+            // innerHTML tetap mempertahankan fungsionalitas PDF
             item.innerHTML = `
                 <input type="text" class="form-control" name="pelatihan_dasar[]"
                     placeholder="Contoh: Workshop Excel, Pelatihan Leadership">
@@ -540,12 +550,13 @@
             }
         }
 
-        // Toggle PNS related fields
+        // ===== SCRIPT INI DIPERBARUI DARI SOURCE =====
         function togglePnsFields() {
             const sel = document.getElementById('is_pns');
             const pnsContainer = document.getElementById('pnsFields');
             const nip = document.getElementById('nip');
             const golongan = document.getElementById('golongan');
+            const pangkat = document.getElementById('pangkat'); // <-- TAMBAHAN
 
             if (!sel || !pnsContainer) return;
 
@@ -553,12 +564,15 @@
                 pnsContainer.style.display = 'block';
                 if (nip) nip.setAttribute('required', 'required');
                 if (golongan) golongan.setAttribute('required', 'required');
+                if (pangkat) pangkat.setAttribute('required', 'required'); // <-- TAMBAHAN
             } else {
                 pnsContainer.style.display = 'none';
                 if (nip) nip.removeAttribute('required');
                 if (golongan) golongan.removeAttribute('required');
+                if (pangkat) pangkat.removeAttribute('required'); // <-- TAMBAHAN
             }
         }
+        // ===== AKHIR SCRIPT DIPERBARUI =====
 
         document.addEventListener('DOMContentLoaded', function() {
             const sel = document.getElementById('is_pns');
@@ -568,4 +582,4 @@
             }
         });
     </script>
-@endsection
+    @endsection

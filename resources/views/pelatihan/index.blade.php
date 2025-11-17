@@ -299,16 +299,17 @@
                             <td class="text-center text-muted font-weight-bold">{{ ($pelatihans->currentPage() - 1) * $pelatihans->perPage() + $index + 1 }}</td>
                             <td>
                                 <span class="font-weight-bold text-dark d-block">{{ $pelatihan->nama }}</span>
+
                                 @if ($pelatihan->is_pns)
                                     <span class="badge badge-light border text-dark p-1" style="font-size: 0.75rem;">
-                                        PNS | {{ $pelatihan->nip }} ({{ $pelatihan->golongan }})
+                                        PNS | {{ $pelatihan->nip }} ({{ $pelatihan->golongan }}{{ $pelatihan->pangkat ? ' / ' . $pelatihan->pangkat : '' }})
                                     </span>
                                 @else
                                     <span class="badge badge-light border text-muted p-1" style="font-size: 0.75rem;">
                                         Non-PNS
                                     </span>
                                 @endif
-                            </td>
+                                </td>
                             <td>
                                 <div class="d-flex flex-column">
                                     <span class="text-dark">{{ $pelatihan->jabatan ?? '-' }}</span>
@@ -330,7 +331,7 @@
                                             @php
                                                 $nama = is_object($item) ? ($item->nama ?? null) : ($item['nama'] ?? null);
                                                 $tahun = is_object($item) ? ($item->tahun ?? null) : ($item['tahun'] ?? null);
-                                                // --- TAMBAHAN: Ambil path file ---
+                                                // --- Ambil path file (tetap ada) ---
                                                 $file = is_object($item) ? ($item->file ?? null) : ($item['file'] ?? null);
                                             @endphp
 
@@ -360,7 +361,7 @@
                                         <span class="text-muted font-italic">-</span>
                                     @endif
                                 </div>
-                                </td>
+                            </td>
 
                             <td class="text-center">
                                 <a href="{{ route('pelatihan.show', $pelatihan->id) }}" class="action-btn" title="Detail">
@@ -471,7 +472,7 @@
             }
         });
 
-
+        // ===== FUNGSI INI DIPERBARUI DARI SOURCE =====
         function exportPelatihan() {
             try {
                 const rawData = @json($pelatihans);
@@ -499,6 +500,7 @@
                         p.nama || '',
                         p.is_pns ? p.nip : 'Non-PNS',
                         p.is_pns ? p.golongan : '',
+                        p.is_pns ? p.pangkat : '', // <-- TAMBAHAN
                         p.jabatan || '',
                         p.unit || '',
                         pelatihans
@@ -506,7 +508,7 @@
                 });
 
                 const ws = XLSX.utils.aoa_to_sheet([
-                    ['Nama', 'NIP (Jika PNS)', 'Golongan', 'Jabatan', 'Unit', 'Daftar Pelatihan (Tahun)']
+                    ['Nama', 'NIP (Jika PNS)', 'Golongan', 'Pangkat', 'Jabatan', 'Unit', 'Daftar Pelatihan (Tahun)'] // <-- TAMBAHAN
                 ].concat(data));
 
                 const wb = XLSX.utils.book_new();
@@ -520,11 +522,12 @@
             }
         }
 
+        // ===== FUNGSI INI DIPERBARUI DARI SOURCE =====
         function downloadTemplatePelatihan() {
             const ws = XLSX.utils.aoa_to_sheet([
-                ['Nama', 'Jabatan', 'Unit', 'is_pns (1=PNS, 0=Non-PNS)', 'NIP', 'Golongan', 'Pelatihan1_Nama', 'Pelatihan1_Tahun', 'Pelatihan2_Nama', 'Pelatihan2_Tahun'],
-                ['Budi Santoso', 'Manager', 'IT', 1, '199001012010011001', 'III/a', 'Basic Safety', 2020, 'Workshop Excel', 2021],
-                ['Ana Wati', 'Staff', 'Marketing', 0, '', '', 'Digital Marketing', 2022, '', '']
+                ['Nama', 'Jabatan', 'Unit', 'is_pns (1=PNS, 0=Non-PNS)', 'NIP', 'Golongan', 'Pangkat', 'Pelatihan1_Nama', 'Pelatihan1_Tahun', 'Pelatihan2_Nama', 'Pelatihan2_Tahun'], // <-- TAMBAHAN
+                ['Budi Santoso', 'Manager', 'IT', 1, '199001012010011001', 'III/a', 'Penata Muda', 'Basic Safety', 2020, 'Workshop Excel', 2021], // <-- TAMBAHAN
+                ['Ana Wati', 'Staff', 'Marketing', 0, '', '', '', 'Digital Marketing', 2022, '', ''] // <-- TAMBAHAN
             ]);
             const wb = XLSX.utils.book_new();
             XLSX.utils.book_append_sheet(wb, ws, 'Template');

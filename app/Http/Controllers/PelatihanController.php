@@ -68,6 +68,7 @@ class PelatihanController extends Controller
             'is_pns' => 'required|boolean',
             'nip' => 'nullable|required_if:is_pns,1|string|max:50',
             'golongan' => 'nullable|required_if:is_pns,1|string|max:100',
+            'pangkat' => 'nullable|required_if:is_pns,1|string|max:100', // <-- TAMBAHAN
             'pelatihan_dasar' => 'nullable|array',
             'pelatihan_dasar.*' => 'nullable|string',
             'pelatihan_tahun_simple' => 'nullable|array',
@@ -151,6 +152,7 @@ class PelatihanController extends Controller
             'is_pns' => 'required|boolean',
             'nip' => 'nullable|required_if:is_pns,1|string|max:50',
             'golongan' => 'nullable|required_if:is_pns,1|string|max:100',
+            'pangkat' => 'nullable|required_if:is_pns,1|string|max:100', // <-- TAMBAHAN
             'pelatihan_dasar' => 'nullable|array',
             'pelatihan_dasar.*' => 'nullable|string',
             'pelatihan_tahun_simple' => 'nullable|array',
@@ -257,8 +259,8 @@ class PelatihanController extends Controller
             $spreadsheet = new Spreadsheet();
             $sheet = $spreadsheet->getActiveSheet();
 
-            // TAMBAHAN: Kolom 'FILE PDF'
-            $headers = ['NAMA', 'JABATAN', 'UNIT', 'STATUS', 'NIP', 'GOLONGAN', 'DAFTAR PELATIHAN (TAHUN)', 'FILE PDF'];
+            // TAMBAHAN: Kolom 'PANGKAT'
+            $headers = ['NAMA', 'JABATAN', 'UNIT', 'STATUS', 'NIP', 'GOLONGAN', 'PANGKAT', 'DAFTAR PELATIHAN (TAHUN)', 'FILE PDF'];
             $sheet->fromArray([$headers], null, 'A1');
 
             $headerStyle = [
@@ -267,7 +269,7 @@ class PelatihanController extends Controller
                 'alignment' => ['horizontal' => 'center', 'vertical' => 'center'],
             ];
             // Ubah range header
-            $sheet->getStyle('A1:H1')->applyFromArray($headerStyle);
+            $sheet->getStyle('A1:I1')->applyFromArray($headerStyle); // <-- Diubah ke I1
 
             $row = 2;
             foreach ($pelatihans as $p) {
@@ -298,6 +300,7 @@ class PelatihanController extends Controller
                     $p->is_pns ? 'PNS' : 'Non-PNS',
                     $p->is_pns ? $p->nip : '',
                     $p->is_pns ? $p->golongan : '',
+                    $p->is_pns ? $p->pangkat : '', // <-- TAMBAHAN
                     $daftarPelatihanStr,
                     $daftarFileStr // TAMBAHAN
                 ];
@@ -307,7 +310,7 @@ class PelatihanController extends Controller
             }
 
             // Ubah range auto-size
-            foreach (range('A', 'H') as $col) {
+            foreach (range('A', 'I') as $col) { // <-- Diubah ke I
                 $sheet->getColumnDimension($col)->setAutoSize(true);
             }
 
@@ -355,6 +358,7 @@ class PelatihanController extends Controller
                         'is_pns' => (isset($row['is_pns (1=PNS, 0=Non-PNS)']) && $row['is_pns (1=PNS, 0=Non-PNS)'] == '1'),
                         'nip' => $row['NIP'] ?? null,
                         'golongan' => $row['Golongan'] ?? null,
+                        'pangkat' => $row['Pangkat'] ?? null, // <-- TAMBAHAN
                     ];
 
                     if (empty($data['nama'])) {

@@ -35,4 +35,9 @@ class Mou extends Model
         'tanggal_masuk' => 'date',
         'tanggal_keluar' => 'date',
     ];
+
+    public function praPenelitians()
+    {
+        return $this->hasMany(PraPenelitian::class);
+    }
 }

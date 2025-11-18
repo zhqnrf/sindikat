@@ -5,6 +5,7 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\MahasiswaController;
 use App\Http\Controllers\RuanganController;
+use App\Http\Controllers\PraPenelitianController;
 use App\Http\Controllers\PelatihanController;
 use App\Http\Controllers\AbsensiController;
 use App\Http\Controllers\MouController;
@@ -85,6 +86,18 @@ Route::middleware('auth')->group(function () {
         Route::get('/{mou}/edit', [MouController::class, 'edit'])->name('edit');
         Route::put('/{mou}', [MouController::class, 'update'])->name('update');
         Route::delete('/{mou}', [MouController::class, 'destroy'])->name('destroy');
+    });
+
+    //Pra-penelitian Routes
+    Route::prefix('pra-penelitian')->name('pra-penelitian.')->group(function () {
+        Route::get('/', [PraPenelitianController::class, 'index'])->name('index');
+        Route::get('/create', [PraPenelitianController::class, 'create'])->name('create');
+        Route::post('/', [PraPenelitianController::class, 'store'])->name('store');
+        Route::get('/{pra_penelitian}', [PraPenelitianController::class, 'show'])->name('show');
+        Route::get('/{pra_penelitian}/edit', [PraPenelitianController::class, 'edit'])->name('edit');
+        Route::put('/{pra_penelitian}', [PraPenelitianController::class, 'update'])->name('update');
+        Route::delete('/{pra_penelitian}', [PraPenelitianController::class, 'destroy'])->name('destroy');
+        Route::patch('/{pra_penelitian}/batal', [PraPenelitianController::class, 'batal'])->name('batal');
     });
 
     //Admin

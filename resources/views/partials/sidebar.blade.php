@@ -108,7 +108,7 @@
                     </div>
                 </div>
 
-                {{-- 5. Penelitian (Link Tunggal) --}}
+                {{-- 5. Penelitian (Dropdown) --}}
                 @php
                     $isPenelitianActive = request()->is('penelitian*');
                 @endphp
@@ -124,8 +124,8 @@
                     <!-- Sub-menu -->
                     <div class="collapse sub-menu {{ $isPenelitianActive ? 'show' : '' }}" id="menuPenelitian">
                         <a class="nav-link {{ request()->is('penelitian*') ? 'active' : '' }}"
-                            href="#">
-                            <span class="sidebar-text">List Penelitian</span>
+                            href="{{ route('pra-penelitian.index') }}">
+                            <span class="sidebar-text">Pra-Penelitian</span>
                         </a>
                     </div>
                 </div>

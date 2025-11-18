@@ -1,81 +1,474 @@
 {{-- Ganti dengan layout utama Anda --}}
-@extends('layouts.app') 
+@extends('layouts.app')
+
+@section('title', 'Pra Penelitian')
+@section('page-title', 'Data Pra Penelitian')
 
 @section('content')
-<div class="container">
-    <h2>Daftar Pra Penelitian</h2>
-    <a href="{{ route('pra-penelitian.create') }}" class="btn btn-primary mb-3">Tambah Pengajuan</a>
+    <style>
+        /* CSS Lengkap dari file Pelatihan disalin ke sini */
+        :root {
+            --custom-maroon: #7c1316;
+            --custom-maroon-light: #a3191d;
+            --custom-maroon-subtle: #fcf0f1;
+            --text-dark: #2c3e50;
+            --text-muted: #95a5a6;
+            --card-radius: 12px;
+            --shadow-soft: 0 4px 20px rgba(0, 0, 0, 0.05);
+            --transition: 0.3s ease;
+        }
 
-    {{-- Tampilkan notifikasi success/error --}}
-    @if(session('success'))
-        <div class="alert alert-success">{{ session('success') }}</div>
-    @endif
-    @if(session('error'))
-        <div class="alert alert-danger">{{ session('error') }}</div>
-    @endif
+        .page-header-wrapper {
+            background: #fff;
+            border-radius: var(--card-radius);
+            padding: 1.5rem;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03);
+            margin-bottom: 2rem;
+            border-left: 5px solid var(--custom-maroon);
+            position: relative;
+            z-index: 1050;
+            overflow: visible;
+        }
+        .filter-card {
+            background: #fff;
+            border-radius: var(--card-radius);
+            box-shadow: var(--shadow-soft);
+            margin-bottom: 1.5rem;
+            border: 1px solid #f0f0f0;
+            position: relative;
+            z-index: 50;
+        }
+        .filter-header {
+            background: var(--custom-maroon-subtle);
+            color: var(--custom-maroon);
+            padding: 1rem 1.5rem;
+            border-radius: var(--card-radius) var(--card-radius) 0 0;
+            font-weight: 600;
+        }
+        .btn-maroon {
+            background-color: var(--custom-maroon);
+            color: #fff;
+            border: none;
+            border-radius: 8px;
+            padding: 8px 16px;
+            font-weight: 500;
+            transition: var(--transition);
+        }
+        .btn-maroon:hover {
+            background-color: var(--custom-maroon-light);
+            color: #fff;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(124, 19, 22, 0.3);
+        }
+        /* Style untuk tombol notepad */
+        .btn-tool {
+            background: #fff;
+            border: 1px solid #e0e0e0;
+            color: var(--text-dark);
+            border-radius: 8px;
+            padding: 8px 12px;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-weight: 500; /* Disesuaikan agar mirip .btn-maroon */
+            padding: 8px 16px; /* Disesuaikan agar mirip .btn-maroon */
+        }
+        .btn-tool:hover,
+        .btn-tool:focus {
+            background: #f8f9fa;
+            border-color: var(--custom-maroon);
+            outline: none;
+        }
 
-    <div class="table-responsive">
-        <li class="nav-item">
-    <a class="nav-link" href="#" data-bs-toggle="modal" data-bs-target="#notepadModal" title="Notepad">
-        <i class="fas fa-sticky-note"></i> </a>
-</li>
-        <table class="table table-bordered">
-            <thead>
-                <tr>
-                    <th>No</th>
-                    <th>Judul Penelitian</th>
-                    <th>Universitas</th>
-                    <th>Exp. MOU</th>
-                    <th>Tgl Mulai</th>
-                    <th>Jml Mhs</th>
-                    <th>Status</th>
-                    <th>Aksi</th>
-                </tr>
-            </thead>
-            <tbody>
-                @forelse($penelitian as $item)
-                    <tr>
-                        <td>{{ $loop->iteration }}</td>
-                        <td>{{ $item->judul }}</td>
-                        <td>{{ $item->mou->nama_universitas ?? 'N/A' }}</td>
-                        {{-- Asumsi kolom exp date di tabel MOU adalah 'tanggal_keluar' --}}
-                        <td>{{ $item->mou->tanggal_keluar->format('d M Y') ?? 'N/A' }}</td> 
-                        <td>{{ $item->tanggal_mulai ? $item->tanggal_mulai->format('d M Y') : 'N/A' }}</td>
-                        <td>{{ $item->mahasiswas_count }}</td>
-                        <td>
-                            <span class="badge {{ $item->status == 'Aktif' ? 'bg-success' : 'bg-danger' }}">
-                                {{ $item->status }}
-                            </span>
-                        </td>
-                        <td>
-                            <a href="{{ route('pra-penelitian.show', $item) }}" class="btn btn-sm btn-info">View</a>
-                            <a href="{{ route('pra-penelitian.edit', $item) }}" class="btn btn-sm btn-warning">Edit</a>
-                            
-                            {{-- Form untuk Hapus --}}
-                            <form action="{{ route('pra-penelitian.destroy', $item) }}" method="POST" class="d-inline" onsubmit="return confirm('Yakin hapus?');">
-                                @csrf
-                                @method('DELETE')
-                                <button type="submit" class="btn btn-sm btn-danger">Hapus</button>
-                            </form>
-                            
-                            {{-- Form untuk Batal --}}
-                            @if($item->status == 'Aktif')
-                            <form action="{{ route('pra-penelitian.batal', $item) }}" method="POST" class="d-inline" onsubmit="return confirm('Yakin batalkan penelitian ini?');">
-                                @csrf
-                                @method('PATCH')
-                                <button type="submit" class="btn btn-sm btn-secondary">Batalkan</button>
-                            </form>
-                            @endif
-                        </td>
-                    </tr>
-                @empty
-                    <tr>
-                        <td colspan="8" class="text-center">Tidak ada data.</td>
-                    </tr>
-                @endforelse
-            </tbody>
-        </table>
+        .custom-table-card {
+            background: #fff;
+            border-radius: var(--card-radius);
+            box-shadow: var(--shadow-soft);
+            overflow: hidden;
+            border: none;
+        }
+        .table {
+            margin-bottom: 0;
+            border-collapse: collapse;
+        }
+        .table thead th {
+            background-color: var(--custom-maroon);
+            color: white;
+            border: none;
+            padding: 1rem;
+            font-weight: 500;
+            text-transform: uppercase;
+            font-size: 0.85rem;
+            letter-spacing: 0.5px;
+        }
+        .table tbody td {
+            padding: 1rem;
+            vertical-align: middle;
+            color: #555;
+            border-bottom: 1px solid #f0f0f0;
+        }
+        .table-hover tbody tr:hover {
+            background-color: #fff5f6;
+        }
+        .action-btn {
+            width: 32px;
+            height: 32px;
+            border-radius: 6px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            color: #6c757d;
+            transition: var(--transition);
+            background: transparent;
+            border: 1px solid transparent;
+        }
+        .action-btn:hover {
+            background: var(--custom-maroon-subtle);
+            color: var(--custom-maroon);
+        }
+        .action-btn.delete:hover {
+            background: #fee2e2;
+            color: #dc2626;
+        }
+        .action-btn.batal:hover {
+            background: #e5e7eb; /* Light gray */
+            color: #374151; /* Dark gray */
+        }
+        .animate-up {
+            animation: fadeInUp 0.6s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        @keyframes fadeInUp {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+    </style>
+
+    {{-- 1. Header Halaman (Diambil dari style Pelatihan) --}}
+    <div class="page-header-wrapper d-flex flex-wrap justify-content-between align-items-center gap-3 animate-up">
+        <div>
+            <h4 class="fw-bold mb-1" style="color: var(--custom-maroon);">Daftar Pra Penelitian</h4>
+            <small class="text-muted">Kelola data pengajuan pra penelitian.</small>
+        </div>
+        <div class="d-flex align-items-center gap-2 flex-wrap">
+            {{-- [BARU] Tombol Notepad --}}
+            <button class="btn btn-tool shadow-sm" type="button" data-bs-toggle="modal" data-bs-target="#notepadModal" title="Notepad">
+                <i class="bi bi-stickies"></i> Catatan
+            </button>
+
+            {{-- Tombol 'Tambah' disesuaikan dengan style .btn-maroon --}}
+            <a href="{{ route('pra-penelitian.create') }}" class="btn btn-maroon shadow-sm d-flex align-items-center gap-2">
+                <i class="bi bi-plus-lg"></i> Tambah Pengajuan
+            </a>
+        </div>
     </div>
-    {{ $penelitian->links() }}
-</div>
+
+    {{-- 2. Filter Card (Struktur baru) --}}
+    <div class="filter-card animate-up" style="animation-delay: 0.1s;">
+        <div class="filter-header">
+            <i class="bi bi-funnel-fill mr-2"></i> Filter & Pencarian
+        </div>
+        <div class="card-body p-4">
+            {{-- Form filter (Anda bisa sesuaikan action dan name) --}}
+            <form id="filterForm" method="GET" action="{{ route('pra-penelitian.index') }}">
+                <div class="row">
+                    <div class="col-md-5 mb-3 mb-md-0">
+                        <label class="small text-muted font-weight-bold text-uppercase">Cari Judul / Universitas</label>
+                        <div class="input-group shadow-sm">
+                            <div class="input-group-prepend">
+                                <span class="input-group-text bg-light border-right-0"><i class="bi bi-search"></i></span>
+                            </div>
+                            <input type="text" class="form-control bg-light border-left-0" name="search"
+                                placeholder="Cari..." value="{{ request('search') }}">
+                        </div>
+                    </div>
+                    <div class="col-md-4 mb-3 mb-md-0">
+                        <label class="small text-muted font-weight-bold text-uppercase">Status</label>
+                        <div class="input-group shadow-sm">
+                            <div class="input-group-prepend">
+                                <span class="input-group-text bg-light border-right-0"><i class="bi bi-check-circle"></i></span>
+                            </div>
+                            <select class="form-control bg-light border-left-0" name="status">
+                                <option value="">Semua Status</option>
+                                <option value="Aktif" @if(request('status') == 'Aktif') selected @endif>Aktif</option>
+                                <option value="Batal" @if(request('status') == 'Batal') selected @endif>Batal</option>
+                                {{-- Tambahkan status lain jika ada --}}
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-md-3 d-flex align-items-end">
+                        <button type="submit" class="btn btn-maroon shadow-sm">Terapkan</button>
+                        <a href="{{ route('pra-penelitian.index') }}" class="btn btn-light border shadow-sm ms-2"
+                            title="Reset Filter">
+                            <i class="bi bi-arrow-counterclockwise"></i> Reset
+                        </a>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    {{-- 3. Tabel Kustom (Diambil dari style Pelatihan) --}}
+    <div class="custom-table-card animate-up" style="animation-delay: 0.2s;">
+        <div class="table-responsive">
+            {{-- Class .table-bordered diganti menjadi .table-hover --}}
+            <table class="table table-hover mb-0">
+                <thead>
+                    <tr>
+                        <th class="text-center" width="5%">No</th>
+                        <th>Judul Penelitian</th>
+                        <th>Universitas</th>
+                        <th>Exp. MOU</th>
+                        <th>Tgl Mulai</th>
+                        <th class="text-center">Jml Mhs</th>
+                        <th>Status</th>
+                        <th class="text-center" width="20%">Aksi</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @forelse($penelitian as $item)
+                        <tr>
+                            <td class="text-center text-muted font-weight-bold">{{ $loop->iteration }}</td>
+                            <td>{{ $item->judul }}</td>
+                            <td>{{ $item->mou->nama_universitas ?? 'N/A' }}</td>
+                            {{-- Asumsi kolom exp date di tabel MOU adalah 'tanggal_keluar' --}}
+                            <td>{{ $item->mou->tanggal_keluar ? $item->mou->tanggal_keluar->format('d M Y') : 'N/A' }}</td>
+                            <td>{{ $item->tanggal_mulai ? $item->tanggal_mulai->format('d M Y') : 'N/A' }}</td>
+                            <td class="text-center">{{ $item->mahasiswas_count }}</td>
+                            <td>
+                                {{-- Style badge disesuaikan --}}
+                                @php
+                                    $statusClass = 'bg-secondary'; // Default
+                                    if ($item->status == 'Aktif') $statusClass = 'bg-success';
+                                    if ($item->status == 'Batal') $statusClass = 'bg-danger';
+                                    // Tambahkan Selesai/Lainnya jika ada
+                                @endphp
+                                <span class="badge {{ $statusClass }} text-white p-2" style="font-size: 0.8rem;">
+                                    {{ $item->status }}
+                                </span>
+                            </td>
+                            <td class="text-center">
+                                {{-- 4. Action Button (Diambil dari style Pelatihan) --}}
+                                <a href="{{ route('pra-penelitian.show', $item) }}" class="action-btn" title="View">
+                                    <i class="bi bi-eye-fill"></i>
+                                </a>
+                                <a href="{{ route('pra-penelitian.edit', $item) }}" class="action-btn" title="Edit">
+                                    <i class="bi bi-pencil-square"></i>
+                                </a>
+
+                                {{-- Form untuk Hapus (Disesuaikan) --}}
+                                <form action="{{ route('pra-penelitian.destroy', $item) }}" method="POST" class="d-inline delete-form">
+                                    @csrf
+                                    @method('DELETE')
+                                    <button type="button" class="action-btn delete btn-delete" title="Hapus">
+                                        <i class="bi bi-trash"></i>
+                                    </button>
+                                </form>
+
+                                {{-- Form untuk Batal (Disesuaikan) --}}
+                                @if($item->status == 'Aktif')
+                                <form action="{{ route('pra-penelitian.batal', $item) }}" method="POST" class="d-inline batal-form">
+                                    @csrf
+                                    @method('PATCH')
+                                    <button type="button" class="action-btn batal btn-batal" title="Batalkan">
+                                        <i class="bi bi-x-circle"></i>
+                                    </button>
+                                </form>
+                                @endif
+                            </td>
+                        </tr>
+                    @empty
+                        {{-- 5. Empty State (Diambil dari style Pelatihan) --}}
+                        <tr>
+                            <td colspan="8" class="text-center py-5">
+                                <div class="d-flex flex-column align-items-center">
+                                    <i class="bi bi-folder-x display-4 text-muted mb-3" style="opacity: 0.5;"></i>
+                                    <h5 class="text-muted font-weight-bold">Tidak ada data ditemukan</h5>
+                                    <p class="text-muted small">Tambahkan pengajuan pra penelitian terlebih dahulu.</p>
+                                </div>
+                            </td>
+                        </tr>
+                    @endforelse
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    {{-- 6. Paginasi (Diambil dari style Pelatihan) --}}
+    <div class="d-flex justify-content-center mt-4 animate-up" style="animation-delay: 0.3s;">
+        {{-- Pastikan Anda punya file 'pagination.custom' atau ganti ke default --}}
+        {{-- {{ $penelitian->links() }} <-- Ganti ke ini jika 'pagination.custom' tidak ada --}}
+        {{ $penelitian->links('pagination.custom') }}
+    </div>
+
+    {{-- 7. Notifikasi SweetAlert (Diambil dari style Pelatihan) --}}
+    @if (session('success'))
+        <script>
+            document.addEventListener('DOMContentLoaded', function() {
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Berhasil!',
+                    text: '{{ session('success') }}',
+                    showConfirmButton: false,
+                    timer: 1800,
+                    toast: true,
+                    position: 'top-end'
+                });
+            });
+        </script>
+    @endif
+
+    @if (session('error'))
+        <script>
+            document.addEventListener('DOMContentLoaded', function() {
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Perhatian!',
+                    text: '{{ session('error') }}',
+                    showConfirmButton: true
+                });
+            });
+        </script>
+    @endif
+
+    {{-- [BARU] Modal Notepad --}}
+    <div class="modal fade" id="notepadModal" tabindex="-1" aria-labelledby="notepadModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content" style="border-radius: var(--card-radius); border: none; box-shadow: var(--shadow-soft);">
+                <div class="modal-header" style="background: var(--custom-maroon-subtle); color: var(--custom-maroon); border-bottom: none;">
+                    <h5 class="modal-title" id="notepadModalLabel"><i class="bi bi-stickies me-2"></i> Notepad Lokal</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p class="text-muted small">Catatan ini disimpan di browser Anda (local storage) dan hanya akan terlihat di perangkat ini. Tidak disimpan ke server.</p>
+                    <textarea id="notepad-area" class="form-control" rows="10" style="border-radius: 8px;" placeholder="Tulis catatan Anda di sini..."></textarea>
+                </div>
+                <div class="modal-footer" style="border-top: 1px solid #f0f0f0;">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>
+                    <button type="button" class="btn btn-danger" id="clear-notepad">Bersihkan Catatan</button>
+                </div>
+            </div>
+        </div>
+    </div>
+@endsection
+
+@section('scripts')
+    {{-- 8. Kebutuhan Javascript (Diambil dari style Pelatihan) --}}
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+
+            // Konfirmasi Hapus
+            const deleteButtons = document.querySelectorAll('.btn-delete');
+            deleteButtons.forEach(btn => {
+                btn.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    const form = this.closest('form');
+
+                    Swal.fire({
+                        title: 'Yakin hapus data?',
+                        text: "Data pra penelitian ini akan dihapus permanen.",
+                        icon: 'warning',
+                        showCancelButton: true,
+                        confirmButtonColor: '#7c1316',
+                        cancelButtonColor: '#6c757d',
+                        confirmButtonText: 'Ya, hapus!',
+                        cancelButtonText: 'Batal'
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            form.submit();
+                        }
+                    });
+                });
+            });
+
+            // Konfirmasi Batal
+            const batalButtons = document.querySelectorAll('.btn-batal');
+            batalButtons.forEach(btn => {
+                btn.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    const form = this.closest('form');
+
+                    Swal.fire({
+                        title: 'Yakin batalkan penelitian?',
+                        text: "Status penelitian akan diubah menjadi 'Batal'.",
+                        icon: 'warning',
+                        showCancelButton: true,
+                        confirmButtonColor: '#7c1316',
+                        cancelButtonColor: '#6c757d',
+                        confirmButtonText: 'Ya, batalkan!',
+                        cancelButtonText: 'Tutup'
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            form.submit();
+                        }
+                    });
+                });
+            });
+
+            // --- [BARU] LOGIKA NOTEPAD LOCAL STORAGE ---
+            const notepadArea = document.getElementById('notepad-area');
+            const clearNotepadBtn = document.getElementById('clear-notepad');
+            const storageKey = 'praPenelitianNotepad'; // Kunci unik untuk halaman ini
+
+            // 1. Muat catatan saat DOM siap
+            if (notepadArea) {
+                notepadArea.value = localStorage.getItem(storageKey) || '';
+            }
+
+            // 2. Simpan catatan saat ada ketikan (real-time)
+            if (notepadArea) {
+                notepadArea.addEventListener('input', () => {
+                    localStorage.setItem(storageKey, notepadArea.value);
+                });
+            }
+
+            // 3. Bersihkan catatan
+            if (clearNotepadBtn) {
+                clearNotepadBtn.addEventListener('click', () => {
+                    Swal.fire({
+                        title: 'Bersihkan Catatan?',
+                        text: "Semua isi notepad akan dihapus dari local storage.",
+                        icon: 'warning',
+                        showCancelButton: true,
+                        confirmButtonColor: '#7c1316',
+                        cancelButtonColor: '#6c757d',
+                        confirmButtonText: 'Ya, bersihkan!',
+                        cancelButtonText: 'Batal'
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            notepadArea.value = '';
+                            localStorage.removeItem(storageKey);
+                            // Tampilkan notifikasi toast kecil
+                            Swal.fire({
+                                icon: 'success',
+                                title: 'Dibersihkan!',
+                                text: 'Catatan telah dihapus.',
+                                showConfirmButton: false,
+                                timer: 1500,
+                                toast: true,
+                                position: 'top-end'
+                            });
+                        }
+                    });
+                });
+            }
+            // --- AKHIR LOGIKA NOTEPAD ---
+
+
+            // Inisialisasi Popover (jika Anda membutuhkannya)
+            var popoverTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="popover"]'))
+            var popoverList = popoverTriggerList.map(function (popoverTriggerEl) {
+                return new bootstrap.Popover(popoverTriggerEl, {
+                    html: false,
+                    sanitize: false
+                })
+            });
+        });
+    </script>
 @endsection

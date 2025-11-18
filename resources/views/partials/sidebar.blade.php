@@ -280,6 +280,7 @@
         --sidebar-pill-active: var(--maroon-light);
         --sidebar-heading-color: rgba(255, 255, 255, 0.5);
         --transition-speed: 0.25s;
+        text-decoration: none !important;
     }
 
     .sidebar {

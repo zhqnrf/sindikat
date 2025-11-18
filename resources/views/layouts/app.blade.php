@@ -35,6 +35,7 @@
             --border-radius: 8px;
             --shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
             --shadow-hover: 0 8px 20px rgba(0, 0, 0, 0.15);
+            text-decoration: none !important;
         }
 
         /* Body */

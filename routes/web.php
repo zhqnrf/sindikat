@@ -129,16 +129,12 @@ Route::post('/absensi/{token}/toggle', [AbsensiController::class, 'toggle'])->na
 
 // Pra-penelitian PUBLIC
 Route::prefix('pra-penelitian')->name('pra-penelitian.')->group(function () {
-    Route::get('/create', [PraPenelitianController::class, 'create'])->name('create');
-    Route::post('/', [PraPenelitianController::class, 'store'])->name('store');
-});
-
-// Pra-penelitian AUTH
-Route::prefix('pra-penelitian')->name('pra-penelitian.')->middleware('auth')->group(function () {
     Route::get('/', [PraPenelitianController::class, 'index'])->name('index');
     Route::get('/{pra_penelitian}', [PraPenelitianController::class, 'show'])->name('show');
     Route::get('/{pra_penelitian}/edit', [PraPenelitianController::class, 'edit'])->name('edit');
     Route::put('/{pra_penelitian}', [PraPenelitianController::class, 'update'])->name('update');
     Route::delete('/{pra_penelitian}', [PraPenelitianController::class, 'destroy'])->name('destroy');
     Route::patch('/{pra_penelitian}/batal', [PraPenelitianController::class, 'batal'])->name('batal');
+    Route::get('/create', [PraPenelitianController::class, 'create'])->name('create');
+    Route::post('/', [PraPenelitianController::class, 'store'])->name('store');
 });

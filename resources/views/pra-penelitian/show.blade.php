@@ -4,7 +4,6 @@
 @section('page-title', 'Detail Pra Penelitian')
 
 @section('content')
-    {{-- Salin semua <style> dari file target (pelatihan) ke sini --}}
     <style>
         :root {
             --custom-maroon: #7c1316;

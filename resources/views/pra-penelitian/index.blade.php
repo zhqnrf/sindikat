@@ -29,6 +29,7 @@
             z-index: 1050;
             overflow: visible;
         }
+
         .filter-card {
             background: #fff;
             border-radius: var(--card-radius);
@@ -38,6 +39,7 @@
             position: relative;
             z-index: 50;
         }
+
         .filter-header {
             background: var(--custom-maroon-subtle);
             color: var(--custom-maroon);
@@ -45,6 +47,7 @@
             border-radius: var(--card-radius) var(--card-radius) 0 0;
             font-weight: 600;
         }
+
         .btn-maroon {
             background-color: var(--custom-maroon);
             color: #fff;
@@ -54,12 +57,14 @@
             font-weight: 500;
             transition: var(--transition);
         }
+
         .btn-maroon:hover {
             background-color: var(--custom-maroon-light);
             color: #fff;
             transform: translateY(-2px);
             box-shadow: 0 4px 12px rgba(124, 19, 22, 0.3);
         }
+
         /* Style untuk tombol notepad */
         .btn-tool {
             background: #fff;
@@ -71,9 +76,12 @@
             display: flex;
             align-items: center;
             gap: 0.5rem;
-            font-weight: 500; /* Disesuaikan agar mirip .btn-maroon */
-            padding: 8px 16px; /* Disesuaikan agar mirip .btn-maroon */
+            font-weight: 500;
+            /* Disesuaikan agar mirip .btn-maroon */
+            padding: 8px 16px;
+            /* Disesuaikan agar mirip .btn-maroon */
         }
+
         .btn-tool:hover,
         .btn-tool:focus {
             background: #f8f9fa;
@@ -88,10 +96,12 @@
             overflow: hidden;
             border: none;
         }
+
         .table {
             margin-bottom: 0;
             border-collapse: collapse;
         }
+
         .table thead th {
             background-color: var(--custom-maroon);
             color: white;
@@ -102,15 +112,18 @@
             font-size: 0.85rem;
             letter-spacing: 0.5px;
         }
+
         .table tbody td {
             padding: 1rem;
             vertical-align: middle;
             color: #555;
             border-bottom: 1px solid #f0f0f0;
         }
+
         .table-hover tbody tr:hover {
             background-color: #fff5f6;
         }
+
         .action-btn {
             width: 32px;
             height: 32px;
@@ -123,23 +136,30 @@
             background: transparent;
             border: 1px solid transparent;
         }
+
         .action-btn:hover {
             background: var(--custom-maroon-subtle);
             color: var(--custom-maroon);
         }
+
         .action-btn.delete:hover {
             background: #fee2e2;
             color: #dc2626;
         }
+
         .action-btn.batal:hover {
-            background: #e5e7eb; /* Light gray */
-            color: #374151; /* Dark gray */
+            background: #e5e7eb;
+            /* Light gray */
+            color: #374151;
+            /* Dark gray */
         }
+
         .animate-up {
             animation: fadeInUp 0.6s cubic-bezier(0.4, 0, 0.2, 1) forwards;
             opacity: 0;
             transform: translateY(20px);
         }
+
         @keyframes fadeInUp {
             to {
                 opacity: 1;
@@ -156,7 +176,8 @@
         </div>
         <div class="d-flex align-items-center gap-2 flex-wrap">
             {{-- [BARU] Tombol Notepad --}}
-            <button class="btn btn-tool shadow-sm" type="button" data-bs-toggle="modal" data-bs-target="#notepadModal" title="Notepad">
+            <button class="btn btn-tool shadow-sm" type="button" data-bs-toggle="modal" data-bs-target="#notepadModal"
+                title="Notepad">
                 <i class="bi bi-stickies"></i> Catatan
             </button>
 
@@ -190,12 +211,13 @@
                         <label class="small text-muted font-weight-bold text-uppercase">Status</label>
                         <div class="input-group shadow-sm">
                             <div class="input-group-prepend">
-                                <span class="input-group-text bg-light border-right-0"><i class="bi bi-check-circle"></i></span>
+                                <span class="input-group-text bg-light border-right-0"><i
+                                        class="bi bi-check-circle"></i></span>
                             </div>
                             <select class="form-control bg-light border-left-0" name="status">
                                 <option value="">Semua Status</option>
-                                <option value="Aktif" @if(request('status') == 'Aktif') selected @endif>Aktif</option>
-                                <option value="Batal" @if(request('status') == 'Batal') selected @endif>Batal</option>
+                                <option value="Aktif" @if (request('status') == 'Aktif') selected @endif>Aktif</option>
+                                <option value="Batal" @if (request('status') == 'Batal') selected @endif>Batal</option>
                                 {{-- Tambahkan status lain jika ada --}}
                             </select>
                         </div>
@@ -243,8 +265,12 @@
                                 {{-- Style badge disesuaikan --}}
                                 @php
                                     $statusClass = 'bg-secondary'; // Default
-                                    if ($item->status == 'Aktif') $statusClass = 'bg-success';
-                                    if ($item->status == 'Batal') $statusClass = 'bg-danger';
+                                    if ($item->status == 'Aktif') {
+                                        $statusClass = 'bg-success';
+                                    }
+                                    if ($item->status == 'Batal') {
+                                        $statusClass = 'bg-danger';
+                                    }
                                     // Tambahkan Selesai/Lainnya jika ada
                                 @endphp
                                 <span class="badge {{ $statusClass }} text-white p-2" style="font-size: 0.8rem;">
@@ -261,7 +287,8 @@
                                 </a>
 
                                 {{-- Form untuk Hapus (Disesuaikan) --}}
-                                <form action="{{ route('pra-penelitian.destroy', $item) }}" method="POST" class="d-inline delete-form">
+                                <form action="{{ route('pra-penelitian.destroy', $item) }}" method="POST"
+                                    class="d-inline delete-form">
                                     @csrf
                                     @method('DELETE')
                                     <button type="button" class="action-btn delete btn-delete" title="Hapus">
@@ -270,14 +297,15 @@
                                 </form>
 
                                 {{-- Form untuk Batal (Disesuaikan) --}}
-                                @if($item->status == 'Aktif')
-                                <form action="{{ route('pra-penelitian.batal', $item) }}" method="POST" class="d-inline batal-form">
-                                    @csrf
-                                    @method('PATCH')
-                                    <button type="button" class="action-btn batal btn-batal" title="Batalkan">
-                                        <i class="bi bi-x-circle"></i>
-                                    </button>
-                                </form>
+                                @if ($item->status == 'Aktif')
+                                    <form action="{{ route('pra-penelitian.batal', $item) }}" method="POST"
+                                        class="d-inline batal-form">
+                                        @csrf
+                                        @method('PATCH')
+                                        <button type="button" class="action-btn batal btn-batal" title="Batalkan">
+                                            <i class="bi bi-x-circle"></i>
+                                        </button>
+                                    </form>
                                 @endif
                             </td>
                         </tr>
@@ -335,21 +363,67 @@
         </script>
     @endif
 
-    {{-- [BARU] Modal Notepad --}}
+    {{-- Modal Notepad CRUD Full --}}
     <div class="modal fade" id="notepadModal" tabindex="-1" aria-labelledby="notepadModalLabel" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content" style="border-radius: var(--card-radius); border: none; box-shadow: var(--shadow-soft);">
-                <div class="modal-header" style="background: var(--custom-maroon-subtle); color: var(--custom-maroon); border-bottom: none;">
-                    <h5 class="modal-title" id="notepadModalLabel"><i class="bi bi-stickies me-2"></i> Notepad Lokal</h5>
+        <div class="modal-dialog modal-lg modal-dialog-centered"> {{-- Ukuran modal diperbesar (modal-lg) --}}
+            <div class="modal-content" style="border-radius: var(--card-radius); overflow: hidden; border: none;">
+                <div class="modal-header" style="background: var(--custom-maroon-subtle); color: var(--custom-maroon);">
+                    <h5 class="modal-title fw-bold" id="notepadModalLabel">
+                        <i class="bi bi-journal-text me-2"></i>Catatan Saya
+                    </h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
-                <div class="modal-body">
-                    <p class="text-muted small">Catatan ini disimpan di browser Anda (local storage) dan hanya akan terlihat di perangkat ini. Tidak disimpan ke server.</p>
-                    <textarea id="notepad-area" class="form-control" rows="10" style="border-radius: 8px;" placeholder="Tulis catatan Anda di sini..."></textarea>
-                </div>
-                <div class="modal-footer" style="border-top: 1px solid #f0f0f0;">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>
-                    <button type="button" class="btn btn-danger" id="clear-notepad">Bersihkan Catatan</button>
+                <div class="modal-body p-0">
+                    <div class="row g-0" style="height: 500px;"> {{-- Tinggi Tetap --}}
+
+                        {{-- SIDEBAR: DAFTAR CATATAN --}}
+                        <div class="col-md-4 border-end bg-light d-flex flex-column">
+                            <div class="p-3 border-bottom d-flex justify-content-between align-items-center bg-white">
+                                <span class="fw-bold text-muted small">DAFTAR CATATAN</span>
+                                <button class="btn btn-sm btn-maroon" id="btn-new-note">
+                                    <i class="bi bi-plus-lg"></i> Baru
+                                </button>
+                            </div>
+                            {{-- List Container --}}
+                            <div class="list-group list-group-flush overflow-auto flex-grow-1" id="notes-list-container">
+                                {{-- Item catatan akan di-render di sini via JS --}}
+                                <div class="text-center p-4 text-muted small loading-indicator">
+                                    <div class="spinner-border spinner-border-sm mb-2" role="status"></div>
+                                    <div>Memuat...</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        {{-- CONTENT: FORM EDITOR --}}
+                        <div class="col-md-8 d-flex flex-column bg-white">
+                            {{-- Form Header (Judul) --}}
+                            <div class="p-3 border-bottom">
+                                <input type="text" id="note-title" class="form-control fw-bold border-0 fs-5"
+                                    placeholder="Judul Catatan..." style="background: transparent;">
+                            </div>
+
+                            {{-- Form Body (Isi) --}}
+                            <div class="flex-grow-1 p-3">
+                                <textarea id="note-content" class="form-control h-100 border-0" style="resize: none; box-shadow: none;"
+                                    placeholder="Tulis isi catatan di sini..."></textarea>
+                            </div>
+
+                            {{-- Form Footer (Tombol Aksi) --}}
+                            <div class="p-3 border-top bg-light d-flex justify-content-between align-items-center">
+                                <small class="text-muted fst-italic" id="status-text">Siap.</small>
+                                <div class="d-flex gap-2">
+                                    <button type="button" class="btn btn-outline-danger btn-sm d-none"
+                                        id="btn-delete-note">
+                                        <i class="bi bi-trash"></i> Hapus
+                                    </button>
+                                    <button type="button" class="btn btn-maroon btn-sm px-4" id="btn-save-note">
+                                        <i class="bi bi-save me-1"></i> Simpan
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
                 </div>
             </div>
         </div>
@@ -411,59 +485,218 @@
                 });
             });
 
-            // --- [BARU] LOGIKA NOTEPAD LOCAL STORAGE ---
-            const notepadArea = document.getElementById('notepad-area');
-            const clearNotepadBtn = document.getElementById('clear-notepad');
-            const storageKey = 'praPenelitianNotepad'; // Kunci unik untuk halaman ini
+            // --- LOGIKA NOTEPAD CRUD (FULL AJAX) ---
+            const modalNotepad = document.getElementById('notepadModal');
+            const listContainer = document.getElementById('notes-list-container');
+            const titleInput = document.getElementById('note-title');
+            const contentInput = document.getElementById('note-content');
+            const btnSave = document.getElementById('btn-save-note');
+            const btnDelete = document.getElementById('btn-delete-note');
+            const btnNew = document.getElementById('btn-new-note');
+            const statusText = document.getElementById('status-text');
 
-            // 1. Muat catatan saat DOM siap
-            if (notepadArea) {
-                notepadArea.value = localStorage.getItem(storageKey) || '';
+            let activeNoteId = null; // Menyimpan ID catatan yang sedang dibuka
+
+            // 1. Load Notes saat Modal Dibuka
+            modalNotepad.addEventListener('show.bs.modal', function() {
+                fetchNotes();
+                resetForm();
+            });
+
+            // 2. Fungsi Fetch Notes dari Database
+            function fetchNotes() {
+                listContainer.innerHTML = `
+        <div class="text-center p-4 text-muted small">
+            <div class="spinner-border spinner-border-sm text-secondary"></div>
+        </div>`;
+
+                fetch('{{ route('notes.index') }}')
+                    .then(res => res.json())
+                    .then(data => {
+                        renderList(data);
+                    })
+                    .catch(err => {
+                        listContainer.innerHTML =
+                            '<div class="text-center p-3 text-danger small">Gagal memuat data.</div>';
+                    });
             }
 
-            // 2. Simpan catatan saat ada ketikan (real-time)
-            if (notepadArea) {
-                notepadArea.addEventListener('input', () => {
-                    localStorage.setItem(storageKey, notepadArea.value);
+            // 3. Render List ke HTML
+            function renderList(notes) {
+                listContainer.innerHTML = '';
+                if (notes.length === 0) {
+                    listContainer.innerHTML = `
+            <div class="text-center p-5 text-muted">
+                <i class="bi bi-journal-x display-6"></i>
+                <p class="small mt-2">Belum ada catatan.</p>
+            </div>`;
+                    return;
+                }
+
+                notes.forEach(note => {
+                    // Format tanggal simpel
+                    const date = new Date(note.updated_at).toLocaleDateString('id-ID', {
+                        day: 'numeric',
+                        month: 'short'
+                    });
+
+                    const item = document.createElement('a');
+                    item.href = '#';
+                    item.className =
+                        `list-group-item list-group-item-action py-3 ${activeNoteId == note.id ? 'active-note bg-light border-start border-4 border-danger' : ''}`;
+                    item.innerHTML = `
+            <div class="d-flex w-100 justify-content-between">
+                <h6 class="mb-1 text-truncate" style="max-width: 180px;">${note.title || 'Tanpa Judul'}</h6>
+                <small class="text-muted" style="font-size: 0.7rem;">${date}</small>
+            </div>
+            <p class="mb-0 text-muted text-truncate small" style="max-width: 220px;">${note.content ? note.content.substring(0, 30) : '...'}</p>
+        `;
+
+                    // Klik Item List
+                    item.addEventListener('click', (e) => {
+                        e.preventDefault();
+                        loadNoteToEditor(note);
+                    });
+
+                    listContainer.appendChild(item);
                 });
             }
 
-            // 3. Bersihkan catatan
-            if (clearNotepadBtn) {
-                clearNotepadBtn.addEventListener('click', () => {
+            // 4. Load Note ke Editor (Kanan)
+            function loadNoteToEditor(note) {
+                activeNoteId = note.id;
+                titleInput.value = note.title;
+                contentInput.value = note.content;
+
+                btnDelete.classList.remove('d-none'); // Munculkan tombol hapus
+                statusText.textContent = `Mengedit: ${note.title}`;
+
+                // Refresh highlight di list
+                fetchNotes();
+            }
+
+            // 5. Klik Tombol "Baru"
+            btnNew.addEventListener('click', () => {
+                resetForm();
+                titleInput.focus();
+            });
+
+            function resetForm() {
+                activeNoteId = null;
+                titleInput.value = '';
+                contentInput.value = '';
+                btnDelete.classList.add('d-none'); // Sembunyikan tombol hapus
+                statusText.textContent = 'Catatan Baru';
+
+                // Hapus highlight active di list (opsional, fetchNotes akan mereset juga)
+            }
+
+            // 6. Tombol Simpan
+            btnSave.addEventListener('click', () => {
+                if (!titleInput.value.trim()) {
                     Swal.fire({
-                        title: 'Bersihkan Catatan?',
-                        text: "Semua isi notepad akan dihapus dari local storage.",
                         icon: 'warning',
-                        showCancelButton: true,
-                        confirmButtonColor: '#7c1316',
-                        cancelButtonColor: '#6c757d',
-                        confirmButtonText: 'Ya, bersihkan!',
-                        cancelButtonText: 'Batal'
-                    }).then((result) => {
-                        if (result.isConfirmed) {
-                            notepadArea.value = '';
-                            localStorage.removeItem(storageKey);
-                            // Tampilkan notifikasi toast kecil
+                        title: 'Judul Kosong',
+                        text: 'Harap isi judul catatan.',
+                        toast: true,
+                        position: 'top-end',
+                        showConfirmButton: false,
+                        timer: 2000
+                    });
+                    return;
+                }
+
+                const originalBtnHtml = btnSave.innerHTML;
+                btnSave.innerHTML = '<span class="spinner-border spinner-border-sm"></span>';
+                btnSave.disabled = true;
+                statusText.textContent = 'Menyimpan...';
+
+                fetch('{{ route('notes.store') }}', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+                        },
+                        body: JSON.stringify({
+                            id: activeNoteId,
+                            title: titleInput.value,
+                            content: contentInput.value
+                        })
+                    })
+                    .then(res => res.json())
+                    .then(data => {
+                        if (data.status === 'success') {
+                            activeNoteId = data.data.id; // Set ID aktif ke yang baru disimpan
+                            fetchNotes(); // Refresh list
+                            btnDelete.classList.remove('d-none');
+
                             Swal.fire({
                                 icon: 'success',
-                                title: 'Dibersihkan!',
-                                text: 'Catatan telah dihapus.',
-                                showConfirmButton: false,
-                                timer: 1500,
+                                title: 'Tersimpan',
                                 toast: true,
-                                position: 'top-end'
+                                position: 'top-end',
+                                showConfirmButton: false,
+                                timer: 1500
                             });
+                            statusText.textContent = 'Disimpan.';
                         }
+                    })
+                    .catch(err => {
+                        console.error(err);
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Gagal',
+                            text: 'Terjadi kesalahan server.'
+                        });
+                    })
+                    .finally(() => {
+                        btnSave.innerHTML = originalBtnHtml;
+                        btnSave.disabled = false;
                     });
+            });
+
+            // 7. Tombol Hapus
+            btnDelete.addEventListener('click', () => {
+                if (!activeNoteId) return;
+
+                Swal.fire({
+                    title: 'Hapus catatan ini?',
+                    text: "Tidak bisa dikembalikan.",
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#d33',
+                    cancelButtonColor: '#3085d6',
+                    confirmButtonText: 'Ya, hapus!'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        fetch(`/notes/${activeNoteId}`, {
+                                method: 'DELETE',
+                                headers: {
+                                    'X-CSRF-TOKEN': document.querySelector(
+                                        'meta[name="csrf-token"]').content
+                                }
+                            })
+                            .then(res => res.json())
+                            .then(data => {
+                                resetForm();
+                                fetchNotes();
+                                Swal.fire({
+                                    icon: 'success',
+                                    title: 'Terhapus',
+                                    toast: true,
+                                    position: 'top-end',
+                                    showConfirmButton: false,
+                                    timer: 1500
+                                });
+                            });
+                    }
                 });
-            }
-            // --- AKHIR LOGIKA NOTEPAD ---
+            });
 
 
             // Inisialisasi Popover (jika Anda membutuhkannya)
             var popoverTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="popover"]'))
-            var popoverList = popoverTriggerList.map(function (popoverTriggerEl) {
+            var popoverList = popoverTriggerList.map(function(popoverTriggerEl) {
                 return new bootstrap.Popover(popoverTriggerEl, {
                     html: false,
                     sanitize: false

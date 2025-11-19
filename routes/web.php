@@ -8,6 +8,7 @@ use App\Http\Controllers\RuanganController;
 use App\Http\Controllers\PraPenelitianController;
 use App\Http\Controllers\PelatihanController;
 use App\Http\Controllers\AbsensiController;
+use App\Http\Controllers\NoteController;
 use App\Http\Controllers\SuratBalasanController;
 use App\Http\Controllers\MouController;
 
@@ -60,16 +61,16 @@ Route::middleware('auth')->group(function () {
     });
 
     //Surat Balasan Routes
-Route::prefix('surat-balasan')->name('surat-balasan.')->group(function () {
-    Route::get('/', [SuratBalasanController::class, 'index'])->name('index');
-    Route::get('/create', [SuratBalasanController::class, 'create'])->name('create');
-    Route::post('/', [SuratBalasanController::class, 'store'])->name('store');
-    Route::get('/{suratBalasan}/edit', [SuratBalasanController::class, 'edit'])->name('edit');
-    Route::put('/{suratBalasan}', [SuratBalasanController::class, 'update'])->name('update');
-    Route::delete('/{suratBalasan}', [SuratBalasanController::class, 'destroy'])->name('destroy');
-    Route::get('/{suratBalasan}/pdf', [SuratBalasanController::class, 'generatePdf'])
-        ->name('pdf');
-});
+    Route::prefix('surat-balasan')->name('surat-balasan.')->group(function () {
+        Route::get('/', [SuratBalasanController::class, 'index'])->name('index');
+        Route::get('/create', [SuratBalasanController::class, 'create'])->name('create');
+        Route::post('/', [SuratBalasanController::class, 'store'])->name('store');
+        Route::get('/{suratBalasan}/edit', [SuratBalasanController::class, 'edit'])->name('edit');
+        Route::put('/{suratBalasan}', [SuratBalasanController::class, 'update'])->name('update');
+        Route::delete('/{suratBalasan}', [SuratBalasanController::class, 'destroy'])->name('destroy');
+        Route::get('/{suratBalasan}/pdf', [SuratBalasanController::class, 'generatePdf'])
+            ->name('pdf');
+    });
 
 
     // Mahasiswa Routes
@@ -106,6 +107,9 @@ Route::prefix('surat-balasan')->name('surat-balasan.')->group(function () {
 
     //Admin
     Route::get('/mahasiswa/{id}/sertifikat', [MahasiswaController::class, 'generateSertifikat'])->name('mahasiswa.sertifikat');
+    Route::get('/notes', [NoteController::class, 'index'])->name('notes.index');
+    Route::post('/notes', [NoteController::class, 'store'])->name('notes.store');
+    Route::delete('/notes/{id}', [NoteController::class, 'destroy'])->name('notes.destroy');
     // Admin: view today's absensi with filters
     Route::get('/absensi', [AbsensiController::class, 'index'])->name('absensi.index');
 });
@@ -138,4 +142,3 @@ Route::prefix('pra-penelitian')->name('pra-penelitian.')->middleware('auth')->gr
     Route::delete('/{pra_penelitian}', [PraPenelitianController::class, 'destroy'])->name('destroy');
     Route::patch('/{pra_penelitian}/batal', [PraPenelitianController::class, 'batal'])->name('batal');
 });
-

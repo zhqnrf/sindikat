@@ -4,6 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>@yield('title', 'Dashboard Interaktif')</title>
 
     {{-- Bootstrap --}}
@@ -13,9 +14,8 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
 
     {{-- Choices.js CSS --}}
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/choices.js/1.1.6/styles/css/choices.min.css"
-        integrity="sha512-+8K1k6gM6+6a2r9oQwB+8u8Zxq2u1Jp0xFhZkq6Ykq1F0s3rVw1Z3QXw6k3Qw6s1y2z7x7Y9G6q2K1M1Q=="
-        crossorigin="anonymous" referrerpolicy="no-referrer" />
+    {{-- Ganti yang lama dengan ini --}}
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/choices.js/public/assets/styles/choices.min.css" />
 
     <link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">
 
@@ -384,10 +384,8 @@
 
     {{-- Bootstrap JS --}}
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-    {{-- Choices.js --}}
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/choices.js/1.1.6/choices.min.js"
-        integrity="sha512-+kq1Zk6gM6+6a2r9oQwB+8u8Zxq2u1Jp0xFhZkq6Ykq1F0s3rVw1Z3QXw6k3Qw6s1y2z7x7Y9G6q2K1M1Q=="
-        crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    {{-- Ganti yang lama dengan ini --}}
+    <script src="https://cdn.jsdelivr.net/npm/choices.js/public/assets/scripts/choices.min.js"></script>
     <script src="https://cdn.quilljs.com/1.3.6/quill.js"></script>
 
     <script>

@@ -4,8 +4,14 @@
 @section('page-title', 'Form Surat Balasan')
 
 @section('content')
+
+    {{-- ========================= --}}
+    {{--  Tambah Choices.js CDN    --}}
+    {{-- ========================= --}}
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/choices.js/public/assets/styles/choices.min.css" />
+    <script src="https://cdn.jsdelivr.net/npm/choices.js/public/assets/scripts/choices.min.js"></script>
+
     <style>
-        /* --- Menggunakan Style dari Referensi --- */
         :root {
             --custom-maroon: #7c1316;
             --custom-maroon-light: #a3191d;
@@ -37,89 +43,10 @@
             font-size: 0.9rem;
             margin-bottom: 0.5rem;
         }
-
-        .input-group-text {
-            background-color: #f8f9fa;
-            border-right: none;
-            color: var(--custom-maroon);
-            border-top-left-radius: 10px;
-            border-bottom-left-radius: 10px;
-            min-width: 45px; /* Agar lebar icon seragam */
-            justify-content: center;
-        }
-
-        .form-control,
-        .form-select {
-            border-left: none;
-            border-radius: 0 10px 10px 0;
-            padding: 0.7rem 1rem;
-            border-color: #dee2e6;
-            box-shadow: none !important;
-            transition: border-color 0.2s;
-        }
-
-        .form-control:focus,
-        .form-select:focus {
-            border-color: var(--custom-maroon-light);
-        }
-
-        /* Khusus Textarea agar icon tetap di atas */
-        .input-group.align-items-start .input-group-text {
-            padding-top: 0.8rem;
-            height: auto;
-            border-bottom-left-radius: 0; /* Sesuaikan jika perlu */
-        }
-
-        .btn-maroon {
-            background-color: var(--custom-maroon);
-            color: white;
-            border: none;
-            padding: 0.8rem 2rem;
-            border-radius: 50px;
-            font-weight: 600;
-            transition: var(--transition);
-            box-shadow: 0 4px 15px rgba(124, 19, 22, 0.2);
-        }
-
-        .btn-maroon:hover {
-            background-color: var(--custom-maroon-light);
-            transform: translateY(-2px);
-            color: white;
-        }
-
-        .btn-light-custom {
-            background: #fff;
-            border: 1px solid #dee2e6;
-            color: var(--text-dark);
-            border-radius: 50px;
-            padding: 0.8rem 1.5rem;
-            font-weight: 600;
-            transition: var(--transition);
-            text-decoration: none;
-            display: inline-block;
-        }
-
-        .btn-light-custom:hover {
-            background: #f8f9fa;
-            color: var(--custom-maroon);
-        }
-
-        .animate-up {
-            animation: fadeInUp 0.6s cubic-bezier(0.4, 0, 0.2, 1) forwards;
-            opacity: 0;
-            transform: translateY(20px);
-        }
-
-        @keyframes fadeInUp {
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
     </style>
 
     <div class="row justify-content-center animate-up">
-        <div class="col-md-10 col-lg-9"> {{-- Lebar disesuaikan karena banyak kolom --}}
+        <div class="col-md-10 col-lg-9">
             <div class="form-card">
                 <div class="card-header-custom">
                     <h4 class="mb-0 fw-bold"><i class="fas fa-envelope-open-text me-2"></i> Form Surat Balasan</h4>
@@ -127,7 +54,7 @@
                 </div>
 
                 <div class="card-body p-4 p-md-5">
-                    {{-- Error Handling --}}
+
                     @if ($errors->any())
                         <div class="alert alert-danger rounded-3 shadow-sm mb-4">
                             <ul class="mb-0 small">
@@ -138,24 +65,18 @@
                         </div>
                     @endif
 
-                    {{-- Mulai Form (Sesuaikan action route Anda) --}}
                     <form action="{{ route('surat-balasan.store') }}" method="POST">
                         @csrf
 
-                        {{-- BAGIAN 1: IDENTITAS --}}
-                        <h6 class="text-muted text-uppercase fw-bold mb-3" style="font-size: 0.75rem; letter-spacing: 1px;">
-                            Identitas Mahasiswa
-                        </h6>
+                        <h6 class="text-muted text-uppercase fw-bold mb-3" style="font-size: 0.75rem;">Identitas Mahasiswa</h6>
 
                         <div class="row">
-                            {{-- Baris 1: Nama & NIM --}}
                             <div class="col-md-6 mb-3">
                                 <label class="form-label">Nama Mahasiswa</label>
                                 <div class="input-group">
                                     <span class="input-group-text"><i class="fas fa-user-graduate"></i></span>
                                     <input type="text" name="nama_mahasiswa" class="form-control"
-                                        placeholder="Masukkan nama mahasiswa"
-                                        value="{{ old('nama_mahasiswa', $suratBalasan->nama_mahasiswa ?? '') }}" required>
+                                           value="{{ old('nama_mahasiswa') }}" required>
                                 </div>
                             </div>
 
@@ -164,19 +85,16 @@
                                 <div class="input-group">
                                     <span class="input-group-text"><i class="fas fa-id-card"></i></span>
                                     <input type="text" name="nim" class="form-control"
-                                        placeholder="Masukkan NIM"
-                                        value="{{ old('nim', $suratBalasan->nim ?? '') }}" required>
+                                           value="{{ old('nim') }}" required>
                                 </div>
                             </div>
 
-                            {{-- Baris 2: WA & Prodi --}}
                             <div class="col-md-6 mb-3">
-                                <label class="form-label">No WA Mahasiswa</label>
+                                <label class="form-label">No WA</label>
                                 <div class="input-group">
                                     <span class="input-group-text"><i class="fab fa-whatsapp"></i></span>
                                     <input type="text" name="wa_mahasiswa" class="form-control"
-                                        placeholder="Contoh: 0812..."
-                                        value="{{ old('wa_mahasiswa', $suratBalasan->wa_mahasiswa ?? '') }}" required>
+                                           value="{{ old('wa_mahasiswa') }}" required>
                                 </div>
                             </div>
 
@@ -185,82 +103,87 @@
                                 <div class="input-group">
                                     <span class="input-group-text"><i class="fas fa-university"></i></span>
                                     <input type="text" name="prodi" class="form-control"
-                                        placeholder="Masukkan Program Studi"
-                                        value="{{ old('prodi', $suratBalasan->prodi ?? '') }}" required>
+                                           value="{{ old('prodi') }}" required>
                                 </div>
                             </div>
                         </div>
 
                         <hr class="my-4 border-light">
 
-                        {{-- BAGIAN 2: DETAIL SURAT --}}
-                        <h6 class="text-muted text-uppercase fw-bold mb-3" style="font-size: 0.75rem; letter-spacing: 1px;">
-                            Detail Keperluan
-                        </h6>
+                        <h6 class="text-muted text-uppercase fw-bold mb-3" style="font-size: 0.75rem;">Detail Keperluan</h6>
 
                         <div class="mb-3">
-                            <label class="form-label">Keperluan </label>
+                            <label class="form-label">Keperluan</label>
                             <div class="input-group">
                                 <span class="input-group-text"><i class="fas fa-file-alt"></i></span>
                                 <input type="text" name="keperluan" class="form-control"
-                                    placeholder="Contoh: Kepentingan Penelitian atau Magang"
-                                    value="{{ old('keperluan', $suratBalasan->keperluan ?? '') }}" required>
+                                       value="{{ old('keperluan') }}" required>
                             </div>
                         </div>
 
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Universitas MOU</label>
+                            <select name="mou_id" class="form-select" required>
+                                <option value="">-- Pilih Universitas --</option>
+                                @foreach ($mous as $m)
+                                    <option value="{{ $m->id }}">{{ $m->nama_universitas }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+
+                        {{-- Rentang Tanggal --}}
                         <div class="row">
-                            {{-- Baris 4: Universitas & Mahasiswa Penelitian --}}
                             <div class="col-md-6 mb-3">
-                                <label class="form-label">Universitas MOU</label>
-                                <div class="input-group">
-                                    <span class="input-group-text"><i class="fas fa-handshake"></i></span>
-                                    <select name="mou_id" class="form-select" required>
-                                        <option value="">-- Pilih Universitas --</option>
-                                        @foreach($mous as $mou)
-                                            <option value="{{ $mou->id }}"
-                                                {{ old('mou_id', $suratBalasan->mou_id ?? '') == $mou->id ? 'selected' : '' }}>
-                                                {{ $mou->nama_universitas }}
-                                            </option>
-                                        @endforeach
-                                    </select>
-                                </div>
+                                <label class="form-label">Tanggal Mulai</label>
+                                <input type="date" class="form-control" name="tanggal_mulai"
+                                       value="{{ date('Y-m-d') }}" required>
                             </div>
 
-                            {{-- Baris 5: Lama Berlaku --}}
-                            <div class="col-md-12 mb-3">
-                                <label class="form-label">Lama Berlaku Surat</label>
-                                <div class="input-group">
-                                    <span class="input-group-text"><i class="fas fa-clock"></i></span>
-                                    <input type="text" name="lama_berlaku" class="form-control"
-                                        placeholder="Contoh: 3 Bulan, 1 Semester"
-                                        value="{{ old('lama_berlaku', $suratBalasan->lama_berlaku ?? '') }}" required>
-                                </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Tanggal Selesai</label>
+                                <input type="date" class="form-control" name="tanggal_selesai" required>
                             </div>
                         </div>
 
-                        {{-- Baris 6: Data (Textarea) --}}
-                        <div class="mb-4">
+                        {{-- Pilihan Data — PAKAI CHOICES JS --}}
+                        <div class="mb-3">
                             <label class="form-label">Data Yang Dibutuhkan</label>
-                            <div class="input-group align-items-start">
-                                <span class="input-group-text"><i class="fas fa-database"></i></span>
-                                <textarea name="data_dibutuhkan" class="form-control" rows="4"
-                                    placeholder="Sebutkan data yang dibutuhkan secara spesifik..." required>{{ old('data_dibutuhkan', $suratBalasan->data_dibutuhkan ?? '') }}</textarea>
-                            </div>
+                            <select id="data_dibutuhkan" name="data_dibutuhkan" class="form-select" required>
+                                <option value="">-- Pilih Data --</option>
+                                <option value="OBAT">OBAT</option>
+                                <option value="SOAP (RANAP)">SOAP (RANAP)</option>
+                                <option value="RADIOLOGI">RADIOLOGI</option>
+                                <option value="SOAP (RALAN)">SOAP (RALAN)</option>
+                                <option value="LAB">LAB</option>
+                            </select>
                         </div>
 
-                        {{-- Tombol Aksi --}}
-                        <div class="d-flex justify-content-between align-items-center pt-3">
-                            <a href="{{ route('surat-balasan.index') }}" class="btn btn-light-custom shadow-sm">
+                        <div class="d-flex justify-content-between pt-3">
+                            <a href="{{ route('surat-balasan.index') }}" class="btn btn-light-custom">
                                 <i class="fas fa-arrow-left me-2"></i> Kembali
                             </a>
+
                             <button type="submit" class="btn btn-maroon">
                                 Simpan Data <i class="fas fa-check-circle ms-2"></i>
                             </button>
                         </div>
 
                     </form>
+
                 </div>
             </div>
         </div>
     </div>
+
+    {{-- ===================================== --}}
+    {{-- INIT Choices.js Searchable Dropdown   --}}
+    {{-- ===================================== --}}
+    <script>
+        new Choices('#data_dibutuhkan', {
+            searchEnabled: true,
+            itemSelectText: '',
+            shouldSort: false
+        });
+    </script>
+
 @endsection

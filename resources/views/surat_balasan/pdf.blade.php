@@ -1,12 +1,14 @@
 <!DOCTYPE html>
 <html>
+
 <head>
     <meta charset="utf-8">
     <title>Surat Balasan - {{ $data->nama_mahasiswa }}</title>
     <style>
         /* --- Reset & Base --- */
         body {
-            font-family: Arial, Helvetica, sans-serif; /* Font standar surat resmi modern */
+            font-family: Arial, Helvetica, sans-serif;
+            /* Font standar surat resmi modern */
             font-size: 12pt;
             line-height: 1.5;
             color: #333;
@@ -25,21 +27,26 @@
             text-align: center;
             margin-bottom: 20px;
         }
+
         .header h3 {
             margin: 0;
             font-size: 16pt;
             text-transform: uppercase;
             font-weight: bold;
         }
+
         .header p {
             margin: 2px 0;
             font-size: 10pt;
         }
+
         .line {
-            border-bottom: 3px solid #7c1316; /* Warna Maroon Custom Anda */
+            border-bottom: 3px solid #7c1316;
+            /* Warna Maroon Custom Anda */
             margin-top: 10px;
             margin-bottom: 2px;
         }
+
         .line-thin {
             border-bottom: 1px solid #7c1316;
             margin-bottom: 30px;
@@ -50,6 +57,7 @@
             text-align: center;
             margin-bottom: 30px;
         }
+
         .title-section h2 {
             text-decoration: underline;
             margin: 0;
@@ -57,6 +65,7 @@
             text-transform: uppercase;
             color: #000;
         }
+
         .title-section p {
             margin: 5px 0;
             font-size: 11pt;
@@ -68,14 +77,18 @@
             margin-bottom: 15px;
             border-collapse: collapse;
         }
+
         .data-table td {
             vertical-align: top;
             padding: 3px 0;
         }
+
         .label {
-            width: 180px; /* Lebar kolom label */
+            width: 180px;
+            /* Lebar kolom label */
             font-weight: bold;
         }
+
         .separator {
             width: 20px;
             text-align: center;
@@ -85,7 +98,8 @@
         .box-data {
             border: 1px solid #ddd;
             padding: 15px;
-            background-color: #fcf0f1; /* Maroon subtle background */
+            background-color: #fcf0f1;
+            /* Maroon subtle background */
             border-radius: 5px;
             margin-top: 10px;
             margin-bottom: 20px;
@@ -97,11 +111,13 @@
             margin-top: 50px;
             width: 100%;
         }
+
         .signature-box {
             float: right;
             width: 40%;
             text-align: center;
         }
+
         .signature-name {
             margin-top: 70px;
             font-weight: bold;
@@ -116,6 +132,7 @@
         }
     </style>
 </head>
+
 <body>
 
     <div class="header">
@@ -129,7 +146,12 @@
     <div class="container">
         <div class="title-section">
             <h2>SURAT KETERANGAN</h2>
-            <p>Nomor: ...... / ...... / {{ date('Y') }}</p>
+            <p>
+                Nomor:
+                MAS/{{ date('Y') }}/{{ date('m') }}/{{ date('d') }}/{{ str_pad($data->id, 3, '0', STR_PAD_LEFT) }}
+            </p>
+
+
         </div>
 
         <p>Dengan ini menerangkan bahwa mahasiswa di bawah ini:</p>
@@ -208,4 +230,5 @@
     </div>
 
 </body>
+
 </html>

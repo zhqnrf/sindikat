@@ -19,8 +19,13 @@ class CreateSuratBalasanTable extends Migration
             $table->string('keperluan');
             $table->string('prodi');
             $table->string('lama_berlaku');
-            $table->text('data_dibutuhkan');
-
+           $table->enum('data_dibutuhkan', [
+                        'OBAT',
+                        'SOAP (RANAP)',
+                        'RADIOLOGI',
+                        'SOAP (RALAN)',
+                        'LAB'
+                ]);
             $table->timestamps();
         });
     }

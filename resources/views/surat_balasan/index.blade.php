@@ -69,11 +69,6 @@
             border: none;
         }
 
-        .table {
-            margin-bottom: 0;
-            border-collapse: collapse;
-        }
-
         .table thead th {
             background-color: var(--custom-maroon);
             color: white;
@@ -96,7 +91,6 @@
             background-color: #fff5f6;
         }
 
-        /* Action Buttons Styles */
         .action-btn {
             width: 32px;
             height: 32px;
@@ -116,9 +110,20 @@
             color: var(--custom-maroon);
         }
 
-        .action-btn.edit:hover { background: #e0f2fe; color: #0284c7; }
-        .action-btn.pdf:hover { background: #fef3c7; color: #d97706; }
-        .action-btn.delete:hover { background: #fee2e2; color: #dc2626; }
+        .action-btn.edit:hover {
+            background: #e0f2fe;
+            color: #0284c7;
+        }
+
+        .action-btn.pdf:hover {
+            background: #fef3c7;
+            color: #d97706;
+        }
+
+        .action-btn.delete:hover {
+            background: #fee2e2;
+            color: #dc2626;
+        }
 
         .animate-up {
             animation: fadeInUp 0.6s cubic-bezier(0.4, 0, 0.2, 1) forwards;
@@ -127,11 +132,14 @@
         }
 
         @keyframes fadeInUp {
-            to { opacity: 1; transform: translateY(0); }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
     </style>
 
-    {{-- 1. Header Halaman --}}
+    {{-- Header --}}
     <div class="page-header-wrapper d-flex flex-wrap justify-content-between align-items-center gap-3 animate-up">
         <div>
             <h4 class="fw-bold mb-1" style="color: var(--custom-maroon);">Daftar Surat Balasan</h4>
@@ -144,7 +152,7 @@
         </div>
     </div>
 
-    {{-- 2. Filter Card (Opsional, tapi bagus untuk UX) --}}
+    {{-- Filter --}}
     <div class="filter-card animate-up" style="animation-delay: 0.1s;">
         <div class="filter-header">
             <i class="bi bi-funnel-fill mr-2"></i> Pencarian
@@ -154,9 +162,9 @@
                 <div class="row">
                     <div class="col-md-9 mb-3 mb-md-0">
                         <div class="input-group shadow-sm">
-                            <div class="input-group-prepend">
-                                <span class="input-group-text bg-light border-right-0"><i class="bi bi-search"></i></span>
-                            </div>
+                            <span class="input-group-text bg-light border-right-0">
+                                <i class="bi bi-search"></i>
+                            </span>
                             <input type="text" class="form-control bg-light border-left-0" name="search"
                                 placeholder="Cari Nama Mahasiswa / NIM..." value="{{ request('search') }}">
                         </div>
@@ -172,7 +180,7 @@
         </div>
     </div>
 
-    {{-- 3. Tabel Data --}}
+    {{-- TABEL LENGKAP --}}
     <div class="custom-table-card animate-up" style="animation-delay: 0.2s;">
         <div class="table-responsive">
             <table class="table table-hover mb-0">
@@ -181,47 +189,54 @@
                         <th class="text-center" width="5%">No</th>
                         <th>Info Mahasiswa</th>
                         <th>Universitas</th>
+                        <th>Rentang Waktu</th>
                         <th>Keperluan</th>
+                        <th>Data Dibutuhkan</th>
                         <th class="text-center" width="15%">Aksi</th>
                     </tr>
                 </thead>
+
                 <tbody>
-                    @forelse($data as $index => $row)
+                    @forelse($data as $row)
                         <tr>
                             <td class="text-center fw-bold text-muted">
                                 {{ ($data->currentPage() - 1) * $data->perPage() + $loop->iteration }}
                             </td>
+
                             <td>
                                 <div class="fw-bold text-dark">{{ $row->nama_mahasiswa }}</div>
-                                <div class="small text-muted">{{ $row->nim }}</div>
+                                <div class="small text-muted">NIM: {{ $row->nim }}</div>
                                 <div class="small text-success">
                                     <i class="bi bi-whatsapp"></i> {{ $row->wa_mahasiswa }}
                                 </div>
+                                <div class="small text-muted">Prodi: {{ $row->prodi }}</div>
                             </td>
+
                             <td>
                                 <span class="badge bg-light text-dark border">
                                     {{ $row->mou->nama_universitas ?? '-' }}
                                 </span>
-                                <div class="small text-muted mt-1">{{ $row->prodi ?? '-' }}</div>
                             </td>
-                            <td>{{ Str::limit($row->keperluan, 50) }}</td>
+
+                            <td class="fw-semibold">{{ $row->lama_berlaku }}</td>
+
+                            <td>{{ Str::limit($row->keperluan, 40) }}</td>
+
+                            <td>{{ Str::limit($row->data_dibutuhkan, 40) }}</td>
 
                             <td class="text-center">
                                 <div class="d-flex justify-content-center gap-1">
-                                    {{-- Tombol PDF --}}
                                     <a href="{{ route('surat-balasan.pdf', $row->id) }}" target="_blank"
-                                       class="action-btn pdf" title="Download PDF" data-bs-toggle="tooltip">
+                                        class="action-btn pdf" title="Download PDF">
                                         <i class="bi bi-file-earmark-pdf-fill"></i>
                                     </a>
 
-                                    {{-- Tombol Edit --}}
                                     <a href="{{ route('surat-balasan.edit', $row->id) }}"
-                                       class="action-btn edit" title="Edit" data-bs-toggle="tooltip">
+                                        class="action-btn edit" title="Edit">
                                         <i class="bi bi-pencil-square"></i>
                                     </a>
 
-                                    {{-- Tombol Hapus --}}
-                                    <form action="{{ route('surat-balasan.destroy', $row->id) }}" method="POST" class="d-inline">
+                                    <form action="{{ route('surat-balasan.destroy', $row->id) }}" method="POST">
                                         @csrf
                                         @method('DELETE')
                                         <button type="button" class="action-btn delete btn-delete" title="Hapus">
@@ -233,7 +248,7 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="5" class="text-center py-5">
+                            <td colspan="7" class="text-center py-5">
                                 <div class="d-flex flex-column align-items-center">
                                     <i class="bi bi-inbox-fill display-4 text-muted mb-3" style="opacity: 0.5;"></i>
                                     <h5 class="text-muted fw-bold">Tidak ada data surat</h5>
@@ -243,29 +258,30 @@
                         </tr>
                     @endforelse
                 </tbody>
+
             </table>
         </div>
     </div>
 
-    {{-- 4. Paginasi --}}
+    {{-- PAGINASI --}}
     <div class="d-flex justify-content-center mt-4 animate-up" style="animation-delay: 0.3s;">
-        {{ $data->links() }} {{-- Gunakan links('pagination.custom') jika ada view custom --}}
+        {{ $data->links() }}
     </div>
 @endsection
 
 @section('scripts')
-    {{-- SweetAlert2 & Tooltip Script --}}
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
     <script>
         document.addEventListener('DOMContentLoaded', function() {
 
-            // Inisialisasi Tooltip Bootstrap
+            // Tooltip
             var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
-            var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+            var tooltipList = tooltipTriggerList.map(function(tooltipTriggerEl) {
                 return new bootstrap.Tooltip(tooltipTriggerEl)
             });
 
-            // SweetAlert untuk Konfirmasi Hapus
+            // SweetAlert Delete
             const deleteButtons = document.querySelectorAll('.btn-delete');
             deleteButtons.forEach(btn => {
                 btn.addEventListener('click', function(e) {
@@ -277,7 +293,7 @@
                         text: "Data surat ini akan dihapus permanen.",
                         icon: 'warning',
                         showCancelButton: true,
-                        confirmButtonColor: '#dc2626', // Merah
+                        confirmButtonColor: '#dc2626',
                         cancelButtonColor: '#6c757d',
                         confirmButtonText: 'Ya, Hapus!',
                         cancelButtonText: 'Batal'
@@ -289,7 +305,7 @@
                 });
             });
 
-            // SweetAlert untuk Flash Message (Success/Error)
+            // Flash Message
             @if(session('success'))
                 Swal.fire({
                     icon: 'success',

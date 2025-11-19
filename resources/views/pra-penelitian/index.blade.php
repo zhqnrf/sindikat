@@ -1,12 +1,10 @@
-{{-- Ganti dengan layout utama Anda --}}
-@extends('layouts.app')
+@extends('layouts.public')
 
 @section('title', 'Pra Penelitian')
 @section('page-title', 'Data Pra Penelitian')
 
 @section('content')
     <style>
-        /* CSS Lengkap dari file Pelatihan disalin ke sini */
         :root {
             --custom-maroon: #7c1316;
             --custom-maroon-light: #a3191d;

@@ -1,11 +1,10 @@
-@extends('layouts.app')
+@extends('layouts.public')
 
 @section('title', 'Edit Pengajuan Pra Penelitian')
 @section('page-title', 'Edit Pengajuan Pra Penelitian')
 
 @section('content')
     <style>
-        /* Style tetap sama seperti form create Anda */
         :root {
             --custom-maroon: #7c1316;
             --custom-maroon-light: #a3191d;

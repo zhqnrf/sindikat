@@ -87,6 +87,12 @@
                     </div>
                 </div>
 
+                <a class="nav-link {{ request()->is('dashboard') ? 'active' : '' }}"
+                    href="{{ route('surat-balasan.index') }}">
+                    <i class="bi bi-file-earmark-text"></i>
+                    <span class="sidebar-text">Surat Balasan</span>
+                </a>
+
                 {{-- 4. Pelatihan (Link Tunggal) --}}
                 @php
                     $isPelatihanActive = request()->is('pelatihan*');
@@ -169,102 +175,105 @@
     </div>
 </div>
 <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            // 1. Temukan elemen input search
-            const searchInput = document.querySelector('.sidebar-search .search-input');
+    document.addEventListener('DOMContentLoaded', function() {
+        // 1. Temukan elemen input search
+        const searchInput = document.querySelector('.sidebar-search .search-input');
 
-            // 2. Tambahkan event listener 'input' (lebih baik dari keyup)
-            if (searchInput) {
-                searchInput.addEventListener('input', function(e) {
-                    filterSidebar(e.target.value);
-                });
-            }
-        });
-
-        function filterSidebar(filterText) {
-            const text = filterText.toLowerCase();
-            const navContainer = document.querySelector('.sidebar-nav-container');
-
-            // 3. Ambil semua item yang perlu difilter
-            const headings = navContainer.querySelectorAll('.sidebar-heading');
-            const items = navContainer.querySelectorAll('.sidebar-nav-container > .nav-link, .sidebar-nav-container > .nav-item-dropdown');
-            const allSubLinks = navContainer.querySelectorAll('.sub-menu .nav-link');
-
-            // --- 4. RESET STATE (Jika search kosong) ---
-            if (text === '') {
-                headings.forEach(h => h.style.display = 'block');
-                items.forEach(item => item.style.display = 'block');
-                allSubLinks.forEach(sub => sub.style.display = ''); // Reset display ke default CSS
-
-                // Tutup semua sub-menu, KECUALI yang sedang aktif
-                navContainer.querySelectorAll('.sub-menu').forEach(sub => {
-                    const parentLink = sub.closest('.nav-item-dropdown').querySelector('[data-bs-toggle="collapse"]');
-
-                    // Jika parent-nya TIDAK punya class 'active-parent'
-                    if (!parentLink.classList.contains('active-parent')) {
-                        sub.classList.remove('show');
-                        parentLink.setAttribute('aria-expanded', 'false');
-                    }
-                });
-                return; // Selesai
-            }
-
-            // --- 5. FILTERING STATE (Jika ada teks di search) ---
-
-            // Sembunyikan semua heading dan sub-link dulu
-            headings.forEach(h => h.style.display = 'none');
-            allSubLinks.forEach(sub => sub.style.display = 'none'); // Akan kita tampilkan satu per satu jika cocok
-
-            items.forEach(item => {
-                let groupHasMatch = false;
-
-                // Cek 1: Apakah teks link utama cocok? (Cth: "Pendidikan")
-                const mainLink = item.matches('.nav-link') ? item : item.querySelector('[data-bs-toggle="collapse"]');
-                const mainText = mainLink.querySelector('.sidebar-text')?.textContent.toLowerCase() || '';
-
-                if (mainText.includes(text)) {
-                    groupHasMatch = true;
-                }
-
-                // Cek 2: Apakah ada sub-link yang cocok? (Cth: "Mahasiswa")
-                if (item.matches('.nav-item-dropdown')) {
-                    const subLinks = item.querySelectorAll('.sub-menu .nav-link');
-
-                    subLinks.forEach(subLink => {
-                        const subText = subLink.textContent.toLowerCase();
-                        if (subText.includes(text)) {
-                            groupHasMatch = true;
-                            subLink.style.display = ''; // Tampilkan sub-link yang cocok
-                        }
-                    });
-                }
-
-                // --- 6. TAMPILKAN / SEMBUNYIKAN GRUP ---
-                if (groupHasMatch) {
-                    item.style.display = 'block'; // Tampilkan grup ini
-
-                    // Jika ini dropdown, paksa buka untuk menunjukkan sub-link yang cocok
-                    if (item.matches('.nav-item-dropdown')) {
-                        item.querySelector('.sub-menu').classList.add('show');
-                        item.querySelector('[data-bs-toggle="collapse"]').setAttribute('aria-expanded', 'true');
-                    }
-
-                    // Tampilkan heading yang mendahului item ini
-                    let heading = item.previousElementSibling;
-                    while (heading) {
-                        if (heading.classList.contains('sidebar-heading')) {
-                            heading.style.display = 'block';
-                            break; // Cukup temukan satu heading di atasnya
-                        }
-                        heading = heading.previousElementSibling;
-                    }
-
-                } else {
-                    item.style.display = 'none'; // Sembunyikan grup ini
-                }
+        // 2. Tambahkan event listener 'input' (lebih baik dari keyup)
+        if (searchInput) {
+            searchInput.addEventListener('input', function(e) {
+                filterSidebar(e.target.value);
             });
         }
-    </script>
+    });
+
+    function filterSidebar(filterText) {
+        const text = filterText.toLowerCase();
+        const navContainer = document.querySelector('.sidebar-nav-container');
+
+        // 3. Ambil semua item yang perlu difilter
+        const headings = navContainer.querySelectorAll('.sidebar-heading');
+        const items = navContainer.querySelectorAll(
+            '.sidebar-nav-container > .nav-link, .sidebar-nav-container > .nav-item-dropdown');
+        const allSubLinks = navContainer.querySelectorAll('.sub-menu .nav-link');
+
+        // --- 4. RESET STATE (Jika search kosong) ---
+        if (text === '') {
+            headings.forEach(h => h.style.display = 'block');
+            items.forEach(item => item.style.display = 'block');
+            allSubLinks.forEach(sub => sub.style.display = ''); // Reset display ke default CSS
+
+            // Tutup semua sub-menu, KECUALI yang sedang aktif
+            navContainer.querySelectorAll('.sub-menu').forEach(sub => {
+                const parentLink = sub.closest('.nav-item-dropdown').querySelector(
+                    '[data-bs-toggle="collapse"]');
+
+                // Jika parent-nya TIDAK punya class 'active-parent'
+                if (!parentLink.classList.contains('active-parent')) {
+                    sub.classList.remove('show');
+                    parentLink.setAttribute('aria-expanded', 'false');
+                }
+            });
+            return; // Selesai
+        }
+
+        // --- 5. FILTERING STATE (Jika ada teks di search) ---
+
+        // Sembunyikan semua heading dan sub-link dulu
+        headings.forEach(h => h.style.display = 'none');
+        allSubLinks.forEach(sub => sub.style.display = 'none'); // Akan kita tampilkan satu per satu jika cocok
+
+        items.forEach(item => {
+            let groupHasMatch = false;
+
+            // Cek 1: Apakah teks link utama cocok? (Cth: "Pendidikan")
+            const mainLink = item.matches('.nav-link') ? item : item.querySelector(
+                '[data-bs-toggle="collapse"]');
+            const mainText = mainLink.querySelector('.sidebar-text')?.textContent.toLowerCase() || '';
+
+            if (mainText.includes(text)) {
+                groupHasMatch = true;
+            }
+
+            // Cek 2: Apakah ada sub-link yang cocok? (Cth: "Mahasiswa")
+            if (item.matches('.nav-item-dropdown')) {
+                const subLinks = item.querySelectorAll('.sub-menu .nav-link');
+
+                subLinks.forEach(subLink => {
+                    const subText = subLink.textContent.toLowerCase();
+                    if (subText.includes(text)) {
+                        groupHasMatch = true;
+                        subLink.style.display = ''; // Tampilkan sub-link yang cocok
+                    }
+                });
+            }
+
+            // --- 6. TAMPILKAN / SEMBUNYIKAN GRUP ---
+            if (groupHasMatch) {
+                item.style.display = 'block'; // Tampilkan grup ini
+
+                // Jika ini dropdown, paksa buka untuk menunjukkan sub-link yang cocok
+                if (item.matches('.nav-item-dropdown')) {
+                    item.querySelector('.sub-menu').classList.add('show');
+                    item.querySelector('[data-bs-toggle="collapse"]').setAttribute('aria-expanded', 'true');
+                }
+
+                // Tampilkan heading yang mendahului item ini
+                let heading = item.previousElementSibling;
+                while (heading) {
+                    if (heading.classList.contains('sidebar-heading')) {
+                        heading.style.display = 'block';
+                        break; // Cukup temukan satu heading di atasnya
+                    }
+                    heading = heading.previousElementSibling;
+                }
+
+            } else {
+                item.style.display = 'none'; // Sembunyikan grup ini
+            }
+        });
+    }
+</script>
 <style>
     /* ========================================= */
     /* --- STYLING SIDEBAR BARU (PILL UI/UX) --- */

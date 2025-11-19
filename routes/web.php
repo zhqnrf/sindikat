@@ -8,6 +8,7 @@ use App\Http\Controllers\RuanganController;
 use App\Http\Controllers\PraPenelitianController;
 use App\Http\Controllers\PelatihanController;
 use App\Http\Controllers\AbsensiController;
+use App\Http\Controllers\SuratBalasanController;
 use App\Http\Controllers\MouController;
 
 /*
@@ -57,6 +58,19 @@ Route::middleware('auth')->group(function () {
         Route::put('/{pelatihan}', [PelatihanController::class, 'update'])->name('update');
         Route::delete('/{pelatihan}', [PelatihanController::class, 'destroy'])->name('destroy');
     });
+
+    //Surat Balasan Routes
+Route::prefix('surat-balasan')->name('surat-balasan.')->group(function () {
+    Route::get('/', [SuratBalasanController::class, 'index'])->name('index');
+    Route::get('/create', [SuratBalasanController::class, 'create'])->name('create');
+    Route::post('/', [SuratBalasanController::class, 'store'])->name('store');
+    Route::get('/{suratBalasan}/edit', [SuratBalasanController::class, 'edit'])->name('edit');
+    Route::put('/{suratBalasan}', [SuratBalasanController::class, 'update'])->name('update');
+    Route::delete('/{suratBalasan}', [SuratBalasanController::class, 'destroy'])->name('destroy');
+    Route::get('/{suratBalasan}/pdf', [SuratBalasanController::class, 'generatePdf'])
+        ->name('pdf');
+});
+
 
     // Mahasiswa Routes
     Route::prefix('mahasiswa')->name('mahasiswa.')->group(function () {

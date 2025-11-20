@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Mou;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
@@ -12,7 +13,19 @@ class AuthController extends Controller
     // Menampilkan halaman login & register (1 halaman gabung)
     public function showLoginForm()
     {
-        return view('auth.login');
+        $universitas = Mou::orderBy('nama_universitas')->get();
+        return view('auth.login', compact('universitas'));
+    }
+
+    protected function authenticated(Request $request, $user)
+    {
+        // Jika user bukan admin DAN belum diapprove
+        if ($user->role !== 'admin' && !$user->is_approved) {
+            auth()->logout(); // Paksa logout
+            return back()->with('error', 'Akun Anda sedang menunggu persetujuan Admin. Silakan coba lagi nanti.');
+        }
+        // Jika lolos, lanjut ke dashboard
+        return redirect()->intended($this->redirectPath());
     }
 
     // Fungsi login
@@ -37,20 +50,23 @@ class AuthController extends Controller
     public function register(Request $request)
     {
         $request->validate([
-            'name'                  => 'required|string|max:255',
-            'email'                 => 'required|string|email|max:255|unique:users',
-            'password'              => 'required|string|min:6|confirmed',
+            'name'     => 'required|string|max:255',
+            'email'    => 'required|string|email|max:255|unique:users',
+            'mou_id'   => 'required|exists:mous,id',
+            'password' => 'required|string|min:6|confirmed',
         ]);
 
         $user = User::create([
             'name'     => $request->name,
             'email'    => $request->email,
             'password' => Hash::make($request->password),
-            'role'     => 'user', // default user
+            'role'     => 'user',
+            'mou_id'   => $request->mou_id,
         ]);
 
-        Auth::login($user); // langsung login setelah register
-        return redirect('/dashboard')->with('success', 'Pendaftaran berhasil! Selamat datang.');
+        Auth::login($user);
+
+        return redirect('/dashboard')->with('success', 'Pendaftaran berhasil!');
     }
 
     // Fungsi logout

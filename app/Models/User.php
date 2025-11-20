@@ -14,10 +14,17 @@ class User extends Authenticatable
         'email',
         'password',
         'role',
+        'mou_id',
+        'is_approved'
     ];
 
     protected $hidden = [
         'password',
         'remember_token',
     ];
+
+    public function mou()
+    {
+        return $this->belongsTo(Mou::class);
+    }
 }

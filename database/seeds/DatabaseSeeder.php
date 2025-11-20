@@ -16,8 +16,8 @@ class DatabaseSeeder extends Seeder
         $this->call([
             RuanganSeeder::class,
             RuanganKetersediaanSeeder::class,
-            MahasiswaSeeder::class,
-            AbsensiSeeder::class,
+            // MahasiswaSeeder::class,
+            // AbsensiSeeder::class,
         ]);
 
         // Create a default user for testing/login

@@ -14,7 +14,7 @@ class Mahasiswa extends Model
 
     protected $fillable = [
         'nm_mahasiswa',
-        'univ_asal',
+        'mou_id',
         'prodi',
         'nm_ruangan',
         'ruangan_id',
@@ -57,6 +57,11 @@ class Mahasiswa extends Model
     public function absensis()
     {
         return $this->hasMany(Absensi::class, 'mahasiswa_id');
+    }
+
+    public function mou()
+    {
+        return $this->belongsTo(Mou::class, 'mou_id');
     }
 
     public function ruangan()

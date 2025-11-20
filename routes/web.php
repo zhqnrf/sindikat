@@ -11,33 +11,83 @@ use App\Http\Controllers\AbsensiController;
 use App\Http\Controllers\NoteController;
 use App\Http\Controllers\SuratBalasanController;
 use App\Http\Controllers\MouController;
+use App\Http\Controllers\UserController;
 
 /*
 |--------------------------------------------------------------------------
 | Web Routes
 |--------------------------------------------------------------------------
-|
-| Define all web routes for your application here.
-| Routes are loaded by the RouteServiceProvider within the "web" middleware group.
-|
 */
 
-// Redirect root to /login
 Route::get('/', fn() => redirect()->route('login'));
 
-// Authentication Routes
+// Authentication
 Route::get('/login', [AuthController::class, 'showLoginForm'])->name('login');
 Route::post('/register', [AuthController::class, 'register'])->name('register.post');
 Route::post('/login', [AuthController::class, 'login'])->name('login.post');
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
-// Protected Routes
-Route::middleware('auth')->group(function () {
+// =========================================================================
+// 1. ROUTES UNTUK SEMUA USER (USER BIASA & ADMIN)
+// =========================================================================
+Route::middleware(['auth'])->group(function () {
 
     // Dashboard
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
-    // Ruangan Routes (resource-like, tapi manual)
+    // --- MAHASISWA (Akses User) ---
+    Route::prefix('mahasiswa')->name('mahasiswa.')->group(function () {
+        // Form & Action
+        Route::get('/create', [MahasiswaController::class, 'create'])->name('create');
+        Route::post('/', [MahasiswaController::class, 'store'])->name('store');
+        
+        // Helper Routes (AJAX untuk Form) - PENTING: Harus bisa diakses User
+        Route::get('/ruangan-info/{id}', [MahasiswaController::class, 'getRuanganInfo'])->name('ruangan.info');
+        Route::get('/search/universitas', [MahasiswaController::class, 'searchUniversitas'])->name('search.universitas');
+    });
+
+    // --- PRA-PENELITIAN (Akses User) ---
+    Route::prefix('pra-penelitian')->name('pra-penelitian.')->group(function () {
+        Route::get('/create', [PraPenelitianController::class, 'create'])->name('create');
+        Route::post('/', [PraPenelitianController::class, 'store'])->name('store');
+    });
+
+    // --- SERTIFIKAT & ABSENSI (Public/Shared) ---
+    Route::get('/sertifikat/download/{token}', [AbsensiController::class, 'generateSertifikatPublik'])->name('sertifikat.download');
+    Route::get('/absensi/{token}', [AbsensiController::class, 'card'])->name('absensi.card');
+    Route::post('/absensi/{token}/toggle', [AbsensiController::class, 'toggle'])->name('absensi.toggle');
+});
+
+// =========================================================================
+// 2. ROUTES KHUSUS ADMIN
+// =========================================================================
+Route::middleware(['auth', 'admin'])->group(function () {
+
+    // Mahasiswa (Admin Features)
+    Route::prefix('mahasiswa')->name('mahasiswa.')->group(function () {
+        Route::get('/', [MahasiswaController::class, 'index'])->name('index');
+        Route::post('/import-excel', [MahasiswaController::class, 'importExcel'])->name('import_excel');
+        Route::get('/export', [MahasiswaController::class, 'export'])->name('export');
+        Route::get('/links', [MahasiswaController::class, 'copyLinks'])->name('links');
+        
+        Route::get('/{id}/sertifikat/summary', [MahasiswaController::class, 'showSertifikatSummary'])->name('sertifikat.summary');
+        Route::get('/{mahasiswa}', [MahasiswaController::class, 'show'])->name('show');
+        Route::get('/{mahasiswa}/edit', [MahasiswaController::class, 'edit'])->name('edit');
+        Route::put('/{mahasiswa}', [MahasiswaController::class, 'update'])->name('update');
+        Route::delete('/{mahasiswa}', [MahasiswaController::class, 'destroy'])->name('destroy');
+    });
+
+    // Pra-penelitian (Admin Features)
+    Route::prefix('pra-penelitian')->name('pra-penelitian.')->group(function () {
+        Route::get('/', [PraPenelitianController::class, 'index'])->name('index');
+        Route::get('/{pra_penelitian}', [PraPenelitianController::class, 'show'])->name('show');
+        Route::get('/{pra_penelitian}/edit', [PraPenelitianController::class, 'edit'])->name('edit');
+        Route::put('/{pra_penelitian}', [PraPenelitianController::class, 'update'])->name('update');
+        Route::delete('/{pra_penelitian}', [PraPenelitianController::class, 'destroy'])->name('destroy');
+        Route::patch('/{pra_penelitian}/batal', [PraPenelitianController::class, 'batal'])->name('batal');
+    });
+
+    // Ruangan
     Route::prefix('ruangan')->name('ruangan.')->group(function () {
         Route::get('/', [RuanganController::class, 'index'])->name('index');
         Route::get('/create', [RuanganController::class, 'create'])->name('create');
@@ -47,7 +97,7 @@ Route::middleware('auth')->group(function () {
         Route::delete('/{ruangan}', [RuanganController::class, 'destroy'])->name('destroy');
     });
 
-    // Pelatihan Routes
+    // Pelatihan
     Route::prefix('pelatihan')->name('pelatihan.')->group(function () {
         Route::get('/', [PelatihanController::class, 'index'])->name('index');
         Route::get('/create', [PelatihanController::class, 'create'])->name('create');
@@ -60,7 +110,7 @@ Route::middleware('auth')->group(function () {
         Route::delete('/{pelatihan}', [PelatihanController::class, 'destroy'])->name('destroy');
     });
 
-    //Surat Balasan Routes
+    // Surat Balasan
     Route::prefix('surat-balasan')->name('surat-balasan.')->group(function () {
         Route::get('/', [SuratBalasanController::class, 'index'])->name('index');
         Route::get('/create', [SuratBalasanController::class, 'create'])->name('create');
@@ -68,30 +118,10 @@ Route::middleware('auth')->group(function () {
         Route::get('/{suratBalasan}/edit', [SuratBalasanController::class, 'edit'])->name('edit');
         Route::put('/{suratBalasan}', [SuratBalasanController::class, 'update'])->name('update');
         Route::delete('/{suratBalasan}', [SuratBalasanController::class, 'destroy'])->name('destroy');
-        Route::get('/{suratBalasan}/pdf', [SuratBalasanController::class, 'generatePdf'])
-            ->name('pdf');
+        Route::get('/{suratBalasan}/pdf', [SuratBalasanController::class, 'generatePdf'])->name('pdf');
     });
 
-
-    // Mahasiswa Routes
-    Route::prefix('mahasiswa')->name('mahasiswa.')->group(function () {
-        Route::get('/', [MahasiswaController::class, 'index'])->name('index');
-        Route::get('/create', [MahasiswaController::class, 'create'])->name('create');
-        Route::post('/import-excel', [MahasiswaController::class, 'importExcel'])->name('import_excel');
-        Route::get('/export', [MahasiswaController::class, 'export'])->name('export');
-        Route::get('/ruangan-info/{id}', [MahasiswaController::class, 'getRuanganInfo'])->name('ruangan.info');
-        Route::get('/search/universitas', [MahasiswaController::class, 'searchUniversitas'])->name('search.universitas');
-        Route::get('/links', [MahasiswaController::class, 'copyLinks'])->name('links');
-        Route::post('/', [MahasiswaController::class, 'store'])->name('store');
-        Route::get('/{id}/sertifikat/summary', [MahasiswaController::class, 'showSertifikatSummary'])
-            ->name('sertifikat.summary');
-        Route::get('/{mahasiswa}', [MahasiswaController::class, 'show'])->name('show');
-        Route::get('/{mahasiswa}/edit', [MahasiswaController::class, 'edit'])->name('edit');
-        Route::put('/{mahasiswa}', [MahasiswaController::class, 'update'])->name('update');
-        Route::delete('/{mahasiswa}', [MahasiswaController::class, 'destroy'])->name('destroy');
-    });
-
-    // Mou Routes
+    // MOU
     Route::prefix('mou')->name('mou.')->group(function () {
         Route::get('/', [MouController::class, 'index'])->name('index');
         Route::get('/create', [MouController::class, 'create'])->name('create');
@@ -103,38 +133,15 @@ Route::middleware('auth')->group(function () {
         Route::delete('/{mou}', [MouController::class, 'destroy'])->name('destroy');
     });
 
-
-
-    //Admin
+    // Admin Utilities
     Route::get('/mahasiswa/{id}/sertifikat', [MahasiswaController::class, 'generateSertifikat'])->name('mahasiswa.sertifikat');
     Route::get('/notes', [NoteController::class, 'index'])->name('notes.index');
     Route::post('/notes', [NoteController::class, 'store'])->name('notes.store');
     Route::delete('/notes/{id}', [NoteController::class, 'destroy'])->name('notes.destroy');
-    // Admin: view today's absensi with filters
     Route::get('/absensi', [AbsensiController::class, 'index'])->name('absensi.index');
-});
 
-Route::get('/test-419', function () {
-    throw new \Illuminate\Session\TokenMismatchException;
-});
-
-Route::get('/sertifikat/download/{token}', [AbsensiController::class, 'generateSertifikatPublik'])
-    ->name('sertifikat.download');
-
-// Public attendance (absensi) routes using share tokens — no auth required
-Route::get('/absensi/{token}', [AbsensiController::class, 'card'])->name('absensi.card');
-
-// Toggle Absen
-Route::post('/absensi/{token}/toggle', [AbsensiController::class, 'toggle'])->name('absensi.toggle');
-
-// Pra-penelitian PUBLIC
-Route::prefix('pra-penelitian')->name('pra-penelitian.')->group(function () {
-    Route::get('/', [PraPenelitianController::class, 'index'])->name('index');
-    Route::get('/{pra_penelitian}', [PraPenelitianController::class, 'show'])->name('show');
-    Route::get('/{pra_penelitian}/edit', [PraPenelitianController::class, 'edit'])->name('edit');
-    Route::put('/{pra_penelitian}', [PraPenelitianController::class, 'update'])->name('update');
-    Route::delete('/{pra_penelitian}', [PraPenelitianController::class, 'destroy'])->name('destroy');
-    Route::patch('/{pra_penelitian}/batal', [PraPenelitianController::class, 'batal'])->name('batal');
-    Route::get('/create', [PraPenelitianController::class, 'create'])->name('create');
-    Route::post('/', [PraPenelitianController::class, 'store'])->name('store');
+    // Manajemen User
+    Route::get('/users', [UserController::class, 'index'])->name('users.index');
+    Route::post('/users/{id}/approve', [UserController::class, 'approve'])->name('users.approve');
+    Route::delete('/users/{id}', [UserController::class, 'destroy'])->name('users.destroy');
 });

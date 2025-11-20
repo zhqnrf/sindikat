@@ -172,10 +172,10 @@
                             <label class="form-label">Pas Foto 3x4 (Opsional)</label>
 
                             {{-- Tampilkan preview foto lama jika ada --}}
-                            @if($mahasiswa->foto_path)
+                            @if ($mahasiswa->foto_path)
                                 <div class="mb-2 p-2 border rounded d-inline-block bg-light">
                                     <img src="{{ asset($mahasiswa->foto_path) }}" alt="Foto Lama"
-                                         style="height: 80px; width: 60px; object-fit: cover; border-radius: 4px;">
+                                        style="height: 80px; width: 60px; object-fit: cover; border-radius: 4px;">
                                     <div class="small text-muted mt-1" style="font-size: 0.7rem;">Foto Saat Ini</div>
                                 </div>
                             @endif
@@ -198,11 +198,21 @@
                             <div class="col-md-6 mb-3">
                                 <label class="form-label">Asal Universitas</label>
                                 <div class="input-group">
+                                    {{-- Tambahan Icon agar seragam --}}
                                     <span class="input-group-text"><i class="bi bi-building"></i></span>
-                                    <input type="text" name="univ_asal" class="form-control"
-                                        value="{{ old('univ_asal', $mahasiswa->univ_asal) }}">
+                                    <select name="mou_id" class="form-select">
+                                        <option value="">-- Pilih Universitas --</option>
+                                        @foreach ($mous as $mou)
+                                            {{-- Perbaikan: Tambahkan $mahasiswa->mou_id sebagai parameter kedua old() --}}
+                                            <option value="{{ $mou->id }}"
+                                                {{ old('mou_id', $mahasiswa->mou_id) == $mou->id ? 'selected' : '' }}>
+                                                {{ $mou->nama_universitas }}
+                                            </option>
+                                        @endforeach
+                                    </select>
                                 </div>
                             </div>
+
                             <div class="col-md-6 mb-3">
                                 <label class="form-label">Program Studi</label>
                                 <div class="input-group">
@@ -212,12 +222,9 @@
                                 </div>
                             </div>
                         </div>
-
                         <hr class="my-4 border-light">
-
                         <h6 class="text-muted text-uppercase fw-bold mb-3" style="font-size: 0.75rem; letter-spacing: 1px;">
                             Penempatan & Durasi</h6>
-
                         <div class="mb-3">
                             <label class="form-label">Pilih Ruangan</label>
                             <div class="input-group">
@@ -257,7 +264,8 @@
                                 <div class="input-group">
                                     <span class="input-group-text"><i class="bi bi-calendar-plus"></i></span>
                                     <input type="date" name="tanggal_mulai" class="form-control"
-                                        value="{{ old('tanggal_mulai', $mahasiswa->tanggal_mulai ? $mahasiswa->tanggal_mulai->format('Y-m-d') : '') }}" required>
+                                        value="{{ old('tanggal_mulai', $mahasiswa->tanggal_mulai ? $mahasiswa->tanggal_mulai->format('Y-m-d') : '') }}"
+                                        required>
                                 </div>
                             </div>
                             <div class="col-md-6 mb-3">
@@ -265,7 +273,8 @@
                                 <div class="input-group">
                                     <span class="input-group-text"><i class="bi bi-calendar-check"></i></span>
                                     <input type="date" name="tanggal_berakhir" class="form-control"
-                                        value="{{ old('tanggal_berakhir', $mahasiswa->tanggal_berakhir ? $mahasiswa->tanggal_berakhir->format('Y-m-d') : '') }}" required>
+                                        value="{{ old('tanggal_berakhir', $mahasiswa->tanggal_berakhir ? $mahasiswa->tanggal_berakhir->format('Y-m-d') : '') }}"
+                                        required>
                                 </div>
                             </div>
                         </div>
@@ -275,9 +284,11 @@
                             <div class="input-group">
                                 <span class="input-group-text"><i class="bi bi-toggle-on"></i></span>
                                 <select name="status" class="form-select">
-                                    <option value="aktif" {{ old('status', $mahasiswa->status) === 'aktif' ? 'selected' : '' }}>🟢 Aktif
+                                    <option value="aktif"
+                                        {{ old('status', $mahasiswa->status) === 'aktif' ? 'selected' : '' }}>🟢 Aktif
                                     </option>
-                                    <option value="nonaktif" {{ old('status', $mahasiswa->status) === 'nonaktif' ? 'selected' : '' }}>🔴
+                                    <option value="nonaktif"
+                                        {{ old('status', $mahasiswa->status) === 'nonaktif' ? 'selected' : '' }}>🔴
                                         Nonaktif</option>
                                 </select>
                             </div>
@@ -286,11 +297,11 @@
                         <div class="form-group mb-4" style="padding-top: 10px;">
                             <div class="form-check form-switch" style="padding-left: 2.5em;">
                                 <input class="form-check-input" type="checkbox" role="switch" name="weekend_aktif"
-                                       value="1" id="weekend_aktif"
-                                       {{ old('weekend_aktif', $mahasiswa->weekend_aktif) ? 'checked' : '' }}
-                                       style="height: 1.25em; width: 2.25em; cursor: pointer;">
+                                    value="1" id="weekend_aktif"
+                                    {{ old('weekend_aktif', $mahasiswa->weekend_aktif) ? 'checked' : '' }}
+                                    style="height: 1.25em; width: 2.25em; cursor: pointer;">
                                 <label class="form-check-label" for="weekend_aktif"
-                                       style="padding-top: 0.2em; font-weight: 600; color: var(--text-dark); cursor: pointer;">
+                                    style="padding-top: 0.2em; font-weight: 600; color: var(--text-dark); cursor: pointer;">
                                     Aktifkan Absensi Weekend
                                 </label>
                             </div>
@@ -359,7 +370,7 @@
                             if (ruanganId == originalRuanganId) {
                                 badgeStatus.className = 'badge rounded-pill bg-info text-dark';
                                 badgeStatus.innerHTML =
-                                '<i class="bi bi-house-door me-1"></i> Ruangan Saat Ini';
+                                    '<i class="bi bi-house-door me-1"></i> Ruangan Saat Ini';
                             }
 
                             infoBox.classList.remove('full');

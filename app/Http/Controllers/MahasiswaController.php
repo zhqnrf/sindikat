@@ -9,7 +9,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Carbon\CarbonPeriod;
 use Illuminate\Support\Facades\File;
-use Barryvdh\DomPDF\Facade\Pdf; 
+use Barryvdh\DomPDF\Facade\Pdf;
 use Carbon\Carbon;
 
 class MahasiswaController extends Controller
@@ -136,7 +136,7 @@ class MahasiswaController extends Controller
                     'ruangan_id' => $ruanganId,
                     'nm_ruangan' => $nmRuangan,
                     // Tambahkan weekend_aktif jika ada di excel
-                    // 'weekend_aktif' => $row['Weekend Aktif'] ?? false, 
+                    // 'weekend_aktif' => $row['Weekend Aktif'] ?? false,
                 ];
 
                 // 3. CEK DATA LAMA (RE-WRITE LOGIC)
@@ -159,7 +159,7 @@ class MahasiswaController extends Controller
                         if ($oldRuanganId) {
                             $oldSnap = RuanganKetersediaan::firstOrCreate(
                                 ['ruangan_id' => $oldRuanganId, 'tanggal' => $today],
-                                ['tersedia' => 0] 
+                                ['tersedia' => 0]
                             );
                             $oldSnap->increment('tersedia');
                         }
@@ -178,7 +178,7 @@ class MahasiswaController extends Controller
                             ['ruangan_id' => $newRuanganId, 'tanggal' => $today],
                             ['tersedia' => $tersedia]
                         );
-                        
+
                         if (!$newSnap->wasRecentlyCreated) {
                             $newSnap->decrement('tersedia');
                         }
@@ -236,6 +236,7 @@ class MahasiswaController extends Controller
             'tanggal_mulai' => 'required|date',
             'tanggal_berakhir' => 'required|date|after:tanggal_mulai',
             'weekend_aktif' => 'nullable|boolean', // <-- Validasi
+            'foto' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
         ]);
 
         // Set status to aktif by default
@@ -244,6 +245,10 @@ class MahasiswaController extends Controller
         // Handle input boolean dari checkbox
         $data['weekend_aktif'] = $request->boolean('weekend_aktif');
 
+        $fotoPath = $this->uploadFoto($request);
+    if ($fotoPath) {
+        $data['foto_path'] = $fotoPath;
+    }
         if (!empty($data['ruangan_id'])) {
             $ruangan = Ruangan::find($data['ruangan_id']);
 
@@ -253,7 +258,7 @@ class MahasiswaController extends Controller
             if ($tersedia <= 0) {
                 return back()->withErrors(['ruangan_id' => 'Kuota ruangan penuh. Tidak dapat menambahkan mahasiswa.'])->withInput();
             }
-            
+
             $today = now()->toDateString();
             $snapshot = RuanganKetersediaan::where('ruangan_id', $ruangan->id)
                 ->where('tanggal', $today)
@@ -299,6 +304,7 @@ class MahasiswaController extends Controller
                 'tanggal_berakhir' => 'required|date|after:tanggal_mulai',
                 'status' => 'required|in:aktif,nonaktif',
                 'weekend_aktif' => 'nullable|boolean', // <-- Validasi
+                'foto' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
             ]);
 
             // Handle input boolean dari checkbox
@@ -306,7 +312,7 @@ class MahasiswaController extends Controller
 
             $oldRuanganId = $mahasiswa->ruangan_id;
             $newRuanganId = $data['ruangan_id'] ?? null;
-            
+
             if ($mahasiswa->status === 'aktif' && $data['status'] === 'nonaktif' && $oldRuanganId) {
                 $old = Ruangan::find($oldRuanganId);
 
@@ -315,7 +321,7 @@ class MahasiswaController extends Controller
                     ['tersedia' => $old->kuota_ruangan]
                 );
 
-                $snap->increment('tersedia'); 
+                $snap->increment('tersedia');
 
                 $data['ruangan_id'] = null;
                 $data['nm_ruangan'] = null;
@@ -323,14 +329,14 @@ class MahasiswaController extends Controller
                 $mahasiswa->update($data);
                 return redirect()->route('mahasiswa.index')->with('success', 'Mahasiswa dinonaktifkan & dikeluarkan dari ruangan.');
             }
-            
+
             if ($newRuanganId == $oldRuanganId) {
                 $mahasiswa->update($data);
                 return redirect()->route('mahasiswa.index')->with('success', 'Mahasiswa diperbarui.');
             }
-            
+
             $today = now()->toDateString();
-            
+
             if ($oldRuanganId) {
                 $old = Ruangan::find($oldRuanganId);
                 $snap = RuanganKetersediaan::where('ruangan_id', $old->id)
@@ -341,17 +347,17 @@ class MahasiswaController extends Controller
                     $snap->increment('tersedia');
                 }
             }
-            
+
             if ($newRuanganId) {
                 $new = Ruangan::find($newRuanganId);
-                
+
                 $terisi = Mahasiswa::where('ruangan_id', $new->id)->count();
                 $tersedia = $new->kuota_ruangan - $terisi;
 
                 if ($tersedia <= 0) {
                     return back()->withErrors(['ruangan_id' => 'Ruangan tujuan penuh. Tidak dapat memindahkan mahasiswa.'])->withInput();
                 }
-                
+
                 $snap = RuanganKetersediaan::where('ruangan_id', $new->id)
                     ->where('tanggal', $today)
                     ->first();
@@ -398,6 +404,32 @@ class MahasiswaController extends Controller
             return redirect()->route('mahasiswa.index')->with('success', 'Mahasiswa dihapus.');
         });
     }
+    private function uploadFoto(Request $request)
+    {
+        if (!$request->hasFile('foto')) {
+            return null; // Tidak ada file diupload
+        }
+
+        $file = $request->file('foto');
+        $nama_file = time() . '_' . $file->getClientOriginalName();
+
+        // Simpan file di public/uploads/pas_foto
+        $file->move(public_path('uploads/pas_foto'), $nama_file);
+
+        return 'uploads/pas_foto/' . $nama_file;
+    }
+
+    /**
+     * Delete old photo file (if exists)
+     * * @param string|null $path
+     * @return void
+     */
+    private function deleteOldPhoto($path)
+    {
+        if ($path && File::exists(public_path($path))) {
+            File::delete(public_path($path));
+        }
+    }
 
     public function getRuanganInfo($id)
     {
@@ -405,10 +437,10 @@ class MahasiswaController extends Controller
         if (!$ruangan) {
             return response()->json(['error' => 'Ruangan tidak ditemukan'], 404);
         }
-        
+
         $terisi = Mahasiswa::where('ruangan_id', $ruangan->id)->count();
         $tersedia = $ruangan->kuota_ruangan - $terisi;
-        $tersedia = max(0, $tersedia); 
+        $tersedia = max(0, $tersedia);
 
         return response()->json([
             'nm_ruangan' => $ruangan->nm_ruangan,
@@ -446,11 +478,11 @@ class MahasiswaController extends Controller
         if ($request->has('univ_asal') && !empty($request->univ_asal)) {
             $query->where('univ_asal', $request->univ_asal);
         }
-        
+
         if ($request->has('ruangan_id') && !empty($request->ruangan_id)) {
             $query->where('ruangan_id', $request->ruangan_id);
         }
-        
+
         if ($request->has('search') && !empty($request->search)) {
             $query->where('nm_mahasiswa', 'like', '%' . $request->search . '%');
         }
@@ -471,17 +503,17 @@ class MahasiswaController extends Controller
 public function showSertifikatSummary($id)
     {
         $mahasiswa = Mahasiswa::findOrFail($id);
-        
+
         $startDate = $mahasiswa->tanggal_mulai;
         $endDate = $mahasiswa->tanggal_berakhir;
         $totalExpectedDays = 0;
-        
+
         if ($startDate && $endDate) {
             $period = CarbonPeriod::create($startDate, $endDate);
             foreach ($period as $date) {
                 if ($mahasiswa->weekend_aktif) {
                     $totalExpectedDays++;
-                } 
+                }
                 elseif (!$date->isWeekend()) {
                     $totalExpectedDays++;
                 }
@@ -492,12 +524,12 @@ public function showSertifikatSummary($id)
             ->select(DB::raw('DATE(created_at) as date'))
             ->distinct()
             ->count();
-            
+
         $participationRate = 0;
         if ($totalExpectedDays > 0) {
             $participationRate = round(($totalActualDays / $totalExpectedDays) * 100, 1);
         }
-        
+
         $totalAlpaDays = $totalExpectedDays - $totalActualDays;
         $totalAlpaDays = max(0, $totalAlpaDays);
 
@@ -524,10 +556,10 @@ public function showSertifikatSummary($id)
         // --- [LOGIKA BARU] Cek input override ---
         // Cek apakah admin mengisi field 'override_percentage' dan nilainya valid
         if ($request->filled('override_percentage') && is_numeric($request->override_percentage)) {
-            
+
             // 1. Jika di-override, gunakan nilai manual
             $percentage = (float) $request->override_percentage;
-            
+
             // Kita tetap hitung total hadir untuk data di PDF (jika perlu)
             $totalActualDays = $mahasiswa->absensis()
                 ->select(DB::raw('DATE(created_at) as date'))
@@ -535,18 +567,18 @@ public function showSertifikatSummary($id)
                 ->count();
 
         } else {
-            
+
             // 2. Jika tidak, hitung otomatis (logika yang sama dari summary)
             $startDate = $mahasiswa->tanggal_mulai;
             $endDate = $mahasiswa->tanggal_berakhir;
             $totalExpectedDays = 0;
-            
+
             if ($startDate && $endDate) {
                 $period = CarbonPeriod::create($startDate, $endDate);
                 foreach ($period as $date) {
                     if ($mahasiswa->weekend_aktif) {
                         $totalExpectedDays++;
-                    } 
+                    }
                     elseif (!$date->isWeekend()) {
                         $totalExpectedDays++;
                     }
@@ -557,15 +589,15 @@ public function showSertifikatSummary($id)
                 ->select(DB::raw('DATE(created_at) as date'))
                 ->distinct()
                 ->count();
-                
+
             if ($totalExpectedDays > 0) {
-                $percentage = round(($totalActualDays / $totalExpectedDays) * 100, 1); 
+                $percentage = round(($totalActualDays / $totalExpectedDays) * 100, 1);
             }
         }
-        
+
         // --- Logika Background (dari langkah sebelumnya) ---
         $path = public_path('background.png');
-        $base64 = ''; 
+        $base64 = '';
         if (File::exists($path)) {
             $type = pathinfo($path, PATHINFO_EXTENSION);
             $fileData = File::get($path);

@@ -43,6 +43,16 @@
             padding: 4px;
             box-shadow: 0 4px 15px rgba(0,0,0,0.1);
             display: inline-block;
+            position: relative; /* Added for image positioning */
+            overflow: hidden; /* Ensures image stays inside circle */
+        }
+
+        /* Style khusus untuk Gambar Foto */
+        .profile-avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover; /* Memastikan foto 3x4 terpotong rapi dalam lingkaran */
+            border-radius: 50%;
         }
 
         .avatar-content {
@@ -131,12 +141,20 @@
 
                 <div class="profile-avatar-wrapper">
                     <div class="profile-avatar">
-                        <div class="avatar-content">
-                            {{ strtoupper(substr($mahasiswa->nm_mahasiswa, 0, 1)) }}
-                        </div>
+                        {{-- LOGIKA TAMPILKAN FOTO --}}
+                        @if($mahasiswa->foto_path)
+                            {{-- Jika ada foto, tampilkan gambar --}}
+                            <img src="{{ asset($mahasiswa->foto_path) }}" alt="Foto {{ $mahasiswa->nm_mahasiswa }}">
+                        @else
+                            {{-- Jika tidak ada, tampilkan inisial --}}
+                            <div class="avatar-content">
+                                {{ strtoupper(substr($mahasiswa->nm_mahasiswa, 0, 1)) }}
+                            </div>
+                        @endif
                     </div>
+
                     <h4 class="mt-2 mb-1 fw-bold" style="color: var(--text-dark);">{{ $mahasiswa->nm_mahasiswa }}</h4>
-                    
+
                     @if ($mahasiswa->status == 'aktif')
                         <span class="status-badge status-active"><i class="bi bi-check-circle-fill me-2"></i> Aktif</span>
                     @else
@@ -171,7 +189,7 @@
                                 <div class="info-label"><i class="bi bi-calendar-range me-1"></i> Sisa Masa Magang</div>
                                 <div class="info-value">
                                     @if ($mahasiswa->sisa_hari > 0)
-                                        <span class="text-primary fw-bold">{{ $mahasiswa->sisa_hari }} Hari</span>
+                                        <span class="text-primary fw-bold">{{ $mahasiswa->sisa_hari }} </span>
                                     @else
                                         <span class="text-danger fw-bold">Berakhir</span>
                                     @endif
@@ -186,7 +204,7 @@
                         <h6 class="fw-bold mb-3 text-dark d-flex align-items-center">
                             <i class="bi bi-qr-code me-2 text-secondary"></i> Link Absensi & Status
                         </h6>
-                        
+
                         <div class="d-flex justify-content-between align-items-center mb-3">
                             <small class="text-muted">Terakhir Absen:</small>
                             <span class="badge {{ $lastStatus ? 'bg-success' : 'bg-secondary' }}">
@@ -196,8 +214,8 @@
 
                         <label class="small text-muted mb-1">Salin Link Absensi:</label>
                         <div class="link-wrapper">
-                            <a href="{{ route('absensi.card', $mahasiswa->share_token) }}" 
-                               target="_blank" class="link-text flex-grow-1 text-decoration-none" 
+                            <a href="{{ route('absensi.card', $mahasiswa->share_token) }}"
+                               target="_blank" class="link-text flex-grow-1 text-decoration-none"
                                id="absensiLink">
                                 {{ route('absensi.card', $mahasiswa->share_token) }}
                             </a>
@@ -223,7 +241,7 @@
     <script>
         function copyLink() {
             const linkText = document.getElementById('absensiLink').innerText;
-            
+
             if (navigator.clipboard && window.isSecureContext) {
                 navigator.clipboard.writeText(linkText).then(() => {
                     alert("Link berhasil disalin!");

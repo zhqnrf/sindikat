@@ -23,6 +23,7 @@ class Mahasiswa extends Model
         'tanggal_mulai',
         'tanggal_berakhir',
         'weekend_aktif',
+        'foto_path',
     ];
 
     protected $appends = ['sisa_hari', 'absensi_percentage'];

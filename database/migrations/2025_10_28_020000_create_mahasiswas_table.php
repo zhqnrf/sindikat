@@ -25,6 +25,7 @@ class CreateMahasiswasTable extends Migration
             $table->boolean('weekend_aktif')->default(false);
             $table->enum('status', ['aktif', 'nonaktif'])->default('aktif');
             $table->string('share_token')->unique();
+            $table->string('foto_path')->nullable();
             $table->timestamps();
 
             $table->foreign('ruangan_id')->references('id')->on('ruangans')->onDelete('set null');

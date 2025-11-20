@@ -149,7 +149,9 @@
                         </div>
                     @endif
 
-                    <form action="{{ route('mahasiswa.update', $mahasiswa->id) }}" method="POST" id="form-mahasiswa">
+                    {{-- 1. PENTING: Tambahkan enctype="multipart/form-data" --}}
+                    <form action="{{ route('mahasiswa.update', $mahasiswa->id) }}" method="POST" id="form-mahasiswa"
+                        enctype="multipart/form-data">
                         @csrf
                         @method('PUT')
 
@@ -164,6 +166,33 @@
                                     value="{{ old('nm_mahasiswa', $mahasiswa->nm_mahasiswa) }}" required>
                             </div>
                         </div>
+
+                        {{-- 2. Bagian Input Foto (Edit) --}}
+                        <div class="mb-4">
+                            <label class="form-label">Pas Foto 3x4 (Opsional)</label>
+
+                            {{-- Tampilkan preview foto lama jika ada --}}
+                            @if($mahasiswa->foto_path)
+                                <div class="mb-2 p-2 border rounded d-inline-block bg-light">
+                                    <img src="{{ asset($mahasiswa->foto_path) }}" alt="Foto Lama"
+                                         style="height: 80px; width: 60px; object-fit: cover; border-radius: 4px;">
+                                    <div class="small text-muted mt-1" style="font-size: 0.7rem;">Foto Saat Ini</div>
+                                </div>
+                            @endif
+
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="bi bi-camera"></i></span>
+                                <input type="file" name="foto" class="form-control"
+                                    accept="image/jpeg,image/png,image/jpg">
+                            </div>
+                            <small class="form-text text-muted">
+                                Upload foto baru jika ingin mengganti. (Max: 2MB, JPG/PNG)
+                            </small>
+                            @error('foto')
+                                <div class="text-danger small">{{ $message }}</div>
+                            @enderror
+                        </div>
+                        {{-- Akhir Bagian Foto --}}
 
                         <div class="row">
                             <div class="col-md-6 mb-3">
@@ -228,7 +257,7 @@
                                 <div class="input-group">
                                     <span class="input-group-text"><i class="bi bi-calendar-plus"></i></span>
                                     <input type="date" name="tanggal_mulai" class="form-control"
-                                        value="{{ old('tanggal_mulai', $mahasiswa->tanggal_mulai->format('Y-m-d')) }}" required>
+                                        value="{{ old('tanggal_mulai', $mahasiswa->tanggal_mulai ? $mahasiswa->tanggal_mulai->format('Y-m-d') : '') }}" required>
                                 </div>
                             </div>
                             <div class="col-md-6 mb-3">
@@ -236,7 +265,7 @@
                                 <div class="input-group">
                                     <span class="input-group-text"><i class="bi bi-calendar-check"></i></span>
                                     <input type="date" name="tanggal_berakhir" class="form-control"
-                                        value="{{ old('tanggal_berakhir', $mahasiswa->tanggal_berakhir->format('Y-m-d')) }}" required>
+                                        value="{{ old('tanggal_berakhir', $mahasiswa->tanggal_berakhir ? $mahasiswa->tanggal_berakhir->format('Y-m-d') : '') }}" required>
                                 </div>
                             </div>
                         </div>
@@ -256,12 +285,11 @@
 
                         <div class="form-group mb-4" style="padding-top: 10px;">
                             <div class="form-check form-switch" style="padding-left: 2.5em;">
-                                <input class="form-check-input" type="checkbox" role="switch" name="weekend_aktif" 
-                                       value="1" id="weekend_aktif" 
-                                       {{-- Logika untuk 'edit': cek 'old' dulu, baru data asli --}}
-                                       {{ old('weekend_aktif', $mahasiswa->weekend_aktif) ? 'checked' : '' }} 
+                                <input class="form-check-input" type="checkbox" role="switch" name="weekend_aktif"
+                                       value="1" id="weekend_aktif"
+                                       {{ old('weekend_aktif', $mahasiswa->weekend_aktif) ? 'checked' : '' }}
                                        style="height: 1.25em; width: 2.25em; cursor: pointer;">
-                                <label class="form-check-label" for="weekend_aktif" 
+                                <label class="form-check-label" for="weekend_aktif"
                                        style="padding-top: 0.2em; font-weight: 600; color: var(--text-dark); cursor: pointer;">
                                     Aktifkan Absensi Weekend
                                 </label>
@@ -302,8 +330,7 @@
                     return;
                 }
 
-                // [FIX] Mengubah URL fetch agar konsisten dengan route API
-                fetch(`/api/ruangan-info/${ruanganId}`) 
+                fetch(`/api/ruangan-info/${ruanganId}`)
                     .then(response => response.json())
                     .then(data => {
                         document.getElementById('info-nama').textContent = data.nm_ruangan;

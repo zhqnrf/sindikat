@@ -149,7 +149,8 @@
                         </div>
                     @endif
 
-                    <form action="{{ route('mahasiswa.store') }}" method="POST" id="form-mahasiswa">
+                    <form action="{{ route('mahasiswa.store') }}" method="POST" id="form-mahasiswa"
+                        enctype="multipart/form-data">
                         @csrf
 
                         <h6 class="text-muted text-uppercase fw-bold mb-3" style="font-size: 0.75rem; letter-spacing: 1px;">
@@ -162,6 +163,33 @@
                                 <input type="text" name="nm_mahasiswa" class="form-control"
                                     value="{{ old('nm_mahasiswa') }}" placeholder="Contoh: Budi Santoso" required>
                             </div>
+                        </div>
+
+                        {{-- Input Foto dengan ID --}}
+                        <div class="mb-4">
+                            <label class="form-label">Pas Foto 3x4 (Opsional)</label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="bi bi-camera"></i></span>
+                                <input type="file" name="foto" id="foto-input" class="form-control"
+                                    accept="image/jpeg,image/png,image/jpg">
+                            </div>
+                            <small class="form-text text-muted">
+                                Format: JPG/PNG/JPEG. Max: 2MB. Ukuran 3x4.
+                            </small>
+
+                            {{-- AREA PREVIEW FOTO (Baru) --}}
+                            <div class="mt-3" id="preview-container" style="display: none;">
+                                <div class="d-inline-block p-1 border rounded bg-light">
+                                    <img id="img-preview" src="#" alt="Preview Foto"
+                                         style="max-width: 150px; max-height: 200px; object-fit: cover; border-radius: 4px; display: block;">
+                                </div>
+                                <div class="small text-muted mt-1 fst-italic">Preview Foto</div>
+                            </div>
+                            {{-- Akhir Area Preview --}}
+
+                            @error('foto')
+                                <div class="text-danger small">{{ $message }}</div>
+                            @enderror
                         </div>
 
                         <div class="row">
@@ -239,14 +267,14 @@
                                 </div>
                             </div>
                         </div>
-                        
+
                         <div class="form-group mb-4" style="padding-top: 10px;">
                             <div class="form-check form-switch" style="padding-left: 2.5em;">
-                                <input class="form-check-input" type="checkbox" role="switch" name="weekend_aktif" 
-                                       value="1" id="weekend_aktif" {{ old('weekend_aktif') ? 'checked' : '' }} 
-                                       style="height: 1.25em; width: 2.25em; cursor: pointer;">
-                                <label class="form-check-label" for="weekend_aktif" 
-                                       style="padding-top: 0.2em; font-weight: 600; color: var(--text-dark); cursor: pointer;">
+                                <input class="form-check-input" type="checkbox" role="switch" name="weekend_aktif"
+                                    value="1" id="weekend_aktif" {{ old('weekend_aktif') ? 'checked' : '' }}
+                                    style="height: 1.25em; width: 2.25em; cursor: pointer;">
+                                <label class="form-check-label" for="weekend_aktif"
+                                    style="padding-top: 0.2em; font-weight: 600; color: var(--text-dark); cursor: pointer;">
                                     Aktifkan Absensi Weekend
                                 </label>
                             </div>
@@ -273,6 +301,29 @@
             const ruanganSelect = document.getElementById('ruangan_id');
             const ruanganInfo = document.getElementById('ruangan-info');
             const submitBtn = document.getElementById('submit-btn');
+
+            // --- LOGIKA PREVIEW FOTO (BARU) ---
+            const fotoInput = document.getElementById('foto-input');
+            const previewContainer = document.getElementById('preview-container');
+            const imgPreview = document.getElementById('img-preview');
+
+            fotoInput.addEventListener('change', function() {
+                const file = this.files[0];
+                if (file) {
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        imgPreview.src = e.target.result;
+                        previewContainer.style.display = 'block';
+                    }
+                    reader.readAsDataURL(file);
+                } else {
+                    // Jika user membatalkan pilihan file
+                    previewContainer.style.display = 'none';
+                    imgPreview.src = '#';
+                }
+            });
+            // -----------------------------------
+
             let selectedRuanganFull = false;
 
             ruanganSelect.addEventListener('change', function() {

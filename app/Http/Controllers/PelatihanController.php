@@ -16,7 +16,6 @@ class PelatihanController extends Controller
      */
     public function __construct()
     {
-        // ... (konstruktor Anda sudah benar) ...
         $this->middleware(function ($request, $next) {
             if (!auth()->check() || auth()->user()->role !== 'admin') {
                 abort(403, 'Akses ditolak.');
@@ -30,7 +29,6 @@ class PelatihanController extends Controller
      */
     public function index(Request $request)
     {
-        // ... (index method Anda sudah benar) ...
         $query = Pelatihan::query();
 
         if ($request->filled('search')) {
@@ -41,6 +39,9 @@ class PelatihanController extends Controller
         }
         if ($request->filled('unit')) {
             $query->where('unit', 'like', '%' . $request->unit . '%');
+        }
+        if ($request->filled('bidang')) {
+            $query->where('bidang', 'like', '%' . $request->bidang . '%');
         }
 
         $pelatihans = $query->orderBy('nama', 'asc')->paginate(10);
@@ -57,64 +58,107 @@ class PelatihanController extends Controller
 
     /**
      * Store a newly created pelatihan in storage
-     * (LOGIKA DIPERBARUI DENGAN FILE UPLOAD)
+     * (LOGIKA DIPERBARUI UNTUK BIDANG, STATUS, DAN 2 JENIS PELATIHAN)
      */
     public function store(Request $request)
     {
         $data = $request->validate([
             'nama' => 'required|string|max:255|unique:pelatihans,nama',
+            'bidang' => 'required|string|max:255', // Input Baru
             'jabatan' => 'nullable|string|max:255',
             'unit' => 'nullable|string|max:255',
-            'is_pns' => 'required|boolean',
-            'nip' => 'nullable|required_if:is_pns,1|string|max:50',
-            'golongan' => 'nullable|required_if:is_pns,1|string|max:100',
-            'pangkat' => 'nullable|required_if:is_pns,1|string|max:100', // <-- TAMBAHAN
+
+            // Ubah is_pns jadi status_pegawai
+            'status_pegawai' => 'required|in:PNS,P3K,Non-PNS',
+
+            // Validasi Kondisional PNS / P3K
+            'nip' => 'nullable|required_if:status_pegawai,PNS,P3K|string|max:50',
+            'golongan' => 'nullable|required_if:status_pegawai,PNS,P3K|string|max:100',
+            'pangkat' => 'nullable|required_if:status_pegawai,PNS,P3K|string|max:100',
+
+            // Validasi Kondisional Non-PNS
+            'nirp' => 'nullable|required_if:status_pegawai,Non-PNS|string|max:50',
+
+            // --- PELATIHAN DASAR ---
             'pelatihan_dasar' => 'nullable|array',
             'pelatihan_dasar.*' => 'nullable|string',
-            'pelatihan_tahun_simple' => 'nullable|array',
-            'pelatihan_tahun_simple.*' => 'nullable|string',
+            'pelatihan_tahun_dasar' => 'nullable|array',
+            'pelatihan_tahun_dasar.*' => 'nullable|string',
+            'pelatihan_file_dasar' => 'nullable|array',
+            'pelatihan_file_dasar.*' => 'nullable|file|mimes:pdf|max:2048',
 
-            // --- TAMBAHAN VALIDASI FILE ---
-            'pelatihan_file' => 'nullable|array',
-            'pelatihan_file.*' => 'nullable|file|mimes:pdf|max:2048', // Maks 2MB per file PDF
+            // --- PELATIHAN PENINGKATAN KOMPETENSI (BARU) ---
+            'pelatihan_kompetensi' => 'nullable|array',
+            'pelatihan_kompetensi.*' => 'nullable|string',
+            'pelatihan_tahun_kompetensi' => 'nullable|array',
+            'pelatihan_tahun_kompetensi.*' => 'nullable|string',
+            'pelatihan_file_kompetensi' => 'nullable|array',
+            'pelatihan_file_kompetensi.*' => 'nullable|file|mimes:pdf|max:2048',
         ]);
 
-        $daftarPelatihan = [];
+        // 1. PROSES PELATIHAN DASAR
+        $daftarPelatihanDasar = [];
         if ($request->has('pelatihan_dasar')) {
             $namaPelatihan = $request->input('pelatihan_dasar');
-            $tahunPelatihan = $request->input('pelatihan_tahun_simple');
-            $filePelatihan = $request->file('pelatihan_file'); // Ambil array file
+            $tahunPelatihan = $request->input('pelatihan_tahun_dasar');
+            $filePelatihan = $request->file('pelatihan_file_dasar');
 
             foreach ($namaPelatihan as $index => $nama) {
                 if (!empty($nama)) {
-
-                    // --- TAMBAHAN LOGIKA PENYIMPANAN FILE ---
                     $filePath = null;
                     if (isset($filePelatihan[$index]) && $filePelatihan[$index]->isValid()) {
                         $file = $filePelatihan[$index];
-                        // Buat nama unik & simpan di 'public/pelatihan_pdf'
-                        $fileName = time() . '_' . $index . '_' . $file->getClientOriginalName();
+                        $fileName = time() . '_dasar_' . $index . '_' . $file->getClientOriginalName();
                         $filePath = $file->storeAs('pelatihan_pdf', $fileName, 'public');
                     }
-                    // --- AKHIR LOGIKA FILE ---
 
-                    $daftarPelatihan[] = [
+                    $daftarPelatihanDasar[] = [
                         'nama'  => $nama,
                         'tahun' => $tahunPelatihan[$index] ?? null,
-                        'file'  => $filePath, // Simpan path file
+                        'file'  => $filePath,
                     ];
                 }
             }
         }
 
-        $data['pelatihan_dasar'] = $daftarPelatihan;
+        // 2. PROSES PELATIHAN PENINGKATAN KOMPETENSI
+        $daftarPelatihanKompetensi = [];
+        if ($request->has('pelatihan_kompetensi')) {
+            $namaKompetensi = $request->input('pelatihan_kompetensi');
+            $tahunKompetensi = $request->input('pelatihan_tahun_kompetensi');
+            $fileKompetensi = $request->file('pelatihan_file_kompetensi');
 
-        unset($data['pelatihan_tahun_simple']);
-        unset($data['pelatihan_file']); // Hapus dari data utama
-        unset($data['data_tahun']);
+            foreach ($namaKompetensi as $index => $nama) {
+                if (!empty($nama)) {
+                    $filePath = null;
+                    if (isset($fileKompetensi[$index]) && $fileKompetensi[$index]->isValid()) {
+                        $file = $fileKompetensi[$index];
+                        $fileName = time() . '_komp_' . $index . '_' . $file->getClientOriginalName();
+                        $filePath = $file->storeAs('pelatihan_pdf', $fileName, 'public');
+                    }
+
+                    $daftarPelatihanKompetensi[] = [
+                        'nama'  => $nama,
+                        'tahun' => $tahunKompetensi[$index] ?? null,
+                        'file'  => $filePath,
+                    ];
+                }
+            }
+        }
+
+        // Simpan ke array data utama
+        $data['pelatihan_dasar'] = $daftarPelatihanDasar;
+        $data['pelatihan_peningkatan_kompetensi'] = $daftarPelatihanKompetensi;
+
+        // Hapus key temporary yang tidak ada di kolom database
+        unset($data['pelatihan_tahun_dasar']);
+        unset($data['pelatihan_file_dasar']);
+        unset($data['pelatihan_kompetensi']);
+        unset($data['pelatihan_tahun_kompetensi']);
+        unset($data['pelatihan_file_kompetensi']);
 
         Pelatihan::create($data);
-        return redirect()->route('pelatihan.index')->with('success', 'Pelatihan berhasil ditambahkan.');
+        return redirect()->route('pelatihan.index')->with('success', 'Data berhasil ditambahkan.');
     }
 
     /**
@@ -122,7 +166,6 @@ class PelatihanController extends Controller
      */
     public function show($id)
     {
-        // ... (show method Anda sudah benar) ...
         $pelatihan = Pelatihan::findOrFail($id);
         return view('pelatihan.show', compact('pelatihan'));
     }
@@ -132,14 +175,12 @@ class PelatihanController extends Controller
      */
     public function edit($id)
     {
-        // ... (edit method Anda sudah benar) ...
         $pelatihan = Pelatihan::findOrFail($id);
         return view('pelatihan.edit', compact('pelatihan'));
     }
 
     /**
      * Update the specified pelatihan in storage
-     * (LOGIKA DIPERBARUI DENGAN FILE UPLOAD)
      */
     public function update(Request $request, $id)
     {
@@ -147,51 +188,65 @@ class PelatihanController extends Controller
 
         $data = $request->validate([
             'nama' => 'required|string|max:255|unique:pelatihans,nama,' . $id,
+            'bidang' => 'required|string|max:255',
             'jabatan' => 'nullable|string|max:255',
             'unit' => 'nullable|string|max:255',
-            'is_pns' => 'required|boolean',
-            'nip' => 'nullable|required_if:is_pns,1|string|max:50',
-            'golongan' => 'nullable|required_if:is_pns,1|string|max:100',
-            'pangkat' => 'nullable|required_if:is_pns,1|string|max:100', // <-- TAMBAHAN
+
+            'status_pegawai' => 'required|in:PNS,P3K,Non-PNS',
+
+            'nip' => 'nullable|required_if:status_pegawai,PNS,P3K|string|max:50',
+            'golongan' => 'nullable|required_if:status_pegawai,PNS,P3K|string|max:100',
+            'pangkat' => 'nullable|required_if:status_pegawai,PNS,P3K|string|max:100',
+
+            'nirp' => 'nullable|required_if:status_pegawai,Non-PNS|string|max:50',
+
+            // --- DASAR ---
             'pelatihan_dasar' => 'nullable|array',
             'pelatihan_dasar.*' => 'nullable|string',
-            'pelatihan_tahun_simple' => 'nullable|array',
-            'pelatihan_tahun_simple.*' => 'nullable|string',
+            'pelatihan_tahun_dasar' => 'nullable|array',
+            'pelatihan_tahun_dasar.*' => 'nullable|string',
+            'pelatihan_file_dasar' => 'nullable|array',
+            'pelatihan_file_dasar.*' => 'nullable|file|mimes:pdf|max:2048',
+            'pelatihan_existing_file_dasar' => 'nullable|array', // File lama
 
-            // --- TAMBAHAN VALIDASI FILE ---
-            'pelatihan_file' => 'nullable|array',
-            'pelatihan_file.*' => 'nullable|file|mimes:pdf|max:2048',
-            'pelatihan_existing_file' => 'nullable|array', // Untuk melacak file lama
-            'pelatihan_existing_file.*' => 'nullable|string',
+            // --- KOMPETENSI ---
+            'pelatihan_kompetensi' => 'nullable|array',
+            'pelatihan_kompetensi.*' => 'nullable|string',
+            'pelatihan_tahun_kompetensi' => 'nullable|array',
+            'pelatihan_tahun_kompetensi.*' => 'nullable|string',
+            'pelatihan_file_kompetensi' => 'nullable|array',
+            'pelatihan_file_kompetensi.*' => 'nullable|file|mimes:pdf|max:2048',
+            'pelatihan_existing_file_kompetensi' => 'nullable|array', // File lama
         ]);
 
-        $daftarPelatihan = [];
+        // --- 1. UPDATE LOGIC PELATIHAN DASAR ---
+        $daftarPelatihanDasar = [];
         if ($request->has('pelatihan_dasar')) {
             $namaPelatihan = $request->input('pelatihan_dasar');
-            $tahunPelatihan = $request->input('pelatihan_tahun_simple');
-            $filePelatihanBaru = $request->file('pelatihan_file'); // Array file baru
-            $fileLama = $request->input('pelatihan_existing_file'); // Array path file lama
+            $tahunPelatihan = $request->input('pelatihan_tahun_dasar');
+            $filePelatihanBaru = $request->file('pelatihan_file_dasar');
+            $fileLama = $request->input('pelatihan_existing_file_dasar');
 
             foreach ($namaPelatihan as $index => $nama) {
                 if (!empty($nama)) {
-                    // Ambil path file lama dari hidden input
+                    // Ambil path file lama
                     $filePath = $fileLama[$index] ?? null;
 
-                    // Cek jika ada file BARU diupload di index ini
+                    // Cek jika ada file BARU diupload
                     if (isset($filePelatihanBaru[$index]) && $filePelatihanBaru[$index]->isValid()) {
                         $file = $filePelatihanBaru[$index];
 
-                        // Hapus file lama jika ada
+                        // Hapus file lama fisik jika ada
                         if ($filePath && Storage::disk('public')->exists($filePath)) {
                             Storage::disk('public')->delete($filePath);
                         }
 
                         // Store file baru
-                        $fileName = time() . '_' . $index . '_' . $file->getClientOriginalName();
+                        $fileName = time() . '_dasar_' . $index . '_' . $file->getClientOriginalName();
                         $filePath = $file->storeAs('pelatihan_pdf', $fileName, 'public');
                     }
 
-                    $daftarPelatihan[] = [
+                    $daftarPelatihanDasar[] = [
                         'nama'  => $nama,
                         'tahun' => $tahunPelatihan[$index] ?? null,
                         'file'  => $filePath,
@@ -199,14 +254,10 @@ class PelatihanController extends Controller
                 }
             }
 
-             // --- Logika Hapus File Yg Dihapus dari Form ---
-            // Dapatkan semua file path yg *disubmit*
-            $submittedFilePaths = collect($daftarPelatihan)->pluck('file')->filter();
-            // Dapatkan semua file path yg *ada di DB*
-            $originalFilePaths = collect($pelatihan->pelatihan_dasar)->pluck('file')->filter();
-            // Cari file yg ada di DB tapi tidak ada di submit (artinya barisnya dihapus)
-            $filesToDelete = $originalFilePaths->diff($submittedFilePaths);
-
+            // Hapus File Fisik jika Baris Dihapus
+            $submittedPaths = collect($daftarPelatihanDasar)->pluck('file')->filter();
+            $originalPaths = collect($pelatihan->pelatihan_dasar)->pluck('file')->filter();
+            $filesToDelete = $originalPaths->diff($submittedPaths);
             foreach ($filesToDelete as $file) {
                 if ($file && Storage::disk('public')->exists($file)) {
                     Storage::disk('public')->delete($file);
@@ -214,26 +265,76 @@ class PelatihanController extends Controller
             }
         }
 
-        $data['pelatihan_dasar'] = $daftarPelatihan;
+        // --- 2. UPDATE LOGIC PELATIHAN KOMPETENSI ---
+        $daftarPelatihanKompetensi = [];
+        if ($request->has('pelatihan_kompetensi')) {
+            $namaKompetensi = $request->input('pelatihan_kompetensi');
+            $tahunKompetensi = $request->input('pelatihan_tahun_kompetensi');
+            $fileKompetensiBaru = $request->file('pelatihan_file_kompetensi');
+            $fileLamaKompetensi = $request->input('pelatihan_existing_file_kompetensi');
 
-        unset($data['pelatihan_tahun_simple']);
-        unset($data['data_tahun']);
-        unset($data['pelatihan_file']);
-        unset($data['pelatihan_existing_file']);
+            foreach ($namaKompetensi as $index => $nama) {
+                if (!empty($nama)) {
+                    // Ambil path file lama
+                    $filePath = $fileLamaKompetensi[$index] ?? null;
+
+                    // Cek jika ada file BARU diupload
+                    if (isset($fileKompetensiBaru[$index]) && $fileKompetensiBaru[$index]->isValid()) {
+                        $file = $fileKompetensiBaru[$index];
+
+                        // Hapus file lama fisik jika ada
+                        if ($filePath && Storage::disk('public')->exists($filePath)) {
+                            Storage::disk('public')->delete($filePath);
+                        }
+
+                        // Store file baru
+                        $fileName = time() . '_komp_' . $index . '_' . $file->getClientOriginalName();
+                        $filePath = $file->storeAs('pelatihan_pdf', $fileName, 'public');
+                    }
+
+                    $daftarPelatihanKompetensi[] = [
+                        'nama'  => $nama,
+                        'tahun' => $tahunKompetensi[$index] ?? null,
+                        'file'  => $filePath,
+                    ];
+                }
+            }
+
+            // Hapus File Fisik jika Baris Dihapus
+            $submittedPaths = collect($daftarPelatihanKompetensi)->pluck('file')->filter();
+            $originalPaths = collect($pelatihan->pelatihan_peningkatan_kompetensi)->pluck('file')->filter();
+            $filesToDelete = $originalPaths->diff($submittedPaths);
+            foreach ($filesToDelete as $file) {
+                if ($file && Storage::disk('public')->exists($file)) {
+                    Storage::disk('public')->delete($file);
+                }
+            }
+        }
+
+        $data['pelatihan_dasar'] = $daftarPelatihanDasar;
+        $data['pelatihan_peningkatan_kompetensi'] = $daftarPelatihanKompetensi;
+
+        // Bersihkan Data Temporary
+        unset($data['pelatihan_tahun_dasar']);
+        unset($data['pelatihan_file_dasar']);
+        unset($data['pelatihan_existing_file_dasar']);
+        unset($data['pelatihan_kompetensi']);
+        unset($data['pelatihan_tahun_kompetensi']);
+        unset($data['pelatihan_file_kompetensi']);
+        unset($data['pelatihan_existing_file_kompetensi']);
 
         $pelatihan->update($data);
-        return redirect()->route('pelatihan.index')->with('success', 'Pelatihan berhasil diperbarui.');
+        return redirect()->route('pelatihan.index')->with('success', 'Data berhasil diperbarui.');
     }
 
     /**
      * Remove the specified pelatihan from storage
-     * (LOGIKA DIPERBARUI DENGAN HAPUS FILE)
      */
     public function destroy($id)
     {
         $pelatihan = Pelatihan::findOrFail($id);
 
-        // --- TAMBAHAN: HAPUS FILE PDF TERKAIT ---
+        // 1. Hapus File Dasar
         if (is_array($pelatihan->pelatihan_dasar)) {
             foreach ($pelatihan->pelatihan_dasar as $item) {
                 $filePath = $item['file'] ?? null;
@@ -242,10 +343,19 @@ class PelatihanController extends Controller
                 }
             }
         }
-        // --- AKHIR HAPUS FILE ---
+
+        // 2. Hapus File Kompetensi
+        if (is_array($pelatihan->pelatihan_peningkatan_kompetensi)) {
+            foreach ($pelatihan->pelatihan_peningkatan_kompetensi as $item) {
+                $filePath = $item['file'] ?? null;
+                if ($filePath && Storage::disk('public')->exists($filePath)) {
+                    Storage::disk('public')->delete($filePath);
+                }
+            }
+        }
 
         $pelatihan->delete();
-        return redirect()->route('pelatihan.index')->with('success', 'Pelatihan berhasil dihapus.');
+        return redirect()->route('pelatihan.index')->with('success', 'Data berhasil dihapus.');
     }
 
     /**
@@ -253,14 +363,25 @@ class PelatihanController extends Controller
      */
     public function export()
     {
-        // ... (export method Anda sudah benar) ...
         try {
             $pelatihans = Pelatihan::all();
             $spreadsheet = new Spreadsheet();
             $sheet = $spreadsheet->getActiveSheet();
 
-            // TAMBAHAN: Kolom 'PANGKAT'
-            $headers = ['NAMA', 'JABATAN', 'UNIT', 'STATUS', 'NIP', 'GOLONGAN', 'PANGKAT', 'DAFTAR PELATIHAN (TAHUN)', 'FILE PDF'];
+            // Header Update
+            $headers = [
+                'NAMA',
+                'BIDANG',
+                'JABATAN',
+                'UNIT',
+                'STATUS',
+                'NIP / NIRP',
+                'GOLONGAN',
+                'PANGKAT',
+                'PELATIHAN DASAR (TAHUN)',
+                'PELATIHAN KOMPETENSI (TAHUN)',
+                'FILE PDF (GABUNGAN)'
+            ];
             $sheet->fromArray([$headers], null, 'A1');
 
             $headerStyle = [
@@ -268,54 +389,76 @@ class PelatihanController extends Controller
                 'fill' => ['fillType' => 'solid', 'startColor' => ['rgb' => '7c1316']],
                 'alignment' => ['horizontal' => 'center', 'vertical' => 'center'],
             ];
-            // Ubah range header
-            $sheet->getStyle('A1:I1')->applyFromArray($headerStyle); // <-- Diubah ke I1
+            // Update Range Header (A sampai K)
+            $sheet->getStyle('A1:K1')->applyFromArray($headerStyle);
 
             $row = 2;
             foreach ($pelatihans as $p) {
-                $daftarPelatihanStr = '';
-                $daftarFileStr = ''; // TAMBAHAN
-
+                // Proses String Pelatihan Dasar
+                $dasarStr = '';
+                $files = [];
                 if (is_array($p->pelatihan_dasar)) {
                     $items = [];
-                    $files = []; // TAMBAHAN
                     foreach ($p->pelatihan_dasar as $item) {
                         $nama = $item['nama'] ?? 'N/A';
                         $tahun = $item['tahun'] ?? '?';
                         $items[] = "{$nama} ({$tahun})";
-
-                        // TAMBAHAN: Kumpulkan link file
                         if (!empty($item['file'])) {
                             $files[] = Storage::url($item['file']);
                         }
                     }
-                    $daftarPelatihanStr = implode('; ', $items);
-                    $daftarFileStr = implode('; ', $files); // TAMBAHAN
+                    $dasarStr = implode('; ', $items);
+                }
+
+                // Proses String Pelatihan Kompetensi
+                $kompStr = '';
+                if (is_array($p->pelatihan_peningkatan_kompetensi)) {
+                    $items = [];
+                    foreach ($p->pelatihan_peningkatan_kompetensi as $item) {
+                        $nama = $item['nama'] ?? 'N/A';
+                        $tahun = $item['tahun'] ?? '?';
+                        $items[] = "{$nama} ({$tahun})";
+                        if (!empty($item['file'])) {
+                            $files[] = Storage::url($item['file']);
+                        }
+                    }
+                    $kompStr = implode('; ', $items);
+                }
+
+                $daftarFileStr = implode('; ', $files);
+
+                // Tentukan Identitas (NIP atau NIRP)
+                $identitas = '';
+                if ($p->status_pegawai == 'PNS' || $p->status_pegawai == 'P3K') {
+                    $identitas = $p->nip;
+                } else {
+                    $identitas = $p->nirp;
                 }
 
                 $rowData = [
                     $p->nama,
+                    $p->bidang,
                     $p->jabatan,
                     $p->unit,
-                    $p->is_pns ? 'PNS' : 'Non-PNS',
-                    $p->is_pns ? $p->nip : '',
-                    $p->is_pns ? $p->golongan : '',
-                    $p->is_pns ? $p->pangkat : '', // <-- TAMBAHAN
-                    $daftarPelatihanStr,
-                    $daftarFileStr // TAMBAHAN
+                    $p->status_pegawai,
+                    $identitas,
+                    $p->golongan,
+                    $p->pangkat,
+                    $dasarStr,
+                    $kompStr,
+                    $daftarFileStr
                 ];
 
                 $sheet->fromArray([$rowData], null, 'A' . $row);
                 $row++;
             }
 
-            // Ubah range auto-size
-            foreach (range('A', 'I') as $col) { // <-- Diubah ke I
+            foreach (range('A', 'K') as $col) {
                 $sheet->getColumnDimension($col)->setAutoSize(true);
             }
 
             $writer = new Xlsx($spreadsheet);
-            $fileName = 'Pelatihan_' . date('Y-m-d_His') . '.xlsx';
+            $fileName = 'Data_Pegawai_' . date('Y-m-d_His') . '.xlsx';
 
             header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
             header('Content-Disposition: attachment;filename="' . $fileName . '"');
@@ -333,9 +476,6 @@ class PelatihanController extends Controller
      */
     public function import_excel(Request $request)
     {
-        // ... (import_excel method Anda sudah benar) ...
-        // Catatan: Impor PDF dari Excel tidak praktis, jadi method ini
-        // hanya akan mengimpor data teks seperti sebelumnya.
         try {
             $request->validate(['data' => 'required|string']);
             $rows = json_decode($request->input('data'), true);
@@ -351,14 +491,19 @@ class PelatihanController extends Controller
                 $rowIndex = $index + 2;
 
                 try {
+                    // Mapping Status Pegawai dari Excel (Asumsi text di Excel: PNS, P3K, Non-PNS)
+                    $statusRaw = $row['Status'] ?? 'Non-PNS';
+
                     $data = [
                         'nama' => $row['Nama'] ?? null,
+                        'bidang' => $row['Bidang'] ?? null,
                         'jabatan' => $row['Jabatan'] ?? null,
                         'unit' => $row['Unit'] ?? null,
-                        'is_pns' => (isset($row['is_pns (1=PNS, 0=Non-PNS)']) && $row['is_pns (1=PNS, 0=Non-PNS)'] == '1'),
-                        'nip' => $row['NIP'] ?? null,
+                        'status_pegawai' => $statusRaw,
+                        'nip' => ($statusRaw == 'PNS' || $statusRaw == 'P3K') ? ($row['NIP'] ?? null) : null,
+                        'nirp' => ($statusRaw == 'Non-PNS') ? ($row['NIRP'] ?? null) : null,
                         'golongan' => $row['Golongan'] ?? null,
-                        'pangkat' => $row['Pangkat'] ?? null, // <-- TAMBAHAN
+                        'pangkat' => $row['Pangkat'] ?? null,
                     ];
 
                     if (empty($data['nama'])) {
@@ -366,24 +511,26 @@ class PelatihanController extends Controller
                         continue;
                     }
 
-                    $daftarPelatihan = [];
-                    $i = 1;
-                    while (true) {
-                        $namaKey = "Pelatihan{$i}_Nama";
-                        $tahunKey = "Pelatihan{$i}_Tahun";
-
-                        if (!isset($row[$namaKey]) || empty($row[$namaKey])) {
-                            break;
+                    // Helper lokal untuk parse pelatihan dari kolom excel (misal Format: Nama1;Nama2)
+                    // Catatan: Ini logic sederhana, idealnya sesuaikan format Excel import Anda
+                    $daftarPelatihanDasar = [];
+                    if (!empty($row['Pelatihan_Dasar'])) {
+                        $items = explode(';', $row['Pelatihan_Dasar']);
+                        foreach($items as $it) {
+                            $daftarPelatihanDasar[] = ['nama' => trim($it), 'tahun' => null, 'file' => null];
                         }
-
-                        $daftarPelatihan[] = [
-                            'nama' => $row[$namaKey],
-                            'tahun' => $row[$tahunKey] ?? null,
-                            'file' => null, // File tidak diimpor dari Excel
-                        ];
-                        $i++;
                     }
-                    $data['pelatihan_dasar'] = $daftarPelatihan;
+
+                    $daftarPelatihanKompetensi = [];
+                    if (!empty($row['Pelatihan_Kompetensi'])) {
+                        $items = explode(';', $row['Pelatihan_Kompetensi']);
+                        foreach($items as $it) {
+                            $daftarPelatihanKompetensi[] = ['nama' => trim($it), 'tahun' => null, 'file' => null];
+                        }
+                    }
+
+                    $data['pelatihan_dasar'] = $daftarPelatihanDasar;
+                    $data['pelatihan_peningkatan_kompetensi'] = $daftarPelatihanKompetensi;
 
                     Pelatihan::updateOrCreate(
                         ['nama' => $data['nama']],

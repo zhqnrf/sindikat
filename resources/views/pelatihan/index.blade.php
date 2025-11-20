@@ -1,7 +1,7 @@
 @extends('layouts.app')
 
-@section('title', 'Pelatihan Dasar')
-@section('page-title', 'Data Pelatihan Dasar')
+@section('title', 'Data Pelatihan')
+@section('page-title', 'Data Pelatihan Pegawai')
 
 @section('content')
     <style>
@@ -103,22 +103,32 @@
             border-bottom: 1px solid #f0f0f0;
         }
 
-        /* --- CSS DIPERBARUI DARI SOURCE --- */
+        /* --- CSS Untuk List Pelatihan --- */
         .pelatihan-list-wrapper {
             display: flex;
             flex-direction: column;
             gap: 0.5rem;
-            max-width: 400px; /* Diperlebar dari 350px */
+            max-width: 450px; /* Diperlebar */
+        }
+
+        .pelatihan-category-label {
+            font-size: 0.75rem;
+            font-weight: bold;
+            color: #999;
+            text-transform: uppercase;
+            margin-top: 0.5rem;
+            margin-bottom: 0.2rem;
+            border-bottom: 1px solid #eee;
         }
 
         .pelatihan-list-item {
             background-color: #f8f9fa;
             border: 1px solid #e9ecef;
             border-radius: 6px;
-            padding: 0.3rem 0.4rem; /* Disesuaikan */
+            padding: 0.3rem 0.4rem;
             font-size: 0.85rem;
             display: flex;
-            justify-content: flex-start; /* Diubah dari space-between */
+            justify-content: flex-start;
             align-items: center;
             cursor: pointer;
             transition: transform 0.2s ease, box-shadow 0.2s ease;
@@ -135,8 +145,8 @@
             overflow: hidden;
             text-overflow: ellipsis;
             white-space: nowrap;
-            padding-right: 5px; /* Disesuaikan */
-            flex-grow: 1; /* Ditambahkan */
+            padding-right: 5px;
+            flex-grow: 1;
         }
         .pelatihan-list-item .tahun {
             font-weight: 600;
@@ -146,8 +156,6 @@
             border-radius: 4px;
             flex-shrink: 0;
         }
-
-        /* TAMBAHAN: Style untuk link PDF di tabel */
         .pelatihan-list-item .pdf-link {
             flex-shrink: 0;
             margin-right: 0.5rem;
@@ -161,8 +169,6 @@
             color: var(--custom-maroon);
             font-size: 1.1rem;
         }
-        /* --- AKHIR CSS DIPERBARUI --- */
-
 
         .table-hover tbody tr:hover {
             background-color: #fff5f6;
@@ -202,8 +208,8 @@
 
     <div class="page-header-wrapper d-flex flex-wrap justify-content-between align-items-center gap-3 animate-up">
         <div>
-            <h4 class="fw-bold mb-1" style="color: var(--custom-maroon);">Data Pelatihan Dasar</h4>
-            <small class="text-muted">Kelola data pelatihan dasar karyawan.</small>
+            <h4 class="fw-bold mb-1" style="color: var(--custom-maroon);">Data Pelatihan Pegawai</h4>
+            <small class="text-muted">Kelola data pelatihan dasar dan kompetensi.</small>
         </div>
         <div class="d-flex align-items-center gap-2 flex-wrap">
             <div class="dropdown position-relative">
@@ -238,17 +244,27 @@
         <div class="card-body p-4">
             <form id="filterForm" method="GET" action="{{ route('pelatihan.index') }}">
                 <div class="row">
-                    <div class="col-md-4 mb-3 mb-md-0">
-                        <label class="small text-muted font-weight-bold text-uppercase">Cari Nama Karyawan</label>
+                    <div class="col-md-3 mb-3 mb-md-0">
+                        <label class="small text-muted font-weight-bold text-uppercase">Cari Nama</label>
                         <div class="input-group shadow-sm">
                             <div class="input-group-prepend">
                                 <span class="input-group-text bg-light border-right-0"><i class="bi bi-search"></i></span>
                             </div>
                             <input type="text" class="form-control bg-light border-left-0" name="search"
-                                placeholder="Nama karyawan..." value="{{ request('search') }}">
+                                placeholder="Nama..." value="{{ request('search') }}">
                         </div>
                     </div>
-                    <div class="col-md-4 mb-3 mb-md-0">
+                    <div class="col-md-3 mb-3 mb-md-0">
+                        <label class="small text-muted font-weight-bold text-uppercase">Bidang</label>
+                        <div class="input-group shadow-sm">
+                            <div class="input-group-prepend">
+                                <span class="input-group-text bg-light border-right-0"><i class="bi bi-layers"></i></span>
+                            </div>
+                            <input type="text" class="form-control bg-light border-left-0" name="bidang"
+                                placeholder="Filter bidang..." value="{{ request('bidang') }}">
+                        </div>
+                    </div>
+                    <div class="col-md-3 mb-3 mb-md-0">
                         <label class="small text-muted font-weight-bold text-uppercase">Jabatan</label>
                         <div class="input-group shadow-sm">
                             <div class="input-group-prepend">
@@ -258,8 +274,8 @@
                                 placeholder="Filter jabatan..." value="{{ request('jabatan') }}">
                         </div>
                     </div>
-                    <div class="col-md-4 mb-3 mb-md-0">
-                        <label class="small text-muted font-weight-bold text-uppercase">Unit</label>
+                    <div class="col-md-3 mb-3 mb-md-0">
+                        <label class="small text-muted font-weight-bold text-uppercase">Unit/Ruang</label>
                         <div class="input-group shadow-sm">
                             <div class="input-group-prepend">
                                 <span class="input-group-text bg-light border-right-0"><i class="bi bi-building"></i></span>
@@ -287,10 +303,10 @@
                     <tr>
                         <th class="text-center" width="5%">No</th>
                         <th>Info Karyawan</th>
-                        <th>Jabatan</th>
+                        <th>Bidang & Jabatan</th>
                         <th>Unit</th>
-                        <th>Pelatihan Dasar (Tahun)</th>
-                        <th class="text-center" width="15%">Aksi</th>
+                        <th width="35%">Riwayat Pelatihan</th>
+                        <th class="text-center" width="10%">Aksi</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -298,21 +314,35 @@
                         <tr>
                             <td class="text-center text-muted font-weight-bold">{{ ($pelatihans->currentPage() - 1) * $pelatihans->perPage() + $index + 1 }}</td>
                             <td>
-                                <span class="font-weight-bold text-dark d-block">{{ $pelatihan->nama }}</span>
+                                <span class="font-weight-bold text-dark d-block mb-1" style="font-size: 1rem;">{{ $pelatihan->nama }}</span>
 
-                                @if ($pelatihan->is_pns)
-                                    <span class="badge badge-light border text-dark p-1" style="font-size: 0.75rem;">
-                                        PNS | {{ $pelatihan->nip }} ({{ $pelatihan->golongan }}{{ $pelatihan->pangkat ? ' / ' . $pelatihan->pangkat : '' }})
+                                @if ($pelatihan->status_pegawai === 'PNS')
+                                    <span class="badge border bg-light text-primary p-1" style="font-size: 0.75rem;">
+                                        PNS | {{ $pelatihan->nip }}
                                     </span>
+                                    <div class="small text-muted mt-1">
+                                        {{ $pelatihan->golongan }} - {{ $pelatihan->pangkat }}
+                                    </div>
+                                @elseif ($pelatihan->status_pegawai === 'P3K')
+                                    <span class="badge border bg-light text-warning text-dark p-1" style="font-size: 0.75rem;">
+                                        P3K | {{ $pelatihan->nip }}
+                                    </span>
+                                    <div class="small text-muted mt-1">
+                                        {{ $pelatihan->golongan }}
+                                    </div>
                                 @else
-                                    <span class="badge badge-light border text-muted p-1" style="font-size: 0.75rem;">
+                                    <span class="badge border bg-light text-secondary p-1" style="font-size: 0.75rem;">
                                         Non-PNS
                                     </span>
+                                    @if($pelatihan->nirp)
+                                        <div class="small text-muted mt-1">NIRP: {{ $pelatihan->nirp }}</div>
+                                    @endif
                                 @endif
-                                </td>
+                            </td>
                             <td>
                                 <div class="d-flex flex-column">
-                                    <span class="text-dark">{{ $pelatihan->jabatan ?? '-' }}</span>
+                                    <span class="text-dark font-weight-bold">{{ $pelatihan->bidang ?? '-' }}</span>
+                                    <span class="text-muted small">{{ $pelatihan->jabatan ?? '-' }}</span>
                                 </div>
                             </td>
                             <td>
@@ -321,62 +351,79 @@
                                 </span>
                             </td>
                             <td>
-                                @php
-                                    $daftarPelatihan = collect($pelatihan->pelatihan_dasar ?? [])->sortByDesc('tahun')->all();
-                                @endphp
-
                                 <div class="pelatihan-list-wrapper">
-                                    @if (is_array($daftarPelatihan) && count($daftarPelatihan) > 0)
-                                        @foreach ($daftarPelatihan as $item)
+                                    {{-- Pelatihan Dasar --}}
+                                    @php
+                                        $dasar = collect($pelatihan->pelatihan_dasar ?? [])->sortByDesc('tahun')->all();
+                                        $kompetensi = collect($pelatihan->pelatihan_peningkatan_kompetensi ?? [])->sortByDesc('tahun')->all();
+                                    @endphp
+
+                                    @if (count($dasar) > 0)
+                                        <div class="pelatihan-category-label">Dasar</div>
+                                        @foreach ($dasar as $item)
                                             @php
                                                 $nama = is_object($item) ? ($item->nama ?? null) : ($item['nama'] ?? null);
                                                 $tahun = is_object($item) ? ($item->tahun ?? null) : ($item['tahun'] ?? null);
-                                                // --- Ambil path file (tetap ada) ---
                                                 $file = is_object($item) ? ($item->file ?? null) : ($item['file'] ?? null);
                                             @endphp
-
                                             @if ($nama)
-                                                <div class="pelatihan-list-item"
-                                                    tabindex="0"
-                                                    data-bs-toggle="popover"
-                                                    data-bs-trigger="focus"
-                                                    data-bs-placement="top"
-                                                    title="Nama Pelatihan"
-                                                    data-bs-content="{{ $nama }}">
-
-                                                    <span class="nama">{{ Str::limit($nama, 30) }}</span>
-
+                                                <div class="pelatihan-list-item" tabindex="0" data-bs-toggle="popover" data-bs-trigger="focus" data-bs-placement="top" title="Pelatihan Dasar" data-bs-content="{{ $nama }}">
+                                                    <span class="nama">{{ Str::limit($nama, 25) }}</span>
                                                     <div class="d-flex align-items-center">
                                                         @if($file)
-                                                        <a href="{{ Storage::url($file) }}" target="_blank" class="pdf-link" title="Lihat PDF">
-                                                            <i class="fas fa-file-pdf"></i>
-                                                        </a>
+                                                            <a href="{{ Storage::url($file) }}" target="_blank" class="pdf-link" title="Lihat PDF"><i class="fas fa-file-pdf"></i></a>
                                                         @endif
                                                         <span class="tahun">{{ $tahun ?? '-' }}</span>
                                                     </div>
                                                 </div>
                                             @endif
                                         @endforeach
-                                    @else
-                                        <span class="text-muted font-italic">-</span>
+                                    @endif
+
+                                    {{-- Pelatihan Kompetensi --}}
+                                    @if (count($kompetensi) > 0)
+                                        <div class="pelatihan-category-label">Peningkatan Kompetensi</div>
+                                        @foreach ($kompetensi as $item)
+                                            @php
+                                                $nama = is_object($item) ? ($item->nama ?? null) : ($item['nama'] ?? null);
+                                                $tahun = is_object($item) ? ($item->tahun ?? null) : ($item['tahun'] ?? null);
+                                                $file = is_object($item) ? ($item->file ?? null) : ($item['file'] ?? null);
+                                            @endphp
+                                            @if ($nama)
+                                                <div class="pelatihan-list-item" tabindex="0" data-bs-toggle="popover" data-bs-trigger="focus" data-bs-placement="top" title="Peningkatan Kompetensi" data-bs-content="{{ $nama }}">
+                                                    <span class="nama">{{ Str::limit($nama, 25) }}</span>
+                                                    <div class="d-flex align-items-center">
+                                                        @if($file)
+                                                            <a href="{{ Storage::url($file) }}" target="_blank" class="pdf-link" title="Lihat PDF"><i class="fas fa-file-pdf"></i></a>
+                                                        @endif
+                                                        <span class="tahun">{{ $tahun ?? '-' }}</span>
+                                                    </div>
+                                                </div>
+                                            @endif
+                                        @endforeach
+                                    @endif
+
+                                    @if (count($dasar) == 0 && count($kompetensi) == 0)
+                                        <span class="text-muted font-italic small">- Belum ada data -</span>
                                     @endif
                                 </div>
                             </td>
 
                             <td class="text-center">
-                                <a href="{{ route('pelatihan.show', $pelatihan->id) }}" class="action-btn" title="Detail">
-                                    <i class="bi bi-eye-fill"></i>
-                                </a>
-                                <a href="{{ route('pelatihan.edit', $pelatihan->id) }}" class="action-btn" title="Edit">
-                                    <i class="bi bi-pencil-square"></i>
-                                </a>
-                                <form action="{{ route('pelatihan.destroy', $pelatihan->id) }}" method="POST"
-                                    class="d-inline delete-form">
-                                    @csrf @method('DELETE')
-                                    <button type="button" class="action-btn delete btn-delete" title="Hapus">
-                                        <i class="bi bi-trash"></i>
-                                    </button>
-                                </form>
+                                <div class="d-flex justify-content-center gap-1">
+                                    <a href="{{ route('pelatihan.show', $pelatihan->id) }}" class="action-btn" title="Detail">
+                                        <i class="bi bi-eye-fill"></i>
+                                    </a>
+                                    <a href="{{ route('pelatihan.edit', $pelatihan->id) }}" class="action-btn" title="Edit">
+                                        <i class="bi bi-pencil-square"></i>
+                                    </a>
+                                    <form action="{{ route('pelatihan.destroy', $pelatihan->id) }}" method="POST" class="d-inline delete-form">
+                                        @csrf @method('DELETE')
+                                        <button type="button" class="action-btn delete btn-delete" title="Hapus">
+                                            <i class="bi bi-trash"></i>
+                                        </button>
+                                    </form>
+                                </div>
                             </td>
                         </tr>
                     @empty
@@ -385,7 +432,7 @@
                                 <div class="d-flex flex-column align-items-center">
                                     <i class="bi bi-folder-x display-4 text-muted mb-3" style="opacity: 0.5;"></i>
                                     <h5 class="text-muted font-weight-bold">Tidak ada data ditemukan</h5>
-                                    <p class="text-muted small">Tambahkan pelatihan dasar terlebih dahulu.</p>
+                                    <p class="text-muted small">Tambahkan data pegawai terlebih dahulu.</p>
                                 </div>
                             </td>
                         </tr>
@@ -399,7 +446,6 @@
         {{ $pelatihans->links('pagination.custom') }}
     </div>
 
-    {{-- ... (Kode SweetAlert session success/error) ... --}}
     @if (session('success'))
         <script>
             Swal.fire({
@@ -428,8 +474,6 @@
 @endsection
 
 @section('scripts')
-
-
     <script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"></script>
     <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
@@ -437,19 +481,10 @@
 
     <script>
         function showToast(message, type = 'success') {
-            const colors = {
-                success: "#00b09b",
-                error: "#ff5f6d",
-                info: "#2193b0"
-            };
+            const colors = { success: "#00b09b", error: "#ff5f6d", info: "#2193b0" };
             Toastify({
-                text: message,
-                duration: 3000,
-                gravity: "bottom",
-                position: "right",
-                style: {
-                    background: colors[type] || colors.info
-                },
+                text: message, duration: 3000, gravity: "bottom", position: "right",
+                style: { background: colors[type] || colors.info },
                 className: "rounded shadow-lg"
             }).showToast();
         }
@@ -472,7 +507,7 @@
             }
         });
 
-        // ===== FUNGSI INI DIPERBARUI DARI SOURCE =====
+        // ===== FUNGSI EXPORT DIPERBARUI =====
         function exportPelatihan() {
             try {
                 const rawData = @json($pelatihans);
@@ -484,36 +519,46 @@
                 }
 
                 const data = dataList.map(p => {
-                    const pelatihansList = p.pelatihan_dasar || [];
+                    // Gabungkan kedua jenis pelatihan untuk Excel
+                    let pelatihansStr = "";
 
-                    pelatihansList.sort((a, b) => (b.tahun || 0) - (a.tahun || 0));
+                    if (p.pelatihan_dasar && p.pelatihan_dasar.length > 0) {
+                        pelatihansStr += "[DASAR]: " + p.pelatihan_dasar.map(i => `${i.nama}(${i.tahun})`).join('; ');
+                    }
 
-                    const pelatihans = pelatihansList
-                        .map(item => {
-                            const nama = item.nama || item.pelatihan || 'N/A';
-                            const tahun = item.tahun || '?';
-                            return `${nama} (${tahun})`;
-                        })
-                        .join('; ');
+                    if (p.pelatihan_peningkatan_kompetensi && p.pelatihan_peningkatan_kompetensi.length > 0) {
+                        if(pelatihansStr) pelatihansStr += " | ";
+                        pelatihansStr += "[KOMPETENSI]: " + p.pelatihan_peningkatan_kompetensi.map(i => `${i.nama}(${i.tahun})`).join('; ');
+                    }
+
+                    // Identitas
+                    let identitas = "";
+                    if (p.status_pegawai === 'PNS' || p.status_pegawai === 'P3K') {
+                        identitas = p.nip;
+                    } else {
+                        identitas = p.nirp;
+                    }
 
                     return [
                         p.nama || '',
-                        p.is_pns ? p.nip : 'Non-PNS',
-                        p.is_pns ? p.golongan : '',
-                        p.is_pns ? p.pangkat : '', // <-- TAMBAHAN
+                        p.status_pegawai || 'Non-PNS',
+                        identitas,
+                        p.golongan || '',
+                        p.pangkat || '',
+                        p.bidang || '',
                         p.jabatan || '',
                         p.unit || '',
-                        pelatihans
+                        pelatihansStr
                     ];
                 });
 
                 const ws = XLSX.utils.aoa_to_sheet([
-                    ['Nama', 'NIP (Jika PNS)', 'Golongan', 'Pangkat', 'Jabatan', 'Unit', 'Daftar Pelatihan (Tahun)'] // <-- TAMBAHAN
+                    ['Nama', 'Status', 'NIP/NIRP', 'Golongan', 'Pangkat', 'Bidang', 'Jabatan', 'Unit', 'Riwayat Pelatihan']
                 ].concat(data));
 
                 const wb = XLSX.utils.book_new();
-                XLSX.utils.book_append_sheet(wb, ws, 'Pelatihan');
-                XLSX.writeFile(wb, `Data_Pelatihan_${new Date().toISOString().split('T')[0]}.xlsx`);
+                XLSX.utils.book_append_sheet(wb, ws, 'Data Pegawai');
+                XLSX.writeFile(wb, `Data_Pegawai_${new Date().toISOString().split('T')[0]}.xlsx`);
 
                 showToast("Berhasil export Excel!", "success");
             } catch (e) {
@@ -522,16 +567,16 @@
             }
         }
 
-        // ===== FUNGSI INI DIPERBARUI DARI SOURCE =====
+        // ===== FUNGSI TEMPLATE DIPERBARUI =====
         function downloadTemplatePelatihan() {
             const ws = XLSX.utils.aoa_to_sheet([
-                ['Nama', 'Jabatan', 'Unit', 'is_pns (1=PNS, 0=Non-PNS)', 'NIP', 'Golongan', 'Pangkat', 'Pelatihan1_Nama', 'Pelatihan1_Tahun', 'Pelatihan2_Nama', 'Pelatihan2_Tahun'], // <-- TAMBAHAN
-                ['Budi Santoso', 'Manager', 'IT', 1, '199001012010011001', 'III/a', 'Penata Muda', 'Basic Safety', 2020, 'Workshop Excel', 2021], // <-- TAMBAHAN
-                ['Ana Wati', 'Staff', 'Marketing', 0, '', '', '', 'Digital Marketing', 2022, '', ''] // <-- TAMBAHAN
+                ['Nama', 'Bidang', 'Jabatan', 'Unit', 'Status (PNS/P3K/Non-PNS)', 'NIP', 'NIRP', 'Golongan', 'Pangkat', 'Pelatihan_Dasar (pisahkan ;)', 'Pelatihan_Kompetensi (pisahkan ;)'],
+                ['Budi', 'Keperawatan', 'Perawat Ahli', 'IGD', 'PNS', '1990...', '', 'III/a', 'Penata Muda', 'Basic Safety; BTCLS', 'Manajemen Bangsal'],
+                ['Siti', 'Keuangan', 'Staf', 'Keuangan', 'Non-PNS', '', 'N-123...', '', '', 'Excel Basic', 'Akuntansi Dasar']
             ]);
             const wb = XLSX.utils.book_new();
             XLSX.utils.book_append_sheet(wb, ws, 'Template');
-            XLSX.writeFile(wb, 'Template_Pelatihan.xlsx');
+            XLSX.writeFile(wb, 'Template_Import.xlsx');
             showToast("Template berhasil diunduh!", "success");
         }
 
@@ -543,15 +588,9 @@
             reader.onload = function(e) {
                 try {
                     const data = new Uint8Array(e.target.result);
-                    const workbook = XLSX.read(data, {
-                        type: 'array',
-                        cellDates: true
-                    });
+                    const workbook = XLSX.read(data, { type: 'array', cellDates: true });
                     const firstSheetName = workbook.SheetNames[0];
-                    const json = XLSX.utils.sheet_to_json(workbook.Sheets[firstSheetName], {
-                        defval: '',
-                        raw: false
-                    });
+                    const json = XLSX.utils.sheet_to_json(workbook.Sheets[firstSheetName], { defval: '', raw: false });
 
                     if (json.length === 0) {
                         showToast('File Excel kosong atau format salah.', 'error');
@@ -567,9 +606,7 @@
                     fetch('{{ route('pelatihan.import_excel') }}', {
                             method: 'POST',
                             body: fd,
-                            headers: {
-                                'Accept': 'application/json'
-                            }
+                            headers: { 'Accept': 'application/json' }
                         })
                         .then(r => r.json())
                         .then(res => {
@@ -577,7 +614,6 @@
                                 showToast(res.message, 'success');
                                 setTimeout(() => location.reload(), 1500);
                             } else {
-                                console.error(res);
                                 showToast('Gagal: ' + (res.message || 'Import gagal'), 'error');
                             }
                         })
@@ -601,10 +637,9 @@
                 btn.addEventListener('click', function(e) {
                     e.preventDefault();
                     const form = this.closest('form');
-
                     Swal.fire({
                         title: 'Yakin hapus data?',
-                        text: "Data pelatihan ini akan dihapus permanen.",
+                        text: "Data ini akan dihapus permanen.",
                         icon: 'warning',
                         showCancelButton: true,
                         confirmButtonColor: '#7c1316',
@@ -620,10 +655,7 @@
             });
             var popoverTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="popover"]'))
             var popoverList = popoverTriggerList.map(function (popoverTriggerEl) {
-                return new bootstrap.Popover(popoverTriggerEl, {
-                    html: false,
-                    sanitize: false
-                })
+                return new bootstrap.Popover(popoverTriggerEl, { html: false, sanitize: false })
             });
         });
     </script>

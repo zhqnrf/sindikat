@@ -6,33 +6,24 @@ use Illuminate\Database\Eloquent\Model;
 
 class Pelatihan extends Model
 {
-
     protected $table = 'pelatihans';
 
-    /**
-     * The attributes that are mass assignable.
-     *
-     * @var array<int, string>
-     */
     protected $fillable = [
         'nama',
+        'bidang',
         'jabatan',
         'unit',
-        'is_pns',
+        'status_pegawai',
         'nip',
         'golongan',
         'pangkat',
+        'nirp',
         'pelatihan_dasar',
+        'pelatihan_peningkatan_kompetensi',
     ];
 
-    /**
-     * The attributes that should be cast.
-     *
-     * @var array<string, string>
-     */
     protected $casts = [
         'pelatihan_dasar' => 'array',
-        'is_pns' => 'boolean',
+        'pelatihan_peningkatan_kompetensi' => 'array', 
     ];
-
 }

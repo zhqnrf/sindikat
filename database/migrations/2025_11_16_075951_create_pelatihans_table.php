@@ -6,32 +6,33 @@ use Illuminate\Support\Facades\Schema;
 
 class CreatePelatihansTable extends Migration
 {
-    /**
-     * Run the migrations.
-     *
-     * @return void
-     */
     public function up()
     {
         Schema::create('pelatihans', function (Blueprint $table) {
             $table->id();
             $table->string('nama');
+            $table->enum('bidang', [
+                'Keperawatan',
+                'Pelayanan Medik',
+                'Penunjang Klinik',
+                'Penunjang Non Klinik',
+                'Kepegawaian',
+                'Perencanaan',
+                'Keuangan'
+            ])->nullable();
             $table->string('jabatan')->nullable();
             $table->string('unit')->nullable();
-            $table->boolean('is_pns')->default(false);
+            $table->enum('status_pegawai', ['PNS', 'P3K', 'Non-PNS']);
             $table->string('nip')->nullable();
-             $table->string('pangkat')->nullable();
+            $table->string('pangkat')->nullable();
             $table->string('golongan')->nullable();
+            $table->string('nirp')->nullable();
             $table->text('pelatihan_dasar')->nullable();
+            $table->text('pelatihan_peningkatan_kompetensi')->nullable(); // Baru
             $table->timestamps();
         });
     }
 
-    /**
-     * Reverse the migrations.
-     *
-     * @return void
-     */
     public function down()
     {
         Schema::dropIfExists('pelatihans');

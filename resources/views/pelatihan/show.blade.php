@@ -1,7 +1,7 @@
 @extends('layouts.app')
 
-@section('title', $pelatihan->nama)
-@section('page-title', $pelatihan->nama)
+@section('title', 'Detail Pelatihan')
+@section('page-title', 'Detail Data Pegawai')
 
 @section('content')
     <style>
@@ -9,342 +9,263 @@
             --custom-maroon: #7c1316;
             --custom-maroon-light: #a3191d;
             --custom-maroon-subtle: #fcf0f1;
-            --text-dark: #2c3e50;
-            --text-muted: #95a5a6;
-            --card-radius: 12px;
-            --shadow-soft: 0 4px 20px rgba(0, 0, 0, 0.05);
-            --transition: 0.3s ease;
-        }
-
-        .header-section {
-            background: linear-gradient(135deg, var(--custom-maroon), var(--custom-maroon-light));
-            color: white;
-            border-radius: var(--card-radius);
-            padding: 2rem;
-            margin-bottom: 2rem;
-            box-shadow: var(--shadow-soft);
-        }
-
-        .header-content {
-            display: flex;
-            justify-content: space-between;
-            align-items: start;
-            gap: 2rem;
-            flex-wrap: wrap;
-        }
-
-        .header-title-group h1 {
-            font-size: 2rem;
-            font-weight: 700;
-            margin: 0 0 0.5rem 0;
-        }
-
-        .header-subtitle {
-            font-size: 0.95rem;
-            opacity: 0.9;
-        }
-
-        .header-actions {
-            display: flex;
-            gap: 1rem;
-            flex-wrap: wrap;
-        }
-
-        .btn-custom {
-            padding: 0.75rem 1.5rem;
-            border-radius: 8px;
-            text-decoration: none;
-            font-weight: 600;
-            transition: var(--transition);
-            display: inline-flex;
-            align-items: center;
-            gap: 0.5rem;
-            border: none;
-            cursor: pointer;
-            font-size: 0.9rem;
-        }
-
-        .btn-edit {
-            background-color: #e3f2fd;
-            color: #1565c0;
-        }
-
-        .btn-edit:hover {
-            background-color: #bbdefb;
-        }
-
-        .btn-back {
-            background-color: rgba(255, 255, 255, 0.2);
-            color: white;
-            border: 1px solid rgba(255, 255, 255, 0.3);
-        }
-
-        .btn-back:hover {
-            background-color: rgba(255, 255, 255, 0.3);
         }
 
         .detail-card {
-            background: #fff;
-            border-radius: var(--card-radius);
-            box-shadow: var(--shadow-soft);
-            margin-bottom: 2rem;
+            border: none;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
             overflow: hidden;
+            background: #fff;
         }
 
-        .detail-card-header {
-            background-color: #f8f9fa;
-            border-bottom: 2px solid var(--custom-maroon);
-            padding: 1.5rem;
-        }
-
-        .detail-card-title {
-            font-size: 1.1rem;
-            font-weight: 700;
-            color: var(--custom-maroon);
-            margin: 0;
-        }
-
-        .detail-card-body {
+        .detail-header {
+            background-color: var(--custom-maroon);
+            color: white;
             padding: 2rem;
+            position: relative;
         }
 
-        .detail-row {
-            display: grid;
-            grid-template-columns: 200px 1fr;
-            gap: 2rem;
-            margin-bottom: 1.5rem;
-            align-items: start;
-        }
-
-        @media (max-width: 768px) {
-            .detail-row {
-                grid-template-columns: 1fr;
-                gap: 0.5rem;
-            }
-        }
-
-        .detail-row:last-child {
-            margin-bottom: 0;
-        }
-
-        .detail-label {
-            font-weight: 600;
-            color: var(--text-dark);
-            font-size: 0.9rem;
-        }
-
-        .detail-value {
-            color: var(--text-dark);
-            font-size: 0.95rem;
-            line-height: 1.5;
-        }
-
-        .detail-value.empty {
-            color: var(--text-muted);
-            font-style: italic;
-        }
-
-        .pelatihan-list {
+        .user-avatar {
+            width: 80px;
+            height: 80px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 50%;
             display: flex;
-            flex-direction: column; /* Ubah ke kolom agar lebih rapi */
-            gap: 0.75rem; /* Beri jarak antar item */
-        }
-
-        .pelatihan-badge {
-            background-color: #e3f2fd;
-            color: #1565c0;
-            padding: 0.6rem 1rem;
-            border-radius: 8px;
-            font-size: 0.9rem;
-            display: flex; /* Gunakan flexbox */
-            justify-content: space-between; /* Nama di kiri, tahun di kanan */
             align-items: center;
+            justify-content: center;
+            font-size: 2.5rem;
+            margin-right: 1.5rem;
+            border: 3px solid rgba(255, 255, 255, 0.3);
         }
 
-        /* Style untuk tahun di dalam badge */
-        .pelatihan-badge-tahun {
-            font-weight: 700;
-            background: white;
-            color: var(--custom-maroon);
-            padding: 0.2rem 0.5rem;
-            border-radius: 6px;
+        .info-label {
             font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: #6c757d;
+            font-weight: 600;
+            margin-bottom: 0.3rem;
         }
 
-        .divider {
-            border-bottom: 1px solid #e9ecef;
-            margin: 1.5rem 0;
-        }
-
-        /* --- CSS TAMBAHAN DARI SOURCE --- */
-        .pdf-link-show {
-            text-decoration: none;
+        .info-value {
+            font-size: 1.1rem;
+            color: var(--text-dark);
             font-weight: 500;
-            color: #1e3a8a;
-            font-size: 0.85rem;
-            background: #e0e7ff;
-            padding: 0.3rem 0.6rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .section-title {
+            color: var(--custom-maroon);
+            font-weight: 700;
+            border-bottom: 2px solid var(--custom-maroon-subtle);
+            padding-bottom: 0.5rem;
+            margin-bottom: 1.5rem;
+            margin-top: 1rem;
+        }
+
+        .list-group-item {
+            border: none;
+            border-bottom: 1px solid #f0f0f0;
+            padding: 1rem 0;
+        }
+        .list-group-item:last-child {
+            border-bottom: none;
+        }
+
+        .badge-status {
+            font-size: 0.9rem;
+            padding: 0.5em 1em;
+            border-radius: 50px;
+        }
+
+        .btn-back {
+            background: #fff;
+            color: var(--custom-maroon);
+            border: 1px solid var(--custom-maroon);
+            transition: 0.3s;
+        }
+        .btn-back:hover {
+            background: var(--custom-maroon);
+            color: #fff;
+        }
+
+        .pdf-link {
+            text-decoration: none;
+            color: #d32f2f; /* Merah PDF */
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            font-size: 0.9rem;
+            padding: 5px 10px;
+            background: #fff5f5;
             border-radius: 6px;
             transition: 0.2s;
         }
-        .pdf-link-show:hover {
-            background: #c7d2fe;
-            color: #1e40af;
+        .pdf-link:hover {
+            background: #fee2e2;
+            color: #991b1b;
         }
-        .pdf-link-show i {
-            margin-right: 0.3rem;
+
+        /* Animation */
+        .animate-up {
+            animation: fadeInUp 0.6s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+            opacity: 0;
+            transform: translateY(20px);
         }
-        /* --- AKHIR CSS TAMBAHAN --- */
+        @keyframes fadeInUp {
+            to { opacity: 1; transform: translateY(0); }
+        }
     </style>
 
-    <div class="header-section">
-        <div class="header-content">
-            <div class="header-title-group">
-                <h1>
-                    <i class="fas fa-graduation-cap"></i>
-                    {{ $pelatihan->nama }}
-                </h1>
-                <p class="header-subtitle">Detail Data Pelatihan Dasar</p>
-            </div>
-            <div class="header-actions">
-                <a href="{{ route('pelatihan.edit', $pelatihan->id) }}" class="btn-custom btn-edit">
-                    <i class="fas fa-edit"></i>
-                    Edit
-                </a>
-                <a href="{{ route('pelatihan.index') }}" class="btn-custom btn-back">
-                    <i class="fas fa-arrow-left"></i>
-                    Kembali
-                </a>
-            </div>
-        </div>
-    </div>
+    <div class="row justify-content-center">
+        <div class="col-lg-10">
+            <div class="detail-card animate-up">
 
-    <div class="detail-card">
-        <div class="detail-card-header">
-            <h2 class="detail-card-title">
-                <i class="fas fa-user"></i>
-                Informasi Karyawan
-            </h2>
-        </div>
-        <div class="detail-card-body">
-            <div class="detail-row">
-                <div class="detail-label">Nama</div>
-                <div class="detail-value">
-                    <strong>{{ $pelatihan->nama }}</strong>
+                {{-- Header Profile --}}
+                <div class="detail-header d-flex align-items-center">
+                    <div class="user-avatar">
+                        <i class="bi bi-person-fill"></i>
+                    </div>
+                    <div>
+                        <h2 class="font-weight-bold mb-1">{{ $pelatihan->nama }}</h2>
+                        <p class="mb-0 opacity-75" style="font-size: 1.1rem;">
+                            {{ $pelatihan->jabatan ?? 'Tidak ada jabatan' }} | {{ $pelatihan->unit ?? 'Tidak ada unit' }}
+                        </p>
+                    </div>
                 </div>
-            </div>
 
-            <div class="detail-row">
-                <div class="detail-label">Jabatan</div>
-                <div class="detail-value {{ empty($pelatihan->jabatan) ? 'empty' : '' }}">
-                    {{ $pelatihan->jabatan ?? 'Tidak diisi' }}
-                </div>
-            </div>
+                <div class="card-body p-4 p-md-5">
 
-            <div class="detail-row">
-                <div class="detail-label">Unit</div>
-                <div class="detail-value {{ empty($pelatihan->unit) ? 'empty' : '' }}">
-                    {{ $pelatihan->unit ?? 'Tidak diisi' }}
-                </div>
-            </div>
-
-            <div class="divider"></div>
-
-            <div class="detail-row">
-                <div class="detail-label">Status Kepegawaian</div>
-                <div class="detail-value">
-                    @if ($pelatihan->is_pns)
-                        <span class="pelatihan-badge" style="background-color: #d1fae5; color: #065f46; display: inline-block; width: auto;">PNS</span>
-                        <div class="mt-2" style="font-size: 0.9rem; padding-top: 10px;">
-                            <div><strong>NIP:</strong> {{ $pelatihan->nip ?? 'Tidak diisi' }}</div>
-                            <div><strong>Golongan:</strong> {{ $pelatihan->golongan ?? 'Tidak diisi' }}</div>
-                            <div><strong>Pangkat:</strong> {{ $pelatihan->pangkat ?? 'Tidak diisi' }}</div>
+                    {{-- Section 1: Data Pegawai --}}
+                    <div class="row mb-4">
+                        <div class="col-md-6">
+                            <div class="info-label"><i class="bi bi-layers-fill me-1"></i> Bidang</div>
+                            <div class="info-value">{{ $pelatihan->bidang }}</div>
                         </div>
-                    @else
-                        <span class="pelatihan-badge" style="background-color: #f3f4f6; color: #4b5563; display: inline-block; width: auto;">Non-PNS</span>
-                    @endif
-                </div>
-            </div>
-            </div>
-    </div>
+                        <div class="col-md-6">
+                            <div class="info-label"><i class="bi bi-person-badge-fill me-1"></i> Status Kepegawaian</div>
+                            <div class="info-value">
+                                @if($pelatihan->status_pegawai == 'PNS')
+                                    <span class="badge badge-status bg-primary">PNS</span>
+                                @elseif($pelatihan->status_pegawai == 'P3K')
+                                    <span class="badge badge-status bg-warning text-dark">P3K</span>
+                                @else
+                                    <span class="badge badge-status bg-secondary">Non-PNS</span>
+                                @endif
+                            </div>
+                        </div>
 
-    <div class="detail-card">
-        <div class="detail-card-header">
-            <h2 class="detail-card-title">
-                <i class="fas fa-certificate"></i>
-                Pelatihan Dasar yang Dimiliki
-            </h2>
-        </div>
-        <div class="detail-card-body">
+                        {{-- Logic Tampilan Detail Status --}}
+                        @if($pelatihan->status_pegawai == 'PNS')
+                            <div class="col-md-4">
+                                <div class="info-label">NIP</div>
+                                <div class="info-value">{{ $pelatihan->nip }}</div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="info-label">Golongan</div>
+                                <div class="info-value">{{ $pelatihan->golongan }}</div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="info-label">Pangkat</div>
+                                <div class="info-value">{{ $pelatihan->pangkat }}</div>
+                            </div>
 
-            @php
-                $daftarPelatihan = $pelatihan->pelatihan_dasar ?? [];
-                // TAMBAHAN: Sortir berdasarkan tahun (DESC)
-                if (is_array($daftarPelatihan)) {
-                    usort($daftarPelatihan, function($a, $b) {
-                        $tahunA = is_array($a) ? ($a['tahun'] ?? 0) : ($a->tahun ?? 0);
-                        $tahunB = is_array($b) ? ($b['tahun'] ?? 0) : ($b->tahun ?? 0);
-                        return $tahunB <=> $tahunA;
-                    });
-                }
-            @endphp
+                        @elseif($pelatihan->status_pegawai == 'P3K')
+                            <div class="col-md-6">
+                                <div class="info-label">NIP</div>
+                                <div class="info-value">{{ $pelatihan->nip }}</div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="info-label">Golongan</div>
+                                <div class="info-value">{{ $pelatihan->golongan }}</div>
+                            </div>
 
-            @if (is_array($daftarPelatihan) && count($daftarPelatihan) > 0)
-                <div class="pelatihan-list">
-
-                    @foreach ($daftarPelatihan as $item)
-                        @php
-                            $nama = is_object($item) ? ($item->nama ?? null) : ($item['nama'] ?? null);
-                            $tahun = is_object($item) ? ($item->tahun ?? null) : ($item['tahun'] ?? null);
-                            // --- Ambil path file (tetap ada) ---
-                            $file = is_object($item) ? ($item->file ?? null) : ($item['file'] ?? null);
-                        @endphp
-
-                        @if ($nama)
-                            <div class="pelatihan-badge">
-                                <span>{{ $nama }}</span>
-
-                                <div class="d-flex align-items-center gap-3">
-                                    @if($file)
-                                    <a href="{{ Storage::url($file) }}" target="_blank" class="pdf-link-show" title="Lihat PDF">
-                                        <i class="fas fa-file-pdf"></i> Lihat PDF
-                                    </a>
-                                    @endif
-                                    <span class="pelatihan-badge-tahun">{{ $tahun ?? '-' }}</span>
-                                </div>
+                        @elseif($pelatihan->status_pegawai == 'Non-PNS')
+                            <div class="col-md-12">
+                                <div class="info-label">NIRP</div>
+                                <div class="info-value">{{ $pelatihan->nirp ?? '-' }}</div>
                             </div>
                         @endif
-                    @endforeach
-                </div>
-            @else
-                <div class="detail-value empty">
-                    <i class="fas fa-inbox"></i>
-                    Belum ada data pelatihan dasar
-                </div>
-            @endif
-        </div>
-    </div>
+                    </div>
 
+                    {{-- Section 2: Pelatihan Dasar --}}
+                    <h5 class="section-title"><i class="bi bi-mortarboard-fill me-2"></i> Pelatihan Dasar</h5>
+                    @php
+                        $dataDasar = collect($pelatihan->pelatihan_dasar ?? [])->sortByDesc('tahun');
+                    @endphp
 
-    <div class="detail-card">
-        <div class="detail-card-header">
-            <h2 class="detail-card-title">
-                <i class="fas fa-info-circle"></i>
-                Informasi Lainnya
-            </h2>
-        </div>
-        <div class="detail-card-body">
-            <div class="detail-row">
-                <div class="detail-label">Dibuat Pada</div>
-                <div class="detail-value">
-                    {{ $pelatihan->created_at->format('d M Y H:i') }}
-                </div>
-            </div>
+                    @if($dataDasar->isEmpty())
+                        <div class="alert alert-light border text-center text-muted">
+                            <i class="bi bi-info-circle me-1"></i> Belum ada data pelatihan dasar.
+                        </div>
+                    @else
+                        <div class="list-group list-group-flush mb-4">
+                            @foreach($dataDasar as $item)
+                                @php
+                                    $nama = is_object($item) ? ($item->nama ?? '-') : ($item['nama'] ?? '-');
+                                    $tahun = is_object($item) ? ($item->tahun ?? '-') : ($item['tahun'] ?? '-');
+                                    $file = is_object($item) ? ($item->file ?? null) : ($item['file'] ?? null);
+                                @endphp
+                                <div class="list-group-item d-flex justify-content-between align-items-center flex-wrap">
+                                    <div>
+                                        <h6 class="mb-1 font-weight-bold">{{ $nama }}</h6>
+                                        <small class="text-muted"><i class="bi bi-calendar-event me-1"></i> Tahun: {{ $tahun }}</small>
+                                    </div>
+                                    @if($file)
+                                        <a href="{{ Storage::url($file) }}" target="_blank" class="pdf-link mt-2 mt-md-0">
+                                            <i class="bi bi-file-earmark-pdf-fill"></i> Lihat Sertifikat
+                                        </a>
+                                    @endif
+                                </div>
+                            @endforeach
+                        </div>
+                    @endif
 
-            <div class="detail-row">
-                <div class="detail-label">Terakhir Diperbarui</div>
-                <div class="detail-value">
-                    {{ $pelatihan->updated_at->format('d M Y H:i') }}
+                    {{-- Section 3: Pelatihan Peningkatan Kompetensi --}}
+                    <h5 class="section-title"><i class="bi bi-graph-up-arrow me-2"></i> Peningkatan Kompetensi</h5>
+                    @php
+                        $dataKompetensi = collect($pelatihan->pelatihan_peningkatan_kompetensi ?? [])->sortByDesc('tahun');
+                    @endphp
+
+                    @if($dataKompetensi->isEmpty())
+                        <div class="alert alert-light border text-center text-muted">
+                            <i class="bi bi-info-circle me-1"></i> Belum ada data peningkatan kompetensi.
+                        </div>
+                    @else
+                        <div class="list-group list-group-flush mb-4">
+                            @foreach($dataKompetensi as $item)
+                                @php
+                                    $nama = is_object($item) ? ($item->nama ?? '-') : ($item['nama'] ?? '-');
+                                    $tahun = is_object($item) ? ($item->tahun ?? '-') : ($item['tahun'] ?? '-');
+                                    $file = is_object($item) ? ($item->file ?? null) : ($item['file'] ?? null);
+                                @endphp
+                                <div class="list-group-item d-flex justify-content-between align-items-center flex-wrap">
+                                    <div>
+                                        <h6 class="mb-1 font-weight-bold">{{ $nama }}</h6>
+                                        <small class="text-muted"><i class="bi bi-calendar-event me-1"></i> Tahun: {{ $tahun }}</small>
+                                    </div>
+                                    @if($file)
+                                        <a href="{{ Storage::url($file) }}" target="_blank" class="pdf-link mt-2 mt-md-0">
+                                            <i class="bi bi-file-earmark-pdf-fill"></i> Lihat Sertifikat
+                                        </a>
+                                    @endif
+                                </div>
+                            @endforeach
+                        </div>
+                    @endif
+
+                    {{-- Actions --}}
+                    <div class="d-flex justify-content-end gap-2 mt-5 border-top pt-3">
+                        <a href="{{ route('pelatihan.index') }}" class="btn btn-back rounded-pill px-4">
+                            <i class="bi bi-arrow-left me-1"></i> Kembali
+                        </a>
+                        <a href="{{ route('pelatihan.edit', $pelatihan->id) }}" class="btn btn-warning text-white rounded-pill px-4">
+                            <i class="bi bi-pencil-square me-1"></i> Edit Data
+                        </a>
+                    </div>
+
                 </div>
             </div>
         </div>

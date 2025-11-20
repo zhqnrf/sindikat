@@ -16,7 +16,10 @@ class CreateMahasiswasTable extends Migration
         Schema::create('mahasiswas', function (Blueprint $table) {
             $table->bigIncrements('id');
             $table->string('nm_mahasiswa');
-            $table->string('univ_asal')->nullable();
+            $table->foreignId('mou_id')
+                ->nullable()
+                ->constrained('mous') // Menyambung ke tabel 'mous'
+                ->onDelete('set null');
             $table->string('prodi')->nullable();
             $table->string('nm_ruangan')->nullable();
             $table->unsignedBigInteger('ruangan_id')->nullable();

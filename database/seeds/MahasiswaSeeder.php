@@ -10,7 +10,7 @@ class MahasiswaSeeder extends Seeder
         $mahasiswas = [
             [
                 'nm_mahasiswa' => 'Febriant Sam Antonie',
-                'univ_asal' => 'SMK TI Pelita Nusantara',
+                'mou_id' => 'SMK TI Pelita Nusantara',
                 'prodi' => 'Rekayasa Perangkat Lunak',
                 'nm_ruangan' => 'IT',
                 'ruangan_id' => 1,
@@ -21,7 +21,7 @@ class MahasiswaSeeder extends Seeder
             ],
             [
                 'nm_mahasiswa' => 'Muhammad Akyas Mahira Abduh',
-                'univ_asal' => 'SMK TI Pelita Nusantara',
+                'mou_id' => 'SMK TI Pelita Nusantara',
                 'prodi' => 'Rekayasa Perangkat Lunak',
                 'nm_ruangan' => 'IT',
                 'ruangan_id' => 1,
@@ -32,7 +32,7 @@ class MahasiswaSeeder extends Seeder
             ],
             [
                 'nm_mahasiswa' => 'Andhika Wibowo',
-                'univ_asal' => 'SMK TI Pelita Nusantara',
+                'mou_id' => 'SMK TI Pelita Nusantara',
                 'prodi' => 'Rekayasa Perangkat Lunak',
                 'nm_ruangan' => 'IT',
                 'ruangan_id' => 1,

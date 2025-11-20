@@ -339,7 +339,7 @@
                             </td>
                             <td>
                                 <div class="d-flex flex-column">
-                                    <span class="text-dark">{{ $m->univ_asal }}</span>
+                                    <span class="text-dark">{{ $m->mou ? $m->mou->nama_universitas : '-' }}</span>
                                     <small class="text-muted">{{ $m->prodi }}</small>
                                 </div>
                             </td>

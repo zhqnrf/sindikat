@@ -5,43 +5,41 @@ namespace App\Http\Controllers;
 use App\Models\Mahasiswa;
 use App\Models\Ruangan;
 use App\Models\RuanganKetersediaan;
+use App\Models\Mou; // Model Universitas
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-use Carbon\CarbonPeriod;
 use Illuminate\Support\Facades\File;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Carbon\Carbon;
+use Carbon\CarbonPeriod;
 
 class MahasiswaController extends Controller
 {
     public function __construct()
     {
-        $this->middleware(function ($request, $next) {
-            if (!auth()->check() || auth()->user()->role !== 'admin') {
-                abort(403);
-            }
-            return $next($request);
-        });
+        $this->middleware('auth');
     }
 
     public function index(Request $request)
     {
-        // 1. Ambil data ruangan untuk dropdown filter
         $ruangans = Ruangan::orderBy('nm_ruangan', 'asc')->get();
 
-        $query = Mahasiswa::where('status', 'aktif');
+        // Eager load 'mou' dan 'ruangan' agar query lebih ringan
+        $query = Mahasiswa::with(['mou', 'ruangan'])->where('status', 'aktif');
 
-        // 2. Filter Universitas
+        // 1. Filter by Universitas (Via Relasi)
         if ($request->has('univ_asal') && !empty($request->univ_asal)) {
-            $query->where('univ_asal', $request->univ_asal);
+            $query->whereHas('mou', function ($q) use ($request) {
+                $q->where('nama_universitas', 'like', '%' . $request->univ_asal . '%');
+            });
         }
 
-        // 3. (BARU) Filter Ruangan
+        // 2. Filter by Ruangan
         if ($request->has('ruangan_id') && !empty($request->ruangan_id)) {
             $query->where('ruangan_id', $request->ruangan_id);
         }
 
-        // 4. Search Nama
+        // 3. Search by Nama
         if ($request->has('search') && !empty($request->search)) {
             $query->where('nm_mahasiswa', 'like', '%' . $request->search . '%');
         }
@@ -49,20 +47,20 @@ class MahasiswaController extends Controller
         $mahasiswas = $query->orderBy('created_at', 'desc')
             ->paginate(10)->withQueryString();
 
-        // Trigger auto-deactivate logic
+        // Trigger auto-deactivate logic (memanggil accessor sisa_hari)
         $mahasiswas->getCollection()->transform(function ($m) {
             $m->sisa_hari;
             return $m->fresh();
         });
 
-        // Pass variable $ruangans ke view
         return view('mahasiswa.index', compact('mahasiswas', 'ruangans'));
     }
 
     public function create()
     {
         $ruangans = Ruangan::all();
-        return view('mahasiswa.create', compact('ruangans'));
+        $mous = Mou::orderBy('nama_universitas', 'asc')->get(); // Ambil data MOU
+        return view('mahasiswa.create', compact('ruangans', 'mous'));
     }
 
     public function store(Request $request)
@@ -75,32 +73,39 @@ class MahasiswaController extends Controller
 
     public function show($id)
     {
-        $mahasiswa = Mahasiswa::findOrFail($id);
+        $mahasiswa = Mahasiswa::with(['mou', 'ruangan'])->findOrFail($id);
         $today = now()->toDateString();
         $last = $mahasiswa->absensis()->whereDate('created_at', $today)->latest()->first();
         $lastStatus = $last ? $last->type : null;
+
         return view('mahasiswa.show', compact('mahasiswa', 'lastStatus'));
     }
 
     /**
-     * Import multiple mahasiswa from Excel (Support Re-write/Update)
+     * Import Excel Logic
      */
     public function importExcel(Request $request)
     {
+        // Alias untuk method private di bawah agar konsisten dengan route
+        return $this->importMahasiswa($request);
+    }
+
+    private function importMahasiswa(Request $request)
+    {
         try {
             $rows = json_decode($request->data, true);
-            $processed = 0; // Ganti created jadi processed karena bisa update/create
+            $processed = 0;
             $errors = [];
 
             foreach ($rows as $i => $row) {
                 $name = $row['Nama'] ?? $row['nama'] ?? null;
-                $univ = $row['Universitas'] ?? null; // Kunci unik kedua
+                $univName = $row['Universitas'] ?? null;
                 $ruanganName = $row['Ruangan'] ?? null;
                 $status = isset($row['Status']) ? strtolower($row['Status']) : 'aktif';
                 $tanggalMulai = $row['Tanggal Mulai'] ?? null;
                 $tanggalBerakhir = $row['Tanggal Berakhir'] ?? null;
 
-                // Validasi dasar
+                // Validasi Dasar
                 if (empty($name)) {
                     $errors[] = "Baris " . ($i + 2) . ": nama kosong";
                     continue;
@@ -110,52 +115,56 @@ class MahasiswaController extends Controller
                     continue;
                 }
 
-                // 1. Cari Ruangan ID berdasarkan Nama Ruangan di Excel
+                // 1. Cari ID Ruangan
                 $ruanganId = null;
                 $nmRuangan = null;
-
                 if ($ruanganName) {
                     $ruanganDb = Ruangan::where('nm_ruangan', 'like', '%' . $ruanganName . '%')->first();
                     if ($ruanganDb) {
                         $ruanganId = $ruanganDb->id;
                         $nmRuangan = $ruanganDb->nm_ruangan;
                     } else {
-                        // Jika ruangan di excel tidak ditemukan di DB, set null atau skip
-                        $nmRuangan = $ruanganName; // Tetap simpan nama text-nya
+                        $nmRuangan = $ruanganName; // Simpan string jika tidak ketemu (opsional)
                     }
                 }
 
-                // 2. SIAPKAN DATA
+                // 2. Cari ID MOU (Universitas)
+                $mouId = null;
+                if ($univName) {
+                    $mouDb = Mou::where('nama_universitas', 'like', '%' . $univName . '%')->first();
+                    if ($mouDb) {
+                        $mouId = $mouDb->id;
+                    }
+                }
+
+                // Data Preparation
                 $dataToSave = [
                     'nm_mahasiswa' => $name,
-                    'univ_asal' => $univ,
+                    'mou_id' => $mouId, // Pakai ID Relasi
                     'prodi' => $row['Prodi'] ?? null,
                     'tanggal_mulai' => $tanggalMulai,
                     'tanggal_berakhir' => $tanggalBerakhir,
                     'status' => in_array($status, ['aktif', 'nonaktif']) ? $status : 'aktif',
                     'ruangan_id' => $ruanganId,
                     'nm_ruangan' => $nmRuangan,
-                    // Tambahkan weekend_aktif jika ada di excel
-                    // 'weekend_aktif' => $row['Weekend Aktif'] ?? false,
                 ];
 
-                // 3. CEK DATA LAMA (RE-WRITE LOGIC)
+                // 3. Cek Data Lama (Untuk Update) atau Buat Baru
+                // Kita cari berdasarkan nama & mou_id agar spesifik
                 $mahasiswa = Mahasiswa::where('nm_mahasiswa', $name)
-                    ->where('univ_asal', $univ)
+                    ->when($mouId, function ($q) use ($mouId) {
+                        return $q->where('mou_id', $mouId);
+                    })
                     ->first();
 
                 $today = now()->toDateString();
 
-                // ==========================
-                // SKENARIO A: UPDATE DATA
-                // ==========================
                 if ($mahasiswa) {
+                    // === UPDATE LOGIC (Cek Pindah Ruangan) ===
                     $oldRuanganId = $mahasiswa->ruangan_id;
-                    $newRuanganId = $ruanganId;
 
-                    // Cek apakah pindah ruangan?
-                    if ($newRuanganId && $newRuanganId != $oldRuanganId) {
-                        // 1. Kembalikan Kuota Ruangan Lama
+                    if ($ruanganId && $ruanganId != $oldRuanganId) {
+                        // Kembalikan kuota ruangan lama
                         if ($oldRuanganId) {
                             $oldSnap = RuanganKetersediaan::firstOrCreate(
                                 ['ruangan_id' => $oldRuanganId, 'tanggal' => $today],
@@ -164,18 +173,18 @@ class MahasiswaController extends Controller
                             $oldSnap->increment('tersedia');
                         }
 
-                        // 2. Kurangi Kuota Ruangan Baru (Cek Penuh gak?)
-                        $newRuangan = Ruangan::find($newRuanganId);
-                        $terisi = Mahasiswa::where('ruangan_id', $newRuanganId)->count();
+                        // Kurangi kuota ruangan baru
+                        $newRuangan = Ruangan::find($ruanganId);
+                        $terisi = Mahasiswa::where('ruangan_id', $ruanganId)->count();
                         $tersedia = $newRuangan->kuota_ruangan - $terisi;
 
                         if ($tersedia <= 0) {
                             $errors[] = "Baris " . ($i + 2) . ": Update gagal, ruangan $ruanganName penuh.";
-                            continue; // Skip baris ini
+                            continue;
                         }
 
                         $newSnap = RuanganKetersediaan::firstOrCreate(
-                            ['ruangan_id' => $newRuanganId, 'tanggal' => $today],
+                            ['ruangan_id' => $ruanganId, 'tanggal' => $today],
                             ['tersedia' => $tersedia]
                         );
 
@@ -184,12 +193,8 @@ class MahasiswaController extends Controller
                         }
                     }
                     $mahasiswa->update($dataToSave);
-                }
-                // ==========================
-                // SKENARIO B: BUAT BARU (CREATE)
-                // ==========================
-                else {
-                    // Cek Kuota Ruangan Dulu
+                } else {
+                    // === CREATE LOGIC ===
                     if ($ruanganId) {
                         $ruangan = Ruangan::find($ruanganId);
                         $terisi = Mahasiswa::where('ruangan_id', $ruanganId)->count();
@@ -200,7 +205,6 @@ class MahasiswaController extends Controller
                             continue;
                         }
 
-                        // Update Snapshot Ketersediaan
                         $snapshot = RuanganKetersediaan::firstOrCreate(
                             ['ruangan_id' => $ruanganId, 'tanggal' => $today],
                             ['tersedia' => $tersedia]
@@ -217,7 +221,7 @@ class MahasiswaController extends Controller
 
             return response()->json([
                 'success' => true,
-                'message' => "Berhasil memproses $processed data (Update/Create)",
+                'message' => "Berhasil memproses $processed data.",
                 'errors' => $errors
             ]);
         } catch (\Exception $e) {
@@ -229,40 +233,41 @@ class MahasiswaController extends Controller
     {
         $data = $request->validate([
             'nm_mahasiswa' => 'required|string|max:255',
-            'univ_asal' => 'nullable|string|max:255',
+            'mou_id' => 'nullable|exists:mous,id', // Validasi ke tabel MOU
             'prodi' => 'nullable|string|max:255',
             'nm_ruangan' => 'nullable|string|max:255',
             'ruangan_id' => 'nullable|exists:ruangans,id',
             'tanggal_mulai' => 'required|date',
             'tanggal_berakhir' => 'required|date|after:tanggal_mulai',
-            'weekend_aktif' => 'nullable|boolean', // <-- Validasi
+            'weekend_aktif' => 'nullable|boolean',
             'foto' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
         ]);
 
-        // Set status to aktif by default
         $data['status'] = 'aktif';
-
-        // Handle input boolean dari checkbox
         $data['weekend_aktif'] = $request->boolean('weekend_aktif');
 
-        $fotoPath = $this->uploadFoto($request);
-    if ($fotoPath) {
-        $data['foto_path'] = $fotoPath;
-    }
+        // Upload Foto
+        if ($request->hasFile('foto')) {
+            $file = $request->file('foto');
+            $nama_file = time() . '_' . $file->getClientOriginalName();
+            $file->move(public_path('uploads/pas_foto'), $nama_file);
+            $data['foto_path'] = 'uploads/pas_foto/' . $nama_file;
+        }
+
+        // Cek Ruangan
         if (!empty($data['ruangan_id'])) {
             $ruangan = Ruangan::find($data['ruangan_id']);
-
             $terisi = Mahasiswa::where('ruangan_id', $ruangan->id)->count();
             $tersedia = $ruangan->kuota_ruangan - $terisi;
 
             if ($tersedia <= 0) {
-                return back()->withErrors(['ruangan_id' => 'Kuota ruangan penuh. Tidak dapat menambahkan mahasiswa.'])->withInput();
+                return back()->withErrors(['ruangan_id' => 'Kuota ruangan penuh.'])->withInput();
             }
 
+            // Update ketersediaan
             $today = now()->toDateString();
             $snapshot = RuanganKetersediaan::where('ruangan_id', $ruangan->id)
-                ->where('tanggal', $today)
-                ->first();
+                ->where('tanggal', $today)->first();
 
             if ($snapshot) {
                 $snapshot->decrement('tersedia');
@@ -273,20 +278,19 @@ class MahasiswaController extends Controller
                     'tersedia' => $tersedia - 1
                 ]);
             }
-
             $data['nm_ruangan'] = $ruangan->nm_ruangan;
         }
 
         Mahasiswa::create($data);
-        return redirect()->route('mahasiswa.index')->with('success', 'Mahasiswa berhasil ditambahkan.');
+        return redirect()->route('mahasiswa.create')->with('success', 'Mahasiswa berhasil ditambahkan.');
     }
 
     public function edit($id)
     {
         $mahasiswa = Mahasiswa::findOrFail($id);
         $ruangans = Ruangan::all();
-
-        return view('mahasiswa.edit', compact('mahasiswa', 'ruangans'));
+        $mous = Mou::orderBy('nama_universitas', 'asc')->get(); // Data untuk dropdown
+        return view('mahasiswa.edit', compact('mahasiswa', 'ruangans', 'mous'));
     }
 
     public function update(Request $request, $id)
@@ -296,89 +300,84 @@ class MahasiswaController extends Controller
 
             $data = $request->validate([
                 'nm_mahasiswa' => 'required|string|max:255',
-                'univ_asal' => 'nullable|string|max:255',
+                'mou_id' => 'nullable|exists:mous,id',
                 'prodi' => 'nullable|string|max:255',
                 'nm_ruangan' => 'nullable|string|max:255',
                 'ruangan_id' => 'nullable|exists:ruangans,id',
                 'tanggal_mulai' => 'required|date',
                 'tanggal_berakhir' => 'required|date|after:tanggal_mulai',
                 'status' => 'required|in:aktif,nonaktif',
-                'weekend_aktif' => 'nullable|boolean', // <-- Validasi
+                'weekend_aktif' => 'nullable|boolean',
                 'foto' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
             ]);
 
-            // Handle input boolean dari checkbox
             $data['weekend_aktif'] = $request->boolean('weekend_aktif');
+
+            // Logic Ganti Foto
+            if ($request->hasFile('foto')) {
+                if ($mahasiswa->foto_path && File::exists(public_path($mahasiswa->foto_path))) {
+                    File::delete(public_path($mahasiswa->foto_path));
+                }
+                $file = $request->file('foto');
+                $nama_file = time() . '_' . $file->getClientOriginalName();
+                $file->move(public_path('uploads/pas_foto'), $nama_file);
+                $data['foto_path'] = 'uploads/pas_foto/' . $nama_file;
+            }
 
             $oldRuanganId = $mahasiswa->ruangan_id;
             $newRuanganId = $data['ruangan_id'] ?? null;
-
-            if ($mahasiswa->status === 'aktif' && $data['status'] === 'nonaktif' && $oldRuanganId) {
-                $old = Ruangan::find($oldRuanganId);
-
-                $snap = RuanganKetersediaan::firstOrCreate(
-                    ['ruangan_id' => $old->id, 'tanggal' => now()->toDateString()],
-                    ['tersedia' => $old->kuota_ruangan]
-                );
-
-                $snap->increment('tersedia');
-
-                $data['ruangan_id'] = null;
-                $data['nm_ruangan'] = null;
-
-                $mahasiswa->update($data);
-                return redirect()->route('mahasiswa.index')->with('success', 'Mahasiswa dinonaktifkan & dikeluarkan dari ruangan.');
-            }
-
-            if ($newRuanganId == $oldRuanganId) {
-                $mahasiswa->update($data);
-                return redirect()->route('mahasiswa.index')->with('success', 'Mahasiswa diperbarui.');
-            }
-
             $today = now()->toDateString();
 
-            if ($oldRuanganId) {
+            // --- SKENARIO 1: STATUS BERUBAH JADI NONAKTIF ---
+            if ($mahasiswa->status === 'aktif' && $data['status'] === 'nonaktif' && $oldRuanganId) {
                 $old = Ruangan::find($oldRuanganId);
-                $snap = RuanganKetersediaan::where('ruangan_id', $old->id)
-                    ->where('tanggal', $today)
-                    ->first();
-
-                if ($snap) {
-                    $snap->increment('tersedia');
-                }
+                $snap = RuanganKetersediaan::firstOrCreate(
+                    ['ruangan_id' => $old->id, 'tanggal' => $today],
+                    ['tersedia' => $old->kuota_ruangan]
+                );
+                $snap->increment('tersedia');
+                $data['ruangan_id'] = null;
+                $data['nm_ruangan'] = null;
+                $mahasiswa->update($data);
+                return redirect()->route('mahasiswa.index')->with('success', 'Mahasiswa dinonaktifkan & keluar ruangan.');
             }
 
-            if ($newRuanganId) {
-                $new = Ruangan::find($newRuanganId);
+            // --- SKENARIO 2: PINDAH RUANGAN ---
+            if ($newRuanganId && $newRuanganId != $oldRuanganId) {
+                // Kembalikan kuota lama
+                if ($oldRuanganId) {
+                    $old = Ruangan::find($oldRuanganId);
+                    $snap = RuanganKetersediaan::where('ruangan_id', $old->id)
+                        ->where('tanggal', $today)->first();
+                    if ($snap) $snap->increment('tersedia');
+                }
 
+                // Ambil kuota baru
+                $new = Ruangan::find($newRuanganId);
                 $terisi = Mahasiswa::where('ruangan_id', $new->id)->count();
                 $tersedia = $new->kuota_ruangan - $terisi;
 
                 if ($tersedia <= 0) {
-                    return back()->withErrors(['ruangan_id' => 'Ruangan tujuan penuh. Tidak dapat memindahkan mahasiswa.'])->withInput();
+                    return back()->withErrors(['ruangan_id' => 'Ruangan tujuan penuh.'])->withInput();
                 }
 
-                $snap = RuanganKetersediaan::where('ruangan_id', $new->id)
-                    ->where('tanggal', $today)
-                    ->first();
+                $snap = RuanganKetersediaan::firstOrCreate(
+                    ['ruangan_id' => $new->id, 'tanggal' => $today],
+                    ['tersedia' => $tersedia]
+                );
 
-                if ($snap) {
+                if (!$snap->wasRecentlyCreated) {
                     $snap->decrement('tersedia');
-                } else {
-                    RuanganKetersediaan::create([
-                        'ruangan_id' => $new->id,
-                        'tanggal' => $today,
-                        'tersedia' => $tersedia - 1
-                    ]);
                 }
 
                 $data['nm_ruangan'] = $new->nm_ruangan;
-            } else {
+            } elseif (!$newRuanganId) {
+                // Jika ruangan dikosongkan
                 $data['nm_ruangan'] = null;
             }
 
             $mahasiswa->update($data);
-            return redirect()->route('mahasiswa.index')->with('success', 'Mahasiswa berhasil diperbarui.');
+            return redirect()->route('mahasiswa.index')->with('success', 'Data berhasil diperbarui.');
         });
     }
 
@@ -387,16 +386,19 @@ class MahasiswaController extends Controller
         return DB::transaction(function () use ($id) {
             $mhs = Mahasiswa::findOrFail($id);
 
+            // Hapus file foto fisik
+            if ($mhs->foto_path && File::exists(public_path($mhs->foto_path))) {
+                File::delete(public_path($mhs->foto_path));
+            }
+
+            // Kembalikan kuota ruangan
             if ($mhs->ruangan_id) {
                 $ruangan = Ruangan::find($mhs->ruangan_id);
-                $today = now()->toDateString();
-
-                $snap = RuanganKetersediaan::where('ruangan_id', $ruangan->id)
-                    ->where('tanggal', $today)
-                    ->first();
-
-                if ($snap) {
-                    $snap->increment('tersedia');
+                if ($ruangan) {
+                    $snap = RuanganKetersediaan::where('ruangan_id', $ruangan->id)
+                        ->where('tanggal', now()->toDateString())
+                        ->first();
+                    if ($snap) $snap->increment('tersedia');
                 }
             }
 
@@ -404,91 +406,52 @@ class MahasiswaController extends Controller
             return redirect()->route('mahasiswa.index')->with('success', 'Mahasiswa dihapus.');
         });
     }
-    private function uploadFoto(Request $request)
-    {
-        if (!$request->hasFile('foto')) {
-            return null; // Tidak ada file diupload
-        }
-
-        $file = $request->file('foto');
-        $nama_file = time() . '_' . $file->getClientOriginalName();
-
-        // Simpan file di public/uploads/pas_foto
-        $file->move(public_path('uploads/pas_foto'), $nama_file);
-
-        return 'uploads/pas_foto/' . $nama_file;
-    }
-
-    /**
-     * Delete old photo file (if exists)
-     * * @param string|null $path
-     * @return void
-     */
-    private function deleteOldPhoto($path)
-    {
-        if ($path && File::exists(public_path($path))) {
-            File::delete(public_path($path));
-        }
-    }
 
     public function getRuanganInfo($id)
     {
         $ruangan = Ruangan::find($id);
-        if (!$ruangan) {
-            return response()->json(['error' => 'Ruangan tidak ditemukan'], 404);
-        }
+        if (!$ruangan) return response()->json(['error' => 'Not Found'], 404);
 
         $terisi = Mahasiswa::where('ruangan_id', $ruangan->id)->count();
-        $tersedia = $ruangan->kuota_ruangan - $terisi;
-        $tersedia = max(0, $tersedia);
+        $tersedia = max(0, $ruangan->kuota_ruangan - $terisi);
 
         return response()->json([
             'nm_ruangan' => $ruangan->nm_ruangan,
             'kuota_total' => $ruangan->kuota_ruangan,
             'tersedia' => $tersedia,
             'terisi' => $terisi,
-            'status' => $tersedia > 0 ? 'Tersedia' : 'Penuh'
         ]);
     }
 
-    /**
-     * API: Get list of universities for live search
-     */
     public function searchUniversitas(Request $request)
     {
         $search = $request->query('q', '');
-
-        $universitas = Mahasiswa::where('status', 'aktif')
-            ->where('univ_asal', 'like', '%' . $search . '%')
-            ->distinct('univ_asal')
-            ->pluck('univ_asal')
-            ->filter(fn($u) => !empty($u))
-            ->values();
+        // Cari di tabel mous
+        $universitas = Mou::where('nama_universitas', 'like', '%' . $search . '%')
+            ->limit(10)
+            ->pluck('nama_universitas'); // Kembalikan nama saja untuk autocomplete text
 
         return response()->json($universitas);
     }
 
-    /**
-     * API: Return mahasiswa links filtered by optional params (used by copyAllLinks)
-     */
     public function copyLinks(Request $request)
     {
-        $query = Mahasiswa::query();
+        $query = Mahasiswa::with('mou'); // Eager load
 
+        // Filter relasi MOU
         if ($request->has('univ_asal') && !empty($request->univ_asal)) {
-            $query->where('univ_asal', $request->univ_asal);
+            $query->whereHas('mou', function ($q) use ($request) {
+                $q->where('nama_universitas', 'like', '%' . $request->univ_asal . '%');
+            });
         }
-
         if ($request->has('ruangan_id') && !empty($request->ruangan_id)) {
             $query->where('ruangan_id', $request->ruangan_id);
         }
-
         if ($request->has('search') && !empty($request->search)) {
             $query->where('nm_mahasiswa', 'like', '%' . $request->search . '%');
         }
 
-        $rows = $query->orderBy('created_at', 'desc')
-            ->get(['nm_mahasiswa', 'share_token']);
+        $rows = $query->orderBy('created_at', 'desc')->get();
 
         $data = $rows->map(function ($m) {
             return [
@@ -500,38 +463,21 @@ class MahasiswaController extends Controller
         return response()->json($data);
     }
 
-public function showSertifikatSummary($id)
+    // --- Sertifikat Logic ---
+    public function showSertifikatSummary($id)
     {
         $mahasiswa = Mahasiswa::findOrFail($id);
-
-        $startDate = $mahasiswa->tanggal_mulai;
-        $endDate = $mahasiswa->tanggal_berakhir;
-        $totalExpectedDays = 0;
-
-        if ($startDate && $endDate) {
-            $period = CarbonPeriod::create($startDate, $endDate);
-            foreach ($period as $date) {
-                if ($mahasiswa->weekend_aktif) {
-                    $totalExpectedDays++;
-                }
-                elseif (!$date->isWeekend()) {
-                    $totalExpectedDays++;
-                }
-            }
-        }
+        $totalExpectedDays = $this->calculateExpectedDays($mahasiswa);
 
         $totalActualDays = $mahasiswa->absensis()
             ->select(DB::raw('DATE(created_at) as date'))
-            ->distinct()
-            ->count();
+            ->distinct()->count();
 
-        $participationRate = 0;
-        if ($totalExpectedDays > 0) {
-            $participationRate = round(($totalActualDays / $totalExpectedDays) * 100, 1);
-        }
+        $participationRate = ($totalExpectedDays > 0)
+            ? round(($totalActualDays / $totalExpectedDays) * 100, 1)
+            : 0;
 
-        $totalAlpaDays = $totalExpectedDays - $totalActualDays;
-        $totalAlpaDays = max(0, $totalAlpaDays);
+        $totalAlpaDays = max(0, $totalExpectedDays - $totalActualDays);
 
         return view('mahasiswa.sertifikat', compact(
             'mahasiswa',
@@ -542,80 +488,52 @@ public function showSertifikatSummary($id)
         ));
     }
 
-
-    /**
-     * [METHOD DIUBAH]
-     * Generate Sertifikat PDF untuk Mahasiswa (via Admin).
-     */
-    public function generateSertifikat(Request $request, $id) // <-- [DIUBAH] Tambahkan Request $request
+    public function generateSertifikat(Request $request, $id)
     {
-        $mahasiswa = Mahasiswa::findOrFail($id);
-        $percentage = 0;
-        $totalActualDays = 0;
+        $mahasiswa = Mahasiswa::with('mou')->findOrFail($id);
+        $totalActualDays = $mahasiswa->absensis()
+            ->select(DB::raw('DATE(created_at) as date'))
+            ->distinct()->count();
 
-        // --- [LOGIKA BARU] Cek input override ---
-        // Cek apakah admin mengisi field 'override_percentage' dan nilainya valid
+        // Cek Override Percentage
         if ($request->filled('override_percentage') && is_numeric($request->override_percentage)) {
-
-            // 1. Jika di-override, gunakan nilai manual
             $percentage = (float) $request->override_percentage;
-
-            // Kita tetap hitung total hadir untuk data di PDF (jika perlu)
-            $totalActualDays = $mahasiswa->absensis()
-                ->select(DB::raw('DATE(created_at) as date'))
-                ->distinct()
-                ->count();
-
         } else {
+            $totalExpectedDays = $this->calculateExpectedDays($mahasiswa);
+            $percentage = ($totalExpectedDays > 0) ? round(($totalActualDays / $totalExpectedDays) * 100, 1) : 0;
+        }
 
-            // 2. Jika tidak, hitung otomatis (logika yang sama dari summary)
-            $startDate = $mahasiswa->tanggal_mulai;
-            $endDate = $mahasiswa->tanggal_berakhir;
-            $totalExpectedDays = 0;
+        // Background Image
+        $bgPath = public_path('background.png');
+        $bgBase64 = '';
+        if (File::exists($bgPath)) {
+            $bgData = File::get($bgPath);
+            $bgBase64 = 'data:image/png;base64,' . base64_encode($bgData);
+        }
 
-            if ($startDate && $endDate) {
-                $period = CarbonPeriod::create($startDate, $endDate);
-                foreach ($period as $date) {
-                    if ($mahasiswa->weekend_aktif) {
-                        $totalExpectedDays++;
-                    }
-                    elseif (!$date->isWeekend()) {
-                        $totalExpectedDays++;
-                    }
+        $pdf = Pdf::loadView('sertifikat.template', [
+            'mahasiswa' => $mahasiswa,
+            'percentage' => $percentage,
+            'total_hadir' => $totalActualDays,
+            'tanggal_terbit' => Carbon::now()->isoFormat('D MMMM YYYY'),
+            'bg_base64' => $bgBase64
+        ]);
+
+        return $pdf->setPaper('a4', 'landscape')
+            ->stream('Sertifikat-' . $mahasiswa->nm_mahasiswa . '.pdf');
+    }
+
+    private function calculateExpectedDays($mahasiswa)
+    {
+        $days = 0;
+        if ($mahasiswa->tanggal_mulai && $mahasiswa->tanggal_berakhir) {
+            $period = CarbonPeriod::create($mahasiswa->tanggal_mulai, $mahasiswa->tanggal_berakhir);
+            foreach ($period as $date) {
+                if ($mahasiswa->weekend_aktif || !$date->isWeekend()) {
+                    $days++;
                 }
             }
-
-            $totalActualDays = $mahasiswa->absensis()
-                ->select(DB::raw('DATE(created_at) as date'))
-                ->distinct()
-                ->count();
-
-            if ($totalExpectedDays > 0) {
-                $percentage = round(($totalActualDays / $totalExpectedDays) * 100, 1);
-            }
         }
-
-        // --- Logika Background (dari langkah sebelumnya) ---
-        $path = public_path('background.png');
-        $base64 = '';
-        if (File::exists($path)) {
-            $type = pathinfo($path, PATHINFO_EXTENSION);
-            $fileData = File::get($path);
-            $base64 = 'data:image/' . $type . ';base64,' . base64_encode($fileData);
-        }
-        // --- Akhir Logika Background ---
-
-        $data = [
-            'mahasiswa' => $mahasiswa,
-            'percentage' => $percentage,       // Persentase (otomatis atau override)
-            'total_hadir' => $totalActualDays, // Total hari hadir
-            'tanggal_terbit' => Carbon::now()->isoFormat('D MMMM YYYY'),
-            'bg_base64' => $base64,
-        ];
-
-        $pdf = Pdf::loadView('sertifikat.template', $data);
-        $pdf->setPaper('a4', 'landscape');
-        $fileName = 'Sertifikat - ' . $mahasiswa->nm_mahasiswa . '.pdf';
-        return $pdf->stream($fileName);
+        return $days;
     }
 }

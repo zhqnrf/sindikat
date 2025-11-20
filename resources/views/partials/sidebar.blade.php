@@ -16,12 +16,9 @@
             </div>
         </div>
 
-        {{-- ====================================================== --}}
-        {{-- STRUKTUR NAVIGASI (GAYA PILL & GRUP) --}}
-        {{-- ====================================================== --}}
         <nav class="nav flex-column sidebar-nav-container">
 
-            {{-- GRUP 1: MENU UTAMA --}}
+            {{-- GRUP 1: MENU UTAMA (Semua User) --}}
             <div class="sidebar-heading">
                 <span class="sidebar-text">Menu Utama</span>
             </div>
@@ -31,32 +28,29 @@
                 <span class="sidebar-text">Dashboard</span>
             </a>
 
+            {{-- ========================================== --}}
+            {{-- MENU KHUSUS ADMIN --}}
+            {{-- ========================================== --}}
             @if (auth()->check() && auth()->user()->role === 'admin')
-                
-                {{-- GRUP 2: ADMINISTRASI --}}
                 <div class="sidebar-heading">
                     <span class="sidebar-text">Administrasi</span>
                 </div>
 
-                {{-- 1. Manajemen User (BARU) --}}
+                {{-- 1. Manajemen User --}}
                 <a class="nav-link {{ request()->is('users*') ? 'active' : '' }}" href="{{ route('users.index') }}">
-                    <i class="bi bi-person-gear"></i> {{-- Icon User Gear --}}
+                    <i class="bi bi-person-gear"></i>
                     <span class="sidebar-text">Manajemen User</span>
                 </a>
 
                 {{-- 2. MOU (Dropdown) --}}
-                @php
-                    $isMouActive = request()->is('mou*');
-                @endphp
+                @php $isMouActive = request()->is('mou*'); @endphp
                 <div class="nav-item-dropdown">
                     <a class="nav-link {{ $isMouActive ? 'active-parent' : '' }}" data-bs-toggle="collapse"
-                        href="#menuMou" role="button" aria-expanded="{{ $isMouActive ? 'true' : 'false' }}"
-                        aria-controls="menuMou">
+                        href="#menuMou" role="button" aria-expanded="{{ $isMouActive ? 'true' : 'false' }}">
                         <i class="bi bi-file-earmark-text"></i>
                         <span class="sidebar-text">MOU</span>
                         <i class="bi bi-chevron-down sidebar-arrow"></i>
                     </a>
-                    {{-- Sub-menu --}}
                     <div class="collapse sub-menu {{ $isMouActive ? 'show' : '' }}" id="menuMou">
                         <a class="nav-link {{ request()->is('mou') ? 'active' : '' }}" href="{{ route('mou.index') }}">
                             <span class="sidebar-text">List MOU</span>
@@ -70,80 +64,85 @@
                 @endphp
                 <div class="nav-item-dropdown">
                     <a class="nav-link {{ $isPendidikanActive ? 'active-parent' : '' }}" data-bs-toggle="collapse"
-                        href="#menuPendidikan" role="button"
-                        aria-expanded="{{ $isPendidikanActive ? 'true' : 'false' }}" aria-controls="menuPendidikan">
+                        href="#menuPendidikan" role="button" aria-expanded="{{ $isPendidikanActive ? 'true' : 'false' }}">
                         <i class="bi bi-mortarboard"></i>
                         <span class="sidebar-text">Pendidikan</span>
                         <i class="bi bi-chevron-down sidebar-arrow"></i>
                     </a>
-                    {{-- Sub-menu --}}
                     <div class="collapse sub-menu {{ $isPendidikanActive ? 'show' : '' }}" id="menuPendidikan">
-                        <a class="nav-link {{ request()->is('mahasiswa*') ? 'active' : '' }}"
-                            href="{{ route('mahasiswa.index') }}">
+                        <a class="nav-link {{ request()->is('mahasiswa*') ? 'active' : '' }}" href="{{ route('mahasiswa.index') }}">
                             <span class="sidebar-text">Mahasiswa</span>
                         </a>
-                        <a class="nav-link {{ request()->is('ruangan*') ? 'active' : '' }}"
-                            href="{{ route('ruangan.index') }}">
+                        <a class="nav-link {{ request()->is('ruangan*') ? 'active' : '' }}" href="{{ route('ruangan.index') }}">
                             <span class="sidebar-text">Ruangan</span>
                         </a>
-                        <a class="nav-link {{ request()->is('absensi*') ? 'active' : '' }}"
-                            href="{{ route('absensi.index') }}">
+                        <a class="nav-link {{ request()->is('absensi*') ? 'active' : '' }}" href="{{ route('absensi.index') }}">
                             <span class="sidebar-text">Riwayat Absensi</span>
                         </a>
                     </div>
                 </div>
-                
-                {{-- 4. Surat Balasan (Tunggal) --}}
-                <a class="nav-link {{ request()->is('surat-balasan*') ? 'active' : '' }}"
-                    href="{{ route('surat-balasan.index') }}">
+
+                {{-- 4. Surat Balasan --}}
+                <a class="nav-link {{ request()->is('surat-balasan*') ? 'active' : '' }}" href="{{ route('surat-balasan.index') }}">
                     <i class="bi bi-envelope-paper"></i>
                     <span class="sidebar-text">Surat Balasan</span>
                 </a>
 
-                {{-- 5. Pelatihan (Dropdown) --}}
-                @php
-                    $isPelatihanActive = request()->is('pelatihan*');
-                @endphp
+                {{-- 5. Pelatihan --}}
+                @php $isPelatihanActive = request()->is('pelatihan*'); @endphp
                 <div class="nav-item-dropdown">
                     <a class="nav-link {{ $isPelatihanActive ? 'active-parent' : '' }}" data-bs-toggle="collapse"
-                        href="#menuPelatihan" role="button"
-                        aria-expanded="{{ $isPelatihanActive ? 'true' : 'false' }}" aria-controls="menuPelatihan">
+                        href="#menuPelatihan" role="button" aria-expanded="{{ $isPelatihanActive ? 'true' : 'false' }}">
                         <i class="bi bi-people"></i>
                         <span class="sidebar-text">Pelatihan</span>
                         <i class="bi bi-chevron-down sidebar-arrow"></i>
                     </a>
                     <div class="collapse sub-menu {{ $isPelatihanActive ? 'show' : '' }}" id="menuPelatihan">
-                        <a class="nav-link {{ request()->is('pelatihan') ? 'active' : '' }}"
-                            href="{{ route('pelatihan.index') }}">
+                        <a class="nav-link {{ request()->is('pelatihan') ? 'active' : '' }}" href="{{ route('pelatihan.index') }}">
                             <span class="sidebar-text">List Pelatihan</span>
                         </a>
                     </div>
                 </div>
 
-                {{-- 6. Penelitian (Dropdown) --}}
-                @php
-                    $isPenelitianActive = request()->is('penelitian*');
-                @endphp
+                {{-- 6. Penelitian --}}
+                @php $isPenelitianActive = request()->is('penelitian*'); @endphp
                 <div class="nav-item-dropdown">
                     <a class="nav-link {{ $isPenelitianActive ? 'active-parent' : '' }}" data-bs-toggle="collapse"
-                        href="#menuPenelitian" role="button"
-                        aria-expanded="{{ $isPenelitianActive ? 'true' : 'false' }}" aria-controls="menuPenelitian">
+                        href="#menuPenelitian" role="button" aria-expanded="{{ $isPenelitianActive ? 'true' : 'false' }}">
                         <i class="bi bi-journal-richtext"></i>
                         <span class="sidebar-text">Penelitian</span>
                         <i class="bi bi-chevron-down sidebar-arrow"></i>
                     </a>
                     <div class="collapse sub-menu {{ $isPenelitianActive ? 'show' : '' }}" id="menuPenelitian">
-                        <a class="nav-link {{ request()->is('penelitian*') ? 'active' : '' }}"
-                            href="{{ route('pra-penelitian.index') }}">
+                        <a class="nav-link {{ request()->is('penelitian*') ? 'active' : '' }}" href="{{ route('pra-penelitian.index') }}">
                             <span class="sidebar-text">Pra-Penelitian</span>
                         </a>
                     </div>
                 </div>
             @endif
+
+            {{-- ========================================== --}}
+            {{-- MENU KHUSUS USER --}}
+            {{-- ========================================== --}}
+            @if (auth()->check() && auth()->user()->role === 'user')
+                <div class="sidebar-heading">
+                    <span class="sidebar-text">Layanan</span>
+                </div>
+
+                {{-- 1. Daftar Magang (Create Mahasiswa) --}}
+                <a class="nav-link {{ request()->routeIs('mahasiswa.create') ? 'active' : '' }}" href="{{ route('mahasiswa.create') }}">
+                    <i class="bi bi-person-plus"></i>
+                    <span class="sidebar-text">Daftar Magang</span>
+                </a>
+
+                {{-- 2. Ajukan Penelitian (Create Pra-Penelitian) --}}
+                <a class="nav-link {{ request()->routeIs('pra-penelitian.create') ? 'active' : '' }}" href="{{ route('pra-penelitian.create') }}">
+                    <i class="bi bi-journal-plus"></i>
+                    <span class="sidebar-text">Ajukan Penelitian</span>
+                </a>
+            @endif
+
         </nav>
-        {{-- ====================================================== --}}
-        {{-- AKHIR STRUKTUR NAVIGASI --}}
-        {{-- ====================================================== --}}
     </div>
 
     {{-- User Profile di Bawah --}}
@@ -188,19 +187,14 @@
                 filterSidebar(e.target.value);
             });
         }
-        
+
         // 2. Toggle Sidebar
         const sidebarToggle = document.getElementById('sidebarToggle');
         const sidebar = document.querySelector('.sidebar');
-        const mainContent = document.querySelector('.main-content'); // Asumsi class konten utama
 
-        if(sidebarToggle) {
+        if (sidebarToggle) {
             sidebarToggle.addEventListener('click', function() {
                 sidebar.classList.toggle('collapsed');
-                // Optional: Adjust main content margin if needed
-                if(mainContent) {
-                   // mainContent.style.marginLeft = sidebar.classList.contains('collapsed') ? '80px' : '250px';
-                }
             });
         }
     });
@@ -208,7 +202,6 @@
     function filterSidebar(filterText) {
         const text = filterText.toLowerCase();
         const navContainer = document.querySelector('.sidebar-nav-container');
-
         const headings = navContainer.querySelectorAll('.sidebar-heading');
         const items = navContainer.querySelectorAll('.sidebar-nav-container > .nav-link, .sidebar-nav-container > .nav-item-dropdown');
         const allSubLinks = navContainer.querySelectorAll('.sub-menu .nav-link');
@@ -235,8 +228,6 @@
 
         items.forEach(item => {
             let groupHasMatch = false;
-
-            // Cek link utama
             const mainLink = item.matches('.nav-link') ? item : item.querySelector('[data-bs-toggle="collapse"]');
             const mainText = mainLink.querySelector('.sidebar-text')?.textContent.toLowerCase() || '';
 
@@ -244,7 +235,6 @@
                 groupHasMatch = true;
             }
 
-            // Cek sub-link
             if (item.matches('.nav-item-dropdown')) {
                 const subLinks = item.querySelectorAll('.sub-menu .nav-link');
                 subLinks.forEach(subLink => {
@@ -262,7 +252,6 @@
                     item.querySelector('.sub-menu').classList.add('show');
                     item.querySelector('[data-bs-toggle="collapse"]').setAttribute('aria-expanded', 'true');
                 }
-                
                 // Show Heading
                 let heading = item.previousElementSibling;
                 while (heading) {

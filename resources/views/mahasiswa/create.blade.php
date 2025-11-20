@@ -138,164 +138,139 @@
                     <p class="mb-0 small opacity-75">Isi data lengkap mahasiswa magang di bawah ini.</p>
                 </div>
 
-                <div class="card-body p-4 p-md-5">
-                    @if ($errors->any())
-                        <div class="alert alert-danger rounded-3 shadow-sm mb-4">
-                            <ul class="mb-0 small">
-                                @foreach ($errors->all() as $error)
-                                    <li>{{ $error }}</li>
-                                @endforeach
-                            </ul>
-                        </div>
-                    @endif
+<div class="card-body p-4 p-md-5">
+    {{-- --}}
+    @if (session('success'))
+        <div class="alert alert-success alert-dismissible fade show rounded-3 shadow-sm mb-4" role="alert">
+            <i class="bi bi-check-circle-fill me-2"></i> {{ session('success') }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    @endif
 
-                    <form action="{{ route('mahasiswa.store') }}" method="POST" id="form-mahasiswa"
-                        enctype="multipart/form-data">
-                        @csrf
+    @if ($errors->any())
+        <div class="alert alert-danger rounded-3 shadow-sm mb-4">
+            <ul class="mb-0 small">
+                @foreach ($errors->all() as $error)
+                    <li>{{ $error }}</li>
+                @endforeach
+            </ul>
+        </div>
+    @endif
 
-                        <h6 class="text-muted text-uppercase fw-bold mb-3" style="font-size: 0.75rem; letter-spacing: 1px;">
-                            Informasi Dasar</h6>
+    <form action="{{ route('mahasiswa.store') }}" method="POST" id="form-mahasiswa" enctype="multipart/form-data">
+        @csrf
 
-                        <div class="mb-3">
-                            <label class="form-label">Nama Lengkap <span class="text-danger">*</span></label>
-                            <div class="input-group">
-                                <span class="input-group-text"><i class="bi bi-person"></i></span>
-                                <input type="text" name="nm_mahasiswa" class="form-control"
-                                    value="{{ old('nm_mahasiswa') }}" placeholder="Contoh: Budi Santoso" required>
-                            </div>
-                        </div>
+        <h6 class="text-muted text-uppercase fw-bold mb-3" style="font-size: 0.75rem; letter-spacing: 1px;">
+            Informasi Dasar</h6>
 
-                        {{-- Input Foto dengan ID --}}
-                        <div class="mb-4">
-                            <label class="form-label">Pas Foto 3x4 (Opsional)</label>
-                            <div class="input-group">
-                                <span class="input-group-text"><i class="bi bi-camera"></i></span>
-                                <input type="file" name="foto" id="foto-input" class="form-control"
-                                    accept="image/jpeg,image/png,image/jpg">
-                            </div>
-                            <small class="form-text text-muted">
-                                Format: JPG/PNG/JPEG. Max: 2MB. Ukuran 3x4.
-                            </small>
+        <div class="mb-3">
+            <label class="form-label">Nama Lengkap <span class="text-danger">*</span></label>
+            <div class="input-group">
+                <span class="input-group-text"><i class="bi bi-person"></i></span>
+                <input type="text" name="nm_mahasiswa" class="form-control"
+                    value="{{ old('nm_mahasiswa') }}" placeholder="Contoh: Budi Santoso" required>
+            </div>
+        </div>
 
-                            {{-- AREA PREVIEW FOTO (Baru) --}}
-                            <div class="mt-3" id="preview-container" style="display: none;">
-                                <div class="d-inline-block p-1 border rounded bg-light">
-                                    <img id="img-preview" src="#" alt="Preview Foto"
-                                         style="max-width: 150px; max-height: 200px; object-fit: cover; border-radius: 4px; display: block;">
-                                </div>
-                                <div class="small text-muted mt-1 fst-italic">Preview Foto</div>
-                            </div>
-                            {{-- Akhir Area Preview --}}
+        {{-- Input Foto (Tetap sama) --}}
+        <div class="mb-4">
+            <label class="form-label">Pas Foto 3x4 (Opsional)</label>
+            <div class="input-group">
+                <span class="input-group-text"><i class="bi bi-camera"></i></span>
+                <input type="file" name="foto" id="foto-input" class="form-control"
+                    accept="image/jpeg,image/png,image/jpg">
+            </div>
+            <small class="form-text text-muted">Format: JPG/PNG/JPEG. Max: 2MB. Ukuran 3x4.</small>
+            <div class="mt-3" id="preview-container" style="display: none;">
+                <div class="d-inline-block p-1 border rounded bg-light">
+                    <img id="img-preview" src="#" alt="Preview Foto"
+                        style="max-width: 150px; max-height: 200px; object-fit: cover; border-radius: 4px; display: block;">
+                </div>
+                <div class="small text-muted mt-1 fst-italic">Preview Foto</div>
+            </div>
+            @error('foto')
+                <div class="text-danger small">{{ $message }}</div>
+            @enderror
+        </div>
 
-                            @error('foto')
-                                <div class="text-danger small">{{ $message }}</div>
-                            @enderror
-                        </div>
-
-                        <div class="row">
-                            <div class="col-md-6 mb-3">
-                                <label class="form-label">Asal Universitas</label>
-                                <div class="input-group">
-                                    <span class="input-group-text"><i class="bi bi-building"></i></span>
-                                    <input type="text" name="univ_asal" class="form-control"
-                                        value="{{ old('univ_asal') }}" placeholder="Nama Kampus">
-                                </div>
-                            </div>
-                            <div class="col-md-6 mb-3">
-                                <label class="form-label">Program Studi</label>
-                                <div class="input-group">
-                                    <span class="input-group-text"><i class="bi bi-book"></i></span>
-                                    <input type="text" name="prodi" class="form-control" value="{{ old('prodi') }}"
-                                        placeholder="Jurusan/Prodi">
-                                </div>
-                            </div>
-                        </div>
-
-                        <hr class="my-4 border-light">
-
-                        <h6 class="text-muted text-uppercase fw-bold mb-3" style="font-size: 0.75rem; letter-spacing: 1px;">
-                            Penempatan & Durasi</h6>
-
-                        <div class="mb-3">
-                            <label class="form-label">Pilih Ruangan (Opsional)</label>
-                            <div class="input-group">
-                                <span class="input-group-text"><i class="bi bi-door-open"></i></span>
-                                <select id="ruangan_id" name="ruangan_id" class="form-select">
-                                    <option value="">-- Pilih Ruangan --</option>
-                                    @foreach ($ruangans as $r)
-                                        <option value="{{ $r->id }}"
-                                            {{ old('ruangan_id') == $r->id ? 'selected' : '' }}>
-                                            {{ $r->nm_ruangan }}
-                                        </option>
-                                    @endforeach
-                                </select>
-                            </div>
-
-                            <div id="ruangan-info" class="room-info-box" style="display: none;">
-                                <div class="d-flex justify-content-between align-items-center">
-                                    <div>
-                                        <h6 class="fw-bold mb-1" id="info-nama" style="color: var(--custom-maroon);"></h6>
-                                        <small class="text-muted">
-                                            Terisi: <span id="info-terisi" class="fw-bold"></span> / <span
-                                                id="info-kuota-total"></span>
-                                        </small>
-                                    </div>
-                                    <div class="text-end">
-                                        <span id="badge-status" class="badge rounded-pill px-3 py-2"></span>
-                                        <div class="small mt-1 text-muted">Sisa: <span id="info-tersedia"
-                                                class="fw-bold"></span></div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="row">
-                            <div class="col-md-6 mb-4">
-                                <label class="form-label">Tanggal Mulai <span class="text-danger">*</span></label>
-                                <div class="input-group">
-                                    <span class="input-group-text"><i class="bi bi-calendar-plus"></i></span>
-                                    <input type="date" name="tanggal_mulai" class="form-control"
-                                        value="{{ old('tanggal_mulai', now()->toDateString()) }}" required>
-                                </div>
-                            </div>
-                            <div class="col-md-6 mb-4">
-                                <label class="form-label">Tanggal Berakhir <span class="text-danger">*</span></label>
-                                <div class="input-group">
-                                    <span class="input-group-text"><i class="bi bi-calendar-check"></i></span>
-                                    <input type="date" name="tanggal_berakhir" class="form-control"
-                                        value="{{ old('tanggal_berakhir') }}" required>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="form-group mb-4" style="padding-top: 10px;">
-                            <div class="form-check form-switch" style="padding-left: 2.5em;">
-                                <input class="form-check-input" type="checkbox" role="switch" name="weekend_aktif"
-                                    value="1" id="weekend_aktif" {{ old('weekend_aktif') ? 'checked' : '' }}
-                                    style="height: 1.25em; width: 2.25em; cursor: pointer;">
-                                <label class="form-check-label" for="weekend_aktif"
-                                    style="padding-top: 0.2em; font-weight: 600; color: var(--text-dark); cursor: pointer;">
-                                    Aktifkan Absensi Weekend
-                                </label>
-                            </div>
-                            <small class="form-text text-muted" style="padding-left: 2.5em;">
-                                Jika dicentang, Sabtu & Minggu akan dihitung sebagai hari magang.
-                            </small>
-                        </div>
-                        <div class="d-flex justify-content-between align-items-center pt-3">
-                            <a href="{{ route('mahasiswa.index') }}" class="btn btn-light-custom shadow-sm">
-                                <i class="bi bi-arrow-left me-2"></i> Kembali
-                            </a>
-                            <button type="submit" class="btn btn-maroon" id="submit-btn">
-                                Simpan Data <i class="bi bi-check-lg ms-2"></i>
-                            </button>
-                        </div>
-                    </form>
+        {{-- --}}
+        <div class="row">
+            <div class="col-md-6 mb-3">
+                <label class="form-label">Asal Universitas <span class="text-danger">*</span></label>
+                <div class="input-group">
+                    {{-- Icon Universitas --}}
+                    <span class="input-group-text"><i class="bi bi-building"></i></span> 
+                    <select name="mou_id" class="form-select" required>
+                        <option value="">-- Pilih Universitas --</option>
+                        @foreach ($mous as $mou)
+                            <option value="{{ $mou->id }}" {{ old('mou_id') == $mou->id ? 'selected' : '' }}>
+                                {{ $mou->nama_universitas }}
+                            </option>
+                        @endforeach
+                    </select>
+                </div>
+            </div>
+            
+            <div class="col-md-6 mb-3">
+                <label class="form-label">Program Studi</label>
+                <div class="input-group">
+                    <span class="input-group-text"><i class="bi bi-book"></i></span>
+                    <input type="text" name="prodi" class="form-control" value="{{ old('prodi') }}"
+                        placeholder="Jurusan/Prodi">
                 </div>
             </div>
         </div>
-    </div>
 
+        <hr class="my-4 border-light">
+
+        {{-- Bagian Penempatan & Tanggal tetap sama seperti sebelumnya --}}
+        <h6 class="text-muted text-uppercase fw-bold mb-3" style="font-size: 0.75rem; letter-spacing: 1px;">
+            Penempatan & Durasi</h6>
+
+        <div class="row">
+            <div class="col-md-6 mb-4">
+                <label class="form-label">Tanggal Mulai <span class="text-danger">*</span></label>
+                <div class="input-group">
+                    <span class="input-group-text"><i class="bi bi-calendar-plus"></i></span>
+                    <input type="date" name="tanggal_mulai" class="form-control"
+                        value="{{ old('tanggal_mulai', now()->toDateString()) }}" required>
+                </div>
+            </div>
+            <div class="col-md-6 mb-4">
+                <label class="form-label">Tanggal Berakhir <span class="text-danger">*</span></label>
+                <div class="input-group">
+                    <span class="input-group-text"><i class="bi bi-calendar-check"></i></span>
+                    <input type="date" name="tanggal_berakhir" class="form-control"
+                        value="{{ old('tanggal_berakhir') }}" required>
+                </div>
+            </div>
+        </div>
+
+        <div class="form-group mb-4" style="padding-top: 10px;">
+            <div class="form-check form-switch" style="padding-left: 2.5em;">
+                <input class="form-check-input" type="checkbox" role="switch" name="weekend_aktif"
+                    value="1" id="weekend_aktif" {{ old('weekend_aktif') ? 'checked' : '' }}
+                    style="height: 1.25em; width: 2.25em; cursor: pointer;">
+                <label class="form-check-label" for="weekend_aktif"
+                    style="padding-top: 0.2em; font-weight: 600; color: var(--text-dark); cursor: pointer;">
+                    Aktifkan Weekend
+                </label>
+            </div>
+            <small class="form-text text-muted" style="padding-left: 2.5em;">
+                Jika dicentang, Sabtu & Minggu akan dihitung sebagai hari magang.
+            </small>
+        </div>
+
+        <div class="d-flex justify-content-between align-items-center pt-3">
+            <a href="{{ route('mahasiswa.index') }}" class="btn btn-light-custom shadow-sm">
+                <i class="bi bi-arrow-left me-2"></i> Kembali
+            </a>
+            <button type="submit" class="btn btn-maroon" id="submit-btn">
+                Simpan Data <i class="bi bi-check-lg ms-2"></i>
+            </button>
+        </div>
+    </form>
+</div>
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             const ruanganSelect = document.getElementById('ruangan_id');

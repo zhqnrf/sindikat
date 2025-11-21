@@ -102,6 +102,11 @@
                             <span class="sidebar-text">List Pelatihan</span>
                         </a>
                     </div>
+                    <div class="collapse sub-menu {{ $isPelatihanActive ? 'show' : '' }}" id="menuPelatihan">
+                        <a class="nav-link {{ request()->is('pelatihan') ? 'active' : '' }}" href="{{ route('public.pelatihan.index') }}">
+                            <span class="sidebar-text">Search Pelatihan</span>
+                        </a>
+                    </div>
                 </div>
 
                 {{-- 6. Penelitian --}}

@@ -21,6 +21,14 @@ use App\Http\Controllers\UserController;
 
 Route::get('/', fn() => redirect()->route('login'));
 
+// Public Pelatihan Routes
+Route::get('/cek-data-pelatihan', [PelatihanController::class, 'publicIndex'])
+    ->name('public.pelatihan.index');
+Route::get('/input-data-pelatihan', [PelatihanController::class, 'publicCreate'])
+    ->name('public.pelatihan.create');
+Route::post('/input-data-pelatihan', [PelatihanController::class, 'publicStore'])
+    ->name('public.pelatihan.store');
+
 // Authentication
 Route::get('/login', [AuthController::class, 'showLoginForm'])->name('login');
 Route::post('/register', [AuthController::class, 'register'])->name('register.post');
@@ -40,7 +48,7 @@ Route::middleware(['auth'])->group(function () {
         // Form & Action
         Route::get('/create', [MahasiswaController::class, 'create'])->name('create');
         Route::post('/', [MahasiswaController::class, 'store'])->name('store');
-        
+
         // Helper Routes (AJAX untuk Form) - PENTING: Harus bisa diakses User
         Route::get('/ruangan-info/{id}', [MahasiswaController::class, 'getRuanganInfo'])->name('ruangan.info');
         Route::get('/search/universitas', [MahasiswaController::class, 'searchUniversitas'])->name('search.universitas');
@@ -69,7 +77,7 @@ Route::middleware(['auth', 'admin'])->group(function () {
         Route::post('/import-excel', [MahasiswaController::class, 'importExcel'])->name('import_excel');
         Route::get('/export', [MahasiswaController::class, 'export'])->name('export');
         Route::get('/links', [MahasiswaController::class, 'copyLinks'])->name('links');
-        
+
         Route::get('/{id}/sertifikat/summary', [MahasiswaController::class, 'showSertifikatSummary'])->name('sertifikat.summary');
         Route::get('/{mahasiswa}', [MahasiswaController::class, 'show'])->name('show');
         Route::get('/{mahasiswa}/edit', [MahasiswaController::class, 'edit'])->name('edit');

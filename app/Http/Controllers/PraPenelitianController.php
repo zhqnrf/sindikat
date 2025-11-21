@@ -59,7 +59,7 @@ class PraPenelitianController extends Controller
             }
 
             DB::commit();
-            return redirect()->route('pra-penelitian.index')->with('success', 'Data pra penelitian berhasil ditambahkan.');
+            return redirect()->route('pra-penelitian.create')->with('success', 'Data pra penelitian berhasil ditambahkan.');
         } catch (\Exception $e) {
             DB::rollBack();
             // Log error: Log::error($e->getMessage());

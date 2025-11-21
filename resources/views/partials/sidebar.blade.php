@@ -18,7 +18,7 @@
 
         <nav class="nav flex-column sidebar-nav-container">
 
-            {{-- GRUP 1: MENU UTAMA (Semua User) --}}
+            {{-- GRUP 1: MENU UTAMA --}}
             <div class="sidebar-heading">
                 <span class="sidebar-text">Menu Utama</span>
             </div>
@@ -29,27 +29,24 @@
             </a>
 
             {{-- ========================================== --}}
-            {{-- MENU KHUSUS ADMIN --}}
+            {{-- MENU KHUSUS ADMIN (Tidak Diubah)           --}}
             {{-- ========================================== --}}
             @if (auth()->check() && auth()->user()->role === 'admin')
                 <div class="sidebar-heading">
                     <span class="sidebar-text">Administrasi</span>
                 </div>
 
-                {{-- 1. Manajemen User --}}
                 <a class="nav-link {{ request()->is('users*') ? 'active' : '' }}" href="{{ route('users.index') }}">
                     <i class="bi bi-person-gear"></i>
                     <span class="sidebar-text">Manajemen User</span>
                 </a>
 
-                {{-- Approval pengajuan --}}
                 <a class="nav-link {{ request()->is('pengajuan*') ? 'active' : '' }}"
                     href="{{ route('admin.pengajuan.index') }}">
                     <i class="bi bi-hourglass-split"></i>
                     <span class="sidebar-text">Approval Pengajuan</span>
                 </a>
 
-                {{-- 2. MOU (Dropdown) --}}
                 @php $isMouActive = request()->is('mou*'); @endphp
                 <div class="nav-item-dropdown">
                     <a class="nav-link {{ $isMouActive ? 'active-parent' : '' }}" data-bs-toggle="collapse"
@@ -59,13 +56,13 @@
                         <i class="bi bi-chevron-down sidebar-arrow"></i>
                     </a>
                     <div class="collapse sub-menu {{ $isMouActive ? 'show' : '' }}" id="menuMou">
-                        <a class="nav-link {{ request()->is('mou') ? 'active' : '' }}" href="{{ route('mou.index') }}">
+                        <a class="nav-link {{ request()->is('mou') ? 'active' : '' }}"
+                            href="{{ route('mou.index') }}">
                             <span class="sidebar-text">List MOU</span>
                         </a>
                     </div>
                 </div>
 
-                {{-- 3. Pendidikan (Dropdown) --}}
                 @php
                     $isPendidikanActive =
                         request()->is('mahasiswa*') || request()->is('ruangan*') || request()->is('absensi*');
@@ -94,14 +91,12 @@
                     </div>
                 </div>
 
-                {{-- 4. Surat Balasan --}}
                 <a class="nav-link {{ request()->is('surat-balasan*') ? 'active' : '' }}"
                     href="{{ route('surat-balasan.index') }}">
                     <i class="bi bi-envelope-paper"></i>
                     <span class="sidebar-text">Surat Balasan</span>
                 </a>
 
-                {{-- 5. Pelatihan --}}
                 @php $isPelatihanActive = request()->is('pelatihan*'); @endphp
                 <div class="nav-item-dropdown">
                     <a class="nav-link {{ $isPelatihanActive ? 'active-parent' : '' }}" data-bs-toggle="collapse"
@@ -116,15 +111,13 @@
                             href="{{ route('pelatihan.index') }}">
                             <span class="sidebar-text">List Pelatihan</span>
                         </a>
-                    </div>
-                    <div class="collapse sub-menu {{ $isPelatihanActive ? 'show' : '' }}" id="menuPelatihan">
-                        <a class="nav-link {{ request()->is('pelatihan') ? 'active' : '' }}" href="{{ route('public.pelatihan.index') }}">
+                        <a class="nav-link {{ request()->is('pelatihan') ? 'active' : '' }}"
+                            href="{{ route('public.pelatihan.index') }}">
                             <span class="sidebar-text">Search Pelatihan</span>
                         </a>
                     </div>
                 </div>
 
-                {{-- 6. Penelitian --}}
                 @php $isPenelitianActive = request()->is('penelitian*'); @endphp
                 <div class="nav-item-dropdown">
                     <a class="nav-link {{ $isPenelitianActive ? 'active-parent' : '' }}" data-bs-toggle="collapse"
@@ -143,75 +136,75 @@
                 </div>
             @endif
 
-            @php
-                use App\Models\Pengajuan;
-
-                $pengajuan = Pengajuan::where('user_id', auth()->id())
-                    ->latest()
-                    ->first();
-            @endphp
-
+            {{-- ========================================== --}}
+            {{-- MENU KHUSUS USER (LOGIKA BARU)             --}}
+            {{-- ========================================== --}}
             @if (auth()->check() && auth()->user()->role === 'user')
+
+                @php
+                    // PERBAIKAN: Jangan pakai 'use' di sini.
+                    // Gunakan langsung \App\Models\Pengajuan (pakai backslash)
+
+                    $userId = auth()->id();
+
+                    // Ambil data spesifik
+                    $pra = \App\Models\Pengajuan::where('user_id', $userId)
+                        ->where('jenis', 'pra_penelitian')
+                        ->latest()
+                        ->first();
+                    $magang = \App\Models\Pengajuan::where('user_id', $userId)
+                        ->where('jenis', 'magang')
+                        ->latest()
+                        ->first();
+
+                    // Cek apakah user sudah punya akses (status approved)
+                    $hasPraAccess = $pra && $pra->status === 'approved';
+                    $hasMagangAccess = $magang && $magang->status === 'approved';
+                @endphp
+
                 <div class="sidebar-heading">
                     <span class="sidebar-text">Layanan</span>
                 </div>
 
-                {{-- ========================================= --}}
-                {{-- CASE 1: BELUM PERNAH MENGAJUKAN --}}
-                {{-- ========================================= --}}
-                @if (!$pengajuan)
-                    <a class="nav-link" href="{{ route('pengajuan.index') }}">
-                        <i class="bi bi-send"></i>
-                        <span class="sidebar-text">Form pengajuan</span>
+                {{-- 1. MENU STATUS & PENGAJUAN (Selalu Muncul) --}}
+                <a class="nav-link {{ request()->is('pengajuan*') ? 'active' : '' }}"
+                    href="{{ route('pengajuan.index') }}">
+                    <i class="bi bi-grid-1x2"></i>
+                    <span class="sidebar-text">Pengajuan & Status</span>
+                </a>
+
+                {{-- 2. MENU AKSES (Hanya muncul jika Approved) --}}
+
+                {{-- Akses Magang --}}
+                @if ($hasMagangAccess)
+                    <div class="sidebar-heading mt-2">
+                        <span class="sidebar-text">Aktivitas Magang</span>
+                    </div>
+                    <a class="nav-link {{ request()->routeIs('mahasiswa.create') ? 'active' : '' }}"
+                        href="{{ route('mahasiswa.create') }}">
+                        <i class="bi bi-briefcase"></i>
+                        <span class="sidebar-text">Biodata Magang</span>
                     </a>
-
-                    {{-- ========================================= --}}
-                    {{-- CASE 2: MASIH PENDING --}}
-                    {{-- ========================================= --}}
-                @elseif ($pengajuan->status === 'pending')
-                    <a class="nav-link disabled" style="opacity: .6;">
-                        <i class="bi bi-hourglass-split"></i>
-                        <span class="sidebar-text">Menunggu Persetujuan</span>
-                    </a>
-
-                    {{-- ========================================= --}}
-                    {{-- CASE 3: DITOLAK --}}
-                    {{-- ========================================= --}}
-                @elseif ($pengajuan->status === 'rejected')
-                    <a class="nav-link" href="{{ route('pengajuan.index') }}">
-                        <i class="bi bi-x-circle"></i>
-                        <span class="sidebar-text">Ditolak (Ajukan Lagi)</span>
-                    </a>
-
-                    {{-- ========================================= --}}
-                    {{-- CASE 4: APPROVED --}}
-                    {{-- ========================================= --}}
-                @elseif ($pengajuan->status === 'approved')
-                    {{-- Jika dia daftar MAGANG --}}
-                    @if ($pengajuan->jenis === 'magang')
-                        <a class="nav-link {{ request()->routeIs('mahasiswa.create') ? 'active' : '' }}"
-                            href="{{ route('mahasiswa.create') }}">
-                            <i class="bi bi-person-plus"></i>
-                            <span class="sidebar-text">Formulir Magang</span>
-                        </a>
-                    @endif
-
-                    {{-- Jika dia daftar PENELITIAN --}}
-                    @if ($pengajuan->jenis === 'pra_penelitian')
-                        <a class="nav-link {{ request()->routeIs('pra-penelitian.create') ? 'active' : '' }}"
-                            href="{{ route('pra-penelitian.create') }}">
-                            <i class="bi bi-journal-plus"></i>
-                            <span class="sidebar-text">Pra-Penelitian</span>
-                        </a>
-                    @endif
-
                 @endif
+
+                {{-- Akses Pra-Penelitian --}}
+                @if ($hasPraAccess)
+                    <div class="sidebar-heading mt-2">
+                        <span class="sidebar-text">Aktivitas Penelitian</span>
+                    </div>
+                    <a class="nav-link {{ request()->routeIs('pra-penelitian.create') ? 'active' : '' }}"
+                        href="{{ route('pra-penelitian.create') }}">
+                        <i class="bi bi-journal-check"></i>
+                        <span class="sidebar-text">Data Pra-Penelitian</span>
+                    </a>
+                @endif
+
             @endif
 
         </nav>
     </div>
 
-    {{-- User Profile di Bawah --}}
+    {{-- User Profile di Bawah (Tetap sama) --}}
     <div class="p-3 sidebar-user-profile">
         <a class="nav-link logout-link" href="#"
             onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
@@ -649,32 +642,32 @@
     }
 
     .sidebar.collapsed .sidebar-user-profile .sidebar-text,
-.sidebar.collapsed .sidebar-user-profile .logout-divider {
-    display: none;
-}
+    .sidebar.collapsed .sidebar-user-profile .logout-divider {
+        display: none;
+    }
 
-.sidebar.collapsed .sidebar-user-profile .logout-link {
-    justify-content: center;
-}
+    .sidebar.collapsed .sidebar-user-profile .logout-link {
+        justify-content: center;
+    }
 
-.sidebar.collapsed .sidebar-user-profile .logout-link .sidebar-text {
-    display: none;
-}
+    .sidebar.collapsed .sidebar-user-profile .logout-link .sidebar-text {
+        display: none;
+    }
 
-.logout-link {
-    padding: 0.5rem;
-    color: var(--sidebar-text-color);
-    font-weight: 500;
-    margin-bottom: 0.5rem;
-}
+    .logout-link {
+        padding: 0.5rem;
+        color: var(--sidebar-text-color);
+        font-weight: 500;
+        margin-bottom: 0.5rem;
+    }
 
-.logout-link:hover {
-    background: var(--sidebar-pill-hover);
-    color: var(--sidebar-text-active);
-}
+    .logout-link:hover {
+        background: var(--sidebar-pill-hover);
+        color: var(--sidebar-text-active);
+    }
 
-.logout-divider {
-    border-color: rgba(255, 255, 255, 0.1);
-    margin: 0.5rem 0 1rem;
-}
+    .logout-divider {
+        border-color: rgba(255, 255, 255, 0.1);
+        margin: 0.5rem 0 1rem;
+    }
 </style>

@@ -236,11 +236,12 @@
                         <p class="welcome-text">
                             Senang bertemu dengan Anda kembali. Sistem siap membantu aktivitas Anda hari ini. 
                             Silakan akses menu yang tersedia pada <strong>sidebar</strong> di sebelah kiri untuk memulai.
+                            Atau gunakan tombol aksi cepat di bawah ini.
                         </p>
                         
                         <!-- Tombol Aksi Cepat (Opsional) -->
                         <div class="d-flex gap-3 flex-wrap">
-                            <a href="#" class="btn-welcome">
+                            <a href="{{ route('pengajuan.index') }}" class="btn-welcome">
                                 Mulai Jelajahi <i class="bi bi-arrow-right"></i>
                             </a>
                         </div>

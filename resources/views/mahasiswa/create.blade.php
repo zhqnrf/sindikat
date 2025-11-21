@@ -1,4 +1,4 @@
-@extends('layouts.app')
+@extends('layouts.public')
 
 @section('title', 'Tambah Mahasiswa')
 @section('page-title', 'Tambah Mahasiswa')
@@ -262,7 +262,7 @@
         </div>
 
         <div class="d-flex justify-content-between align-items-center pt-3">
-            <a href="{{ route('mahasiswa.index') }}" class="btn btn-light-custom shadow-sm">
+            <a href="{{ route('dashboard') }}" class="btn btn-light-custom shadow-sm">
                 <i class="bi bi-arrow-left me-2"></i> Kembali
             </a>
             <button type="submit" class="btn btn-maroon" id="submit-btn">

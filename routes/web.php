@@ -11,6 +11,7 @@ use App\Http\Controllers\AbsensiController;
 use App\Http\Controllers\NoteController;
 use App\Http\Controllers\SuratBalasanController;
 use App\Http\Controllers\MouController;
+use App\Http\Controllers\PengajuanController;
 use App\Http\Controllers\UserController;
 
 /*
@@ -35,21 +36,30 @@ Route::middleware(['auth'])->group(function () {
     // Dashboard
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
-    // --- MAHASISWA (Akses User) ---
-    Route::prefix('mahasiswa')->name('mahasiswa.')->group(function () {
-        // Form & Action
-        Route::get('/create', [MahasiswaController::class, 'create'])->name('create');
-        Route::post('/', [MahasiswaController::class, 'store'])->name('store');
-        
-        // Helper Routes (AJAX untuk Form) - PENTING: Harus bisa diakses User
-        Route::get('/ruangan-info/{id}', [MahasiswaController::class, 'getRuanganInfo'])->name('ruangan.info');
-        Route::get('/search/universitas', [MahasiswaController::class, 'searchUniversitas'])->name('search.universitas');
+    // Pengajuan Routes
+    Route::prefix('pengajuan')->name('pengajuan.')->group(function () {
+        Route::get('/', [PengajuanController::class, 'index'])->name('index');
+        Route::post('/pra', [PengajuanController::class, 'ajukanPra'])->name('pra');
+        Route::post('/magang', [PengajuanController::class, 'ajukanMagang'])->name('magang');
     });
 
-    // --- PRA-PENELITIAN (Akses User) ---
-    Route::prefix('pra-penelitian')->name('pra-penelitian.')->group(function () {
-        Route::get('/create', [PraPenelitianController::class, 'create'])->name('create');
-        Route::post('/', [PraPenelitianController::class, 'store'])->name('store');
+    // access after approval
+    Route::middleware(['auth', 'pra'])->group(function () {
+        Route::prefix('pra-penelitian')->name('pra-penelitian.')->group(function () {
+            Route::get('/create', [PraPenelitianController::class, 'create'])->name('create');
+            Route::post('/', [PraPenelitianController::class, 'store'])->name('store');
+        });
+    });
+
+    Route::middleware(['auth', 'magang'])->group(function () {
+        Route::prefix('mahasiswa')->name('mahasiswa.')->group(function () {
+            Route::get('/create', [MahasiswaController::class, 'create'])->name('create');
+            Route::post('/', [MahasiswaController::class, 'store'])->name('store');
+
+            // Helper Routes (AJAX untuk Form) - PENTING: Harus bisa diakses User
+            Route::get('/ruangan-info/{id}', [MahasiswaController::class, 'getRuanganInfo'])->name('ruangan.info');
+            Route::get('/search/universitas', [MahasiswaController::class, 'searchUniversitas'])->name('search.universitas');
+        });
     });
 
     // --- SERTIFIKAT & ABSENSI (Public/Shared) ---
@@ -62,6 +72,13 @@ Route::middleware(['auth'])->group(function () {
 // 2. ROUTES KHUSUS ADMIN
 // =========================================================================
 Route::middleware(['auth', 'admin'])->group(function () {
+    
+    // Pengajuan Routes Admin
+    Route::prefix('admin/pengajuan')->name('admin.pengajuan.')->group(function () {
+        Route::get('/', [PengajuanController::class, 'adminIndex'])->name('index');
+        Route::post('/{pengajuan}/approve', [PengajuanController::class, 'approve'])->name('approve');
+        Route::post('/{pengajuan}/reject', [PengajuanController::class, 'reject'])->name('reject');
+    });
 
     // Mahasiswa (Admin Features)
     Route::prefix('mahasiswa')->name('mahasiswa.')->group(function () {
@@ -69,7 +86,6 @@ Route::middleware(['auth', 'admin'])->group(function () {
         Route::post('/import-excel', [MahasiswaController::class, 'importExcel'])->name('import_excel');
         Route::get('/export', [MahasiswaController::class, 'export'])->name('export');
         Route::get('/links', [MahasiswaController::class, 'copyLinks'])->name('links');
-        
         Route::get('/{id}/sertifikat/summary', [MahasiswaController::class, 'showSertifikatSummary'])->name('sertifikat.summary');
         Route::get('/{mahasiswa}', [MahasiswaController::class, 'show'])->name('show');
         Route::get('/{mahasiswa}/edit', [MahasiswaController::class, 'edit'])->name('edit');

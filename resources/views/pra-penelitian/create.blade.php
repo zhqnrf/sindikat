@@ -407,6 +407,10 @@
                                 <i class="fas fa-save"></i>
                                 Simpan Pengajuan
                             </button>
+                            <a href="{{ route('dashboard') }}" class="btn-secondary-custom">
+                                <i class="fas fa-arrow-left"></i>
+                                Kembali
+                            </a>
                         </div>
                     </form>
                 </div>

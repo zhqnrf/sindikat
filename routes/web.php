@@ -22,6 +22,14 @@ use App\Http\Controllers\UserController;
 
 Route::get('/', fn() => redirect()->route('login'));
 
+// Public Pelatihan Routes
+Route::get('/cek-data-pelatihan', [PelatihanController::class, 'publicIndex'])
+    ->name('public.pelatihan.index');
+Route::get('/input-data-pelatihan', [PelatihanController::class, 'publicCreate'])
+    ->name('public.pelatihan.create');
+Route::post('/input-data-pelatihan', [PelatihanController::class, 'publicStore'])
+    ->name('public.pelatihan.store');
+
 // Authentication
 Route::get('/login', [AuthController::class, 'showLoginForm'])->name('login');
 Route::post('/register', [AuthController::class, 'register'])->name('register.post');
@@ -36,12 +44,23 @@ Route::middleware(['auth'])->group(function () {
     // Dashboard
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
-    // Pengajuan Routes
+    // Pengajuan Routes (User mengajukan pra-penelitian atau magang)
     Route::prefix('pengajuan')->name('pengajuan.')->group(function () {
         Route::get('/', [PengajuanController::class, 'index'])->name('index');
         Route::post('/pra', [PengajuanController::class, 'ajukanPra'])->name('pra');
         Route::post('/magang', [PengajuanController::class, 'ajukanMagang'])->name('magang');
     });
+
+    // --- MAHASISWA (Akses User setelah approved magang) ---
+    Route::middleware(['magang'])->group(function () {
+        Route::prefix('mahasiswa')->name('mahasiswa.')->group(function () {
+            Route::get('/create', [MahasiswaController::class, 'create'])->name('create');
+            Route::post('/', [MahasiswaController::class, 'store'])->name('store');
+            Route::get('/ruangan-info/{id}', [MahasiswaController::class, 'getRuanganInfo'])->name('ruangan.info');
+            Route::get('/search/universitas', [MahasiswaController::class, 'searchUniversitas'])->name('search.universitas');
+        });
+    });
+
 
     // access after approval
     Route::middleware(['auth', 'pra'])->group(function () {

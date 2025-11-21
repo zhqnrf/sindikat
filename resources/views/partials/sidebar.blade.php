@@ -117,6 +117,11 @@
                             <span class="sidebar-text">List Pelatihan</span>
                         </a>
                     </div>
+                    <div class="collapse sub-menu {{ $isPelatihanActive ? 'show' : '' }}" id="menuPelatihan">
+                        <a class="nav-link {{ request()->is('pelatihan') ? 'active' : '' }}" href="{{ route('public.pelatihan.index') }}">
+                            <span class="sidebar-text">Search Pelatihan</span>
+                        </a>
+                    </div>
                 </div>
 
                 {{-- 6. Penelitian --}}
@@ -644,32 +649,32 @@
     }
 
     .sidebar.collapsed .sidebar-user-profile .sidebar-text,
-    .sidebar.collapsed .sidebar-user-profile .logout-divider {
-        display: none;
-    }
+.sidebar.collapsed .sidebar-user-profile .logout-divider {
+    display: none;
+}
 
-    .sidebar.collapsed .sidebar-user-profile .logout-link {
-        justify-content: center;
-    }
+.sidebar.collapsed .sidebar-user-profile .logout-link {
+    justify-content: center;
+}
 
-    .sidebar.collapsed .sidebar-user-profile .logout-link .sidebar-text {
-        display: none;
-    }
+.sidebar.collapsed .sidebar-user-profile .logout-link .sidebar-text {
+    display: none;
+}
 
-    .logout-link {
-        padding: 0.5rem;
-        color: var(--sidebar-text-color);
-        font-weight: 500;
-        margin-bottom: 0.5rem;
-    }
+.logout-link {
+    padding: 0.5rem;
+    color: var(--sidebar-text-color);
+    font-weight: 500;
+    margin-bottom: 0.5rem;
+}
 
-    .logout-link:hover {
-        background: var(--sidebar-pill-hover);
-        color: var(--sidebar-text-active);
-    }
+.logout-link:hover {
+    background: var(--sidebar-pill-hover);
+    color: var(--sidebar-text-active);
+}
 
-    .logout-divider {
-        border-color: rgba(255, 255, 255, 0.1);
-        margin: 0.5rem 0 1rem;
-    }
+.logout-divider {
+    border-color: rgba(255, 255, 255, 0.1);
+    margin: 0.5rem 0 1rem;
+}
 </style>

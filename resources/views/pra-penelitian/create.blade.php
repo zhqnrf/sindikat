@@ -5,7 +5,6 @@
 
 @section('content')
     <style>
-        /* Mengambil semua style dari form Pelatihan */
         :root {
             --custom-maroon: #7c1316;
             --custom-maroon-light: #a3191d;
@@ -16,6 +15,7 @@
             --transition: 0.3s ease;
         }
 
+        /* --- Card Styling --- */
         .form-card {
             border: none;
             border-radius: var(--card-radius);
@@ -31,12 +31,7 @@
             border-bottom: 4px solid var(--custom-maroon-light);
         }
 
-        .card-header-title {
-            font-size: 1.3rem;
-            font-weight: 700;
-            margin: 0;
-        }
-
+        /* --- Form Styling --- */
         .form-label {
             font-weight: 600;
             color: var(--text-dark);
@@ -44,67 +39,62 @@
             margin-bottom: 0.5rem;
         }
 
+        /* Input Group Style (Konsisten) */
         .input-group-text {
             background-color: #f8f9fa;
             border-right: none;
             color: var(--custom-maroon);
             border-top-left-radius: 10px;
             border-bottom-left-radius: 10px;
+            border-color: #dee2e6;
         }
 
         .form-control,
-        .form-select,
-        textarea.form-control {
+        .form-select {
             border-left: none;
             border-radius: 0 10px 10px 0;
             padding: 0.7rem 1rem;
             border-color: #dee2e6;
             box-shadow: none !important;
             transition: border-color 0.2s;
-            font-family: inherit;
-        }
-
-        /* Perbaikan untuk input yang tidak pakai input-group */
-        .form-control[type="date"] {
-            border-left: 1px solid #dee2e6;
-            border-radius: 10px;
-        }
-
-        .input-group .form-control[type="date"] {
-            border-left: none;
-            /* Kembali ke style group */
-            border-radius: 0 10px 10px 0;
+            color: var(--text-dark);
         }
 
         .form-control:focus,
-        .form-select:focus,
-        textarea.form-control:focus {
+        .form-select:focus {
             border-color: var(--custom-maroon-light);
-            box-shadow: 0 0 0 0.2rem rgba(124, 19, 22, 0.1) !important;
         }
 
-        .form-group {
+        /* --- Dynamic Section (Mahasiswa & Dosen) --- */
+        .dynamic-section {
+            background-color: #fff;
+            border: 2px dashed #e9ecef;
+            border-radius: 12px;
+            padding: 1.5rem;
             margin-bottom: 1.5rem;
+            position: relative;
+            transition: border-color 0.3s;
         }
 
-        .error-message {
-            color: #dc3545;
-            font-size: 0.85rem;
-            margin-top: 0.3rem;
+        .dynamic-section:hover {
+            border-color: var(--custom-maroon-light);
         }
 
-        .form-row-custom {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 1.5rem;
+        .section-badge {
+            position: absolute;
+            top: -12px;
+            left: 20px;
+            background: var(--custom-maroon);
+            color: white;
+            padding: 2px 12px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
         }
 
-        @media (max-width: 768px) {
-            .form-row-custom {
-                grid-template-columns: 1fr;
-            }
-        }
-
+        /* --- Buttons --- */
         .btn-maroon {
             background-color: var(--custom-maroon);
             color: white;
@@ -122,139 +112,82 @@
             color: white;
         }
 
-        .btn-secondary-custom {
+        .btn-light-custom {
+            background: #fff;
+            border: 1px solid #dee2e6;
+            color: var(--text-dark);
+            border-radius: 50px;
+            padding: 0.8rem 1.5rem;
+            font-weight: 600;
+        }
+
+        .btn-light-custom:hover {
+            background: #f8f9fa;
+            color: var(--custom-maroon);
+        }
+
+        .btn-add-row {
             background: #e9ecef;
             color: var(--text-dark);
             border: none;
-            padding: 0.8rem 2rem;
-            border-radius: 50px;
+            border-radius: 8px;
+            padding: 5px 12px;
+            font-size: 0.85rem;
             font-weight: 600;
             transition: var(--transition);
-            display: inline-block;
-            text-decoration: none;
         }
 
-        .btn-secondary-custom:hover {
-            background: #dee2e6;
-            color: var(--text-dark);
-        }
-
-        .button-group {
-            display: flex;
-            gap: 1rem;
-            justify-content: flex-start;
-            margin-top: 2rem;
-        }
-
-        .card-body-custom {
-            padding: 2rem;
-        }
-
-        .info-box {
-            background: var(--custom-maroon-subtle);
-            border: 1px dashed var(--custom-maroon-light);
-            border-radius: 10px;
-            padding: 1rem;
-            margin-bottom: 1.5rem;
-            font-size: 0.9rem;
-            color: var(--text-dark);
-        }
-
-        .info-box i {
-            margin-right: 0.5rem;
-            color: var(--custom-maroon);
-        }
-
-        /* Meniru style section dinamis */
-        .dynamic-section {
-            background: #f8f9fa;
-            border: 2px dashed var(--custom-maroon);
-            border-radius: 10px;
-            padding: 1.5rem;
-            margin-bottom: 1.5rem;
-        }
-
-        .dynamic-section-title {
-            font-weight: 700;
-            color: var(--custom-maroon);
-            margin-bottom: 1rem;
-            font-size: 1rem;
-        }
-
-        /* --- [BARU] Style untuk tombol Tambah/Hapus Mahasiswa --- */
-        #tambah-mahasiswa {
+        .btn-add-row:hover {
             background: var(--custom-maroon);
             color: white;
-            border: none;
-            border-radius: 5px;
-            padding: 0.5rem 1rem;
-            font-size: 0.9rem;
+        }
+
+        .btn-delete-row {
+            width: 40px;
+            height: 40px;
+            border-radius: 8px;
+            border: 1px solid #fee2e2;
+            background: #fff;
+            color: #dc2626;
+            display: flex;
+            align-items: center;
+            justify-content: center;
             transition: var(--transition);
         }
 
-        #tambah-mahasiswa:hover {
-            background: var(--custom-maroon-light);
-        }
-
-        .hapus-mahasiswa {
-            background: #e74c3c;
+        .btn-delete-row:hover {
+            background: #dc2626;
             color: white;
-            border: none;
-            border-radius: 5px;
-            width: 38px;
-            height: 38px;
-            line-height: 38px;
-            /* Disesuaikan agar pas */
-            text-align: center;
-            padding: 0;
-            transition: var(--transition);
         }
 
-        .hapus-mahasiswa:hover {
-            background: #c0392b;
+        /* Animation */
+        .animate-up {
+            animation: fadeInUp 0.6s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+            opacity: 0;
+            transform: translateY(20px);
         }
 
-        /* --- [BARU] Override style input di dalam list mahasiswa --- */
-        #mahasiswa-list .form-control {
-            border-left: 1px solid #dee2e6;
-            /* Reset border */
-            border-radius: 10px;
-            /* Radius penuh */
-        }
-
-        #mahasiswa-list .input-group .form-control {
-            border-left: none;
-            /* Khusus no telpon */
-            border-radius: 0 10px 10px 0;
-        }
-
-        #mahasiswa-list .input-group-text {
-            /* Style +62 disamakan */
-            background-color: #f8f9fa;
-            border-right: none;
-            color: var(--custom-maroon);
-            border-top-left-radius: 10px;
-            border-bottom-left-radius: 10px;
+        @keyframes fadeInUp {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
     </style>
 
-    <div class="row justify-content-center">
-        <div class="col-lg-10"> {{-- Dibuat sedikit lebih lebar untuk form ini --}}
+    <div class="row justify-content-center animate-up">
+        <div class="col-lg-10">
             <div class="form-card">
                 <div class="card-header-custom">
-                    <h2 class="card-header-title">
-                        <i class="fas fa-plus-circle"></i>
-                        Tambah Pengajuan Pra Penelitian
-                    </h2>
+                    <h4 class="mb-0 fw-bold"><i class="bi bi-journal-plus me-2"></i> Tambah Pengajuan Pra Penelitian</h4>
+                    <p class="mb-0 small opacity-75">Isi formulir di bawah ini dengan data yang valid.</p>
                 </div>
 
-                <div class="card-body-custom">
+                <div class="card-body p-4 p-md-5">
 
-                    {{-- Tampilkan error validasi (Style Baru) --}}
                     @if ($errors->any())
-                        <div class="alert alert-danger" role="alert">
-                            <strong>Terjadi kesalahan!</strong>
-                            <ul style="margin: 0.5rem 0 0 0;">
+                        <div class="alert alert-danger rounded-3 shadow-sm mb-4">
+                            <ul class="mb-0 small">
                                 @foreach ($errors->all() as $error)
                                     <li>{{ $error }}</li>
                                 @endforeach
@@ -262,41 +195,36 @@
                         </div>
                     @endif
 
-                    {{-- Info Box (Style Baru) --}}
-                    <div class="info-box">
-                        <i class="fas fa-info-circle"></i>
-                        Isi data penelitian dengan lengkap. Tambahkan minimal 1 mahasiswa untuk diajukan.
+                    {{-- Info Box --}}
+                    <div class="alert alert-light border-0 shadow-sm d-flex align-items-center mb-4"
+                        style="background-color: var(--custom-maroon-subtle);">
+                        <i class="bi bi-info-circle-fill text-custom-maroon me-3 fs-4"></i>
+                        <div class="small text-muted">
+                            Pastikan Anda telah membaca panduan pengajuan. Semua field bertanda <span
+                                class="text-danger">*</span> wajib diisi.
+                        </div>
                     </div>
 
-                    <form action="{{ route('pra-penelitian.store') }}" method="POST">
+                    <form action="{{ route('pra-penelitian.store') }}" method="POST" enctype="multipart/form-data">
                         @csrf
 
-                        {{-- Data Penelitian Utama (Style Baru) --}}
-                        <div class="form-row-custom">
-                            <div class="form-group">
-                                <label for="judul" class="form-label">
-                                    <i class="fas fa-file-alt"></i> Judul Pra Penelitian
-                                </label>
+                        {{-- 1. DATA PENELITIAN --}}
+                        <div class="row g-3 mb-4">
+                            <div class="col-12">
+                                <label class="form-label">Judul Pra Penelitian <span class="text-danger">*</span></label>
                                 <div class="input-group">
-                                    <span class="input-group-text"><i class="fas fa-file-alt"></i></span>
-                                    <input type="text" class="form-control @error('judul') is-invalid @enderror"
-                                        id="judul" name="judul" value="{{ old('judul') }}"
-                                        placeholder="Masukkan judul" required>
+                                    <span class="input-group-text"><i class="bi bi-type-h1"></i></span>
+                                    <input type="text" name="judul" class="form-control" value="{{ old('judul') }}"
+                                        placeholder="Masukkan judul penelitian..." required>
                                 </div>
-                                @error('judul')
-                                    <div class="error-message">{{ $message }}</div>
-                                @enderror
                             </div>
 
-                            <div class="form-group">
-                                <label for="mou_id" class="form-label">
-                                    <i class="fas fa-university"></i> Universitas (MOU)
-                                </label>
+                            <div class="col-md-6">
+                                <label class="form-label">Universitas <span class="text-danger">*</span></label>
                                 <div class="input-group">
-                                    <span class="input-group-text"><i class="fas fa-university"></i></span>
-                                    <select name="mou_id" id="mou_id"
-                                        class="form-select @error('mou_id') is-invalid @enderror" required>
-                                        <option value="">Pilih Universitas</option>
+                                    <span class="input-group-text"><i class="bi bi-building"></i></span>
+                                    <select name="mou_id" class="form-select" required>
+                                        <option value="">-- Pilih Universitas --</option>
                                         @foreach ($mous as $mou)
                                             <option value="{{ $mou->id }}"
                                                 {{ old('mou_id') == $mou->id ? 'selected' : '' }}>
@@ -306,139 +234,219 @@
                                         @endforeach
                                     </select>
                                 </div>
-                                @error('mou_id')
-                                    <div class="error-message">{{ $message }}</div>
-                                @enderror
                             </div>
-                        </div>
 
-                        <div class="form-row-custom">
-                            <div class="form-group">
-                                <label for="jenis_penelitian" class="form-label">
-                                    <i class="fas fa-tasks"></i> Jenis Penelitian
-                                </label>
+                            <div class="col-md-6">
+                                <label class="form-label">Jenis Penelitian <span class="text-danger">*</span></label>
                                 <div class="input-group">
-                                    <span class="input-group-text"><i class="fas fa-tasks"></i></span>
-                                    <select name="jenis_penelitian" id="jenis_penelitian"
-                                        class="form-select @error('jenis_penelitian') is-invalid @enderror" required>
+                                    <span class="input-group-text"><i class="bi bi-grid"></i></span>
+                                    <select name="jenis_penelitian" class="form-select" required>
                                         <option value="Data Awal"
                                             {{ old('jenis_penelitian') == 'Data Awal' ? 'selected' : '' }}>Data Awal
                                         </option>
                                         <option value="Uji Validitas"
-                                            {{ old('jenis_penelitian') == 'Uji Validitas' ? 'selected' : '' }}>Uji
-                                            Validitas</option>
+                                            {{ old('jenis_penelitian') == 'Uji Validitas' ? 'selected' : '' }}>Uji Validitas
+                                        </option>
                                         <option value="Penelitian"
                                             {{ old('jenis_penelitian') == 'Penelitian' ? 'selected' : '' }}>Penelitian
                                         </option>
                                     </select>
                                 </div>
-                                @error('jenis_penelitian')
-                                    <div class="error-message">{{ $message }}</div>
-                                @enderror
-                            </div>
-
-                            <div class="form-group">
-                                <label for="tanggal_mulai" class="form-label">
-                                    <i class="fas fa-calendar-alt"></i> Tanggal Mulai Penelitian
-                                </label>
-                                {{-- Input date tidak perlu input-group jika tidak ada ikon di dalam --}}
-                                <input type="date" class="form-control @error('tanggal_mulai') is-invalid @enderror"
-                                    id="tanggal_mulai" name="tanggal_mulai" value="{{ old('tanggal_mulai') }}" required>
-                                @error('tanggal_mulai')
-                                    <div class="error-message">{{ $message }}</div>
-                                @enderror
                             </div>
                         </div>
 
+                        <div class="row g-3 mb-4">
+                            <div class="col-md-6">
+                                <label class="form-label">Program Studi</label>
+                                <div class="input-group">
+                                    <span class="input-group-text"><i class="bi bi-book"></i></span>
+                                    <input type="text" name="prodi" class="form-control" value="{{ old('prodi') }}"
+                                        placeholder="Contoh: Psikologi" required>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Tanggal Mulai Penelitian</label>
+                                <div class="input-group">
+                                    <span class="input-group-text"><i class="bi bi-calendar-event"></i></span>
+                                    <input type="date" name="tanggal_mulai" class="form-control"
+                                        value="{{ old('tanggal_mulai') }}" required>
+                                </div>
+                            </div>
+                        </div>
 
-                        {{-- Data Mahasiswa Dinamis (Style Baru) --}}
+                        {{-- 2. DATA TAMBAHAN (BERKAS) --}}
+                        <div class="row g-3 mb-5">
+                            <div class="col-md-4">
+                                <label class="form-label">Tgl. Rencana Skripsi</label>
+                                <div class="input-group">
+                                    <span class="input-group-text"><i class="bi bi-calendar-check"></i></span>
+                                    <input type="date" name="tanggal_rencana_skripsi" class="form-control"
+                                        value="{{ old('tanggal_rencana_skripsi') }}" required>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label">Upload Kerangka (PDF)</label>
+                                <div class="input-group">
+                                    <span class="input-group-text"><i class="bi bi-file-earmark-pdf"></i></span>
+                                    <input type="file" name="kerangka_penelitian" class="form-control"
+                                        accept="application/pdf" required>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label">Surat Pengantar (PDF)</label>
+                                <div class="input-group">
+                                    <span class="input-group-text"><i class="bi bi-envelope-paper"></i></span>
+                                    <input type="file" name="surat_pengantar" class="form-control"
+                                        accept="application/pdf" required>
+                                </div>
+                            </div>
+                        </div>
+
+                        {{-- 3. SECTION DATA MAHASISWA --}}
                         <div class="dynamic-section">
-                            <div class="dynamic-section-title d-flex justify-content-between align-items-center">
-                                <span><i class="fas fa-users"></i> Data Mahasiswa</span>
-                                <button type="button" id="tambah-mahasiswa" class="btn-sm">
-                                    <i class="fas fa-plus"></i> Tambah Mahasiswa
+                            <span class="section-badge">Data Mahasiswa</span>
+
+                            <div class="d-flex justify-content-end mb-3">
+                                <button type="button" id="tambah-mahasiswa" class="btn-add-row">
+                                    <i class="bi bi-plus-lg"></i> Tambah Anggota
                                 </button>
                             </div>
 
+                            {{-- Header Tabel (Desktop Only) --}}
+                            <div class="row g-3 mb-2 d-none d-md-flex px-2 text-muted fw-bold small text-uppercase">
+                                <div class="col-md-4">Nama Mahasiswa</div>
+                                <div class="col-md-4">No. WhatsApp</div>
+                                <div class="col-md-3">Jenjang (S1/D3)</div>
+                                <div class="col-md-1 text-center">Aksi</div>
+                            </div>
+
                             <div id="mahasiswa-list">
-                                <div class="row g-3 mb-2 d-none d-md-flex"
-                                    style="font-weight: 600; font-size: 0.9rem; color: var(--text-dark);">
-                                    <div class="col-md-4">Nama Mahasiswa</div>
-                                    <div class="col-md-4">No. Telpon (+62)</div>
-                                    <div class="col-md-3">Jenjang</div>
-                                    <div class="col-md-1">Aksi</div>
-                                </div>
-
-                                <hr class="d-none d-md-block mt-0 mb-3">
-
-                                <div class="row g-3 mb-2 align-items-center mahasiswa-row">
+                                {{-- Baris Pertama (Default) --}}
+                                <div class="row g-3 mb-3 align-items-center mahasiswa-row">
                                     <div class="col-md-4">
-                                        <input type="text" name="mahasiswas[0][nama]" class="form-control"
-                                            placeholder="Nama Mahasiswa" required>
+                                        <div class="input-group">
+                                            <span class="input-group-text"><i class="bi bi-person"></i></span>
+                                            <input type="text" name="mahasiswas[0][nama]" class="form-control"
+                                                placeholder="Nama Lengkap" required>
+                                        </div>
                                     </div>
-
                                     <div class="col-md-4">
                                         <div class="input-group">
                                             <span class="input-group-text">+62</span>
                                             <input type="tel" name="mahasiswas[0][no_telpon]" class="form-control"
-                                                placeholder="812XXXXXXX" required>
+                                                placeholder="812xxxx" required>
                                         </div>
                                     </div>
-
                                     <div class="col-md-3">
-                                        <input type="text" name="mahasiswas[0][jenjang]" class="form-control"
-                                            placeholder="S1/D3/S2" required>
+                                        <div class="input-group">
+                                            <span class="input-group-text"><i class="bi bi-mortarboard"></i></span>
+                                            <input type="text" name="mahasiswas[0][jenjang]" class="form-control"
+                                                placeholder="S1" required>
+                                        </div>
                                     </div>
-
-                                    <div class="col-md-1">
-                                        <button type="button" class="hapus-mahasiswa">
-                                            <i class="fas fa-trash"></i>
+                                    <div class="col-md-1 text-center">
+                                        <button type="button" class="btn-delete-row hapus-mahasiswa">
+                                            <i class="bi bi-trash"></i>
                                         </button>
                                     </div>
                                 </div>
                             </div>
-
                         </div>
 
+                        {{-- 4. SECTION DOSEN PEMBIMBING --}}
+                        <div class="dynamic-section">
+                            <span class="section-badge">Dosen Pembimbing</span>
 
-                        {{-- Tombol Submit (Style Baru) --}}
-                        <div class="button-group">
-                            <button type="submit" class="btn-maroon">
-                                <i class="fas fa-save"></i>
-                                Simpan Pengajuan
-                            </button>
-                            <a href="{{ route('dashboard') }}" class="btn-secondary-custom">
-                                <i class="fas fa-arrow-left"></i>
-                                Kembali
+                            <div class="row g-3 mt-1">
+                                {{-- Dosen 1 --}}
+                                <div class="col-md-6">
+                                    <div class="p-3 bg-light rounded-3 border">
+                                        <h6 class="fw-bold text-dark mb-3"><i
+                                                class="bi bi-1-circle-fill text-secondary me-2"></i> Pembimbing 1</h6>
+                                        <div class="mb-3">
+                                            <label class="small text-muted fw-bold">Nama Lengkap</label>
+                                            <div class="input-group">
+                                                <span class="input-group-text"><i class="bi bi-person-badge"></i></span>
+                                                <input type="text" name="dosen1_nama" class="form-control" required>
+                                            </div>
+                                        </div>
+                                        <div>
+                                            <label class="small text-muted fw-bold">Nomor HP</label>
+                                            <div class="input-group">
+                                                <span class="input-group-text">+62</span>
+                                                <input type="tel" name="dosen1_hp" class="form-control" required>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {{-- Dosen 2 --}}
+                                <div class="col-md-6">
+                                    <div class="p-3 bg-light rounded-3 border">
+                                        <h6 class="fw-bold text-dark mb-3"><i
+                                                class="bi bi-2-circle-fill text-secondary me-2"></i> Pembimbing 2</h6>
+                                        <div class="mb-3">
+                                            <label class="small text-muted fw-bold">Nama Lengkap</label>
+                                            <div class="input-group">
+                                                <span class="input-group-text"><i class="bi bi-person-badge"></i></span>
+                                                <input type="text" name="dosen2_nama" class="form-control" required>
+                                            </div>
+                                        </div>
+                                        <div>
+                                            <label class="small text-muted fw-bold">Nomor HP</label>
+                                            <div class="input-group">
+                                                <span class="input-group-text">+62</span>
+                                                <input type="tel" name="dosen2_hp" class="form-control" required>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        {{-- Footer Action --}}
+                        <div class="d-flex justify-content-between align-items-center pt-3">
+                            <a href="{{ route('dashboard') }}" class="btn btn-light-custom shadow-sm">
+                                <i class="bi bi-arrow-left me-2"></i> Kembali
                             </a>
+                            <button type="submit" class="btn btn-maroon">
+                                Simpan Pengajuan <i class="bi bi-check-lg ms-2"></i>
+                            </button>
                         </div>
+
                     </form>
                 </div>
             </div>
         </div>
     </div>
 
-    {{-- Template untuk baris baru (disembunyikan) --}}
+    {{-- TEMPLATE ROW JS --}}
     <template id="mahasiswa-template">
-        <div class="row g-3 mb-2 align-items-center mahasiswa-row">
+        <div class="row g-3 mb-3 align-items-center mahasiswa-row animate-up" style="animation-duration: 0.3s;">
             <div class="col-md-4">
-                <input type="text" name="mahasiswas[INDEX][nama]" class="form-control" placeholder="Nama Mahasiswa"
-                    required>
+                <div class="input-group">
+                    <span class="input-group-text"><i class="bi bi-person"></i></span>
+                    <input type="text" name="mahasiswas[INDEX][nama]" class="form-control" placeholder="Nama Lengkap"
+                        required>
+                </div>
             </div>
             <div class="col-md-4">
                 <div class="input-group">
                     <span class="input-group-text">+62</span>
-                    <input type="tel" name="mahasiswas[INDEX][no_telpon]" class="form-control" placeholder="812XXXXXXX"
+                    <input type="tel" name="mahasiswas[INDEX][no_telpon]" class="form-control" placeholder="812xxxx"
                         required>
                 </div>
             </div>
             <div class="col-md-3">
-                <input type="text" name="mahasiswas[INDEX][jenjang]" class="form-control"
-                    placeholder="S1/D3/S2" required>
+                <div class="input-group">
+                    <span class="input-group-text"><i class="bi bi-mortarboard"></i></span>
+                    <input type="text" name="mahasiswas[INDEX][jenjang]" class="form-control" placeholder="S1"
+                        required>
+                </div>
             </div>
-            <div class="col-md-1">
-                <button type="button" class="hapus-mahasiswa">
-                    <i class="fas fa-trash"></i>
+            <div class="col-md-1 text-center">
+                <button type="button" class="btn-delete-row hapus-mahasiswa">
+                    <i class="bi bi-trash"></i>
                 </button>
             </div>
         </div>
@@ -447,79 +455,62 @@
 @endsection
 
 @section('scripts')
-    {{-- Memasukkan SweetAlert untuk konfirmasi hapus baris --}}
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-
-    {{-- SCRIPT ASLI ANDA UNTUK LOGIKA DINAMIS (PENTING) --}}
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             const list = document.getElementById('mahasiswa-list');
             const addButton = document.getElementById('tambah-mahasiswa');
             const template = document.getElementById('mahasiswa-template');
-            let index = {{ old('mahasiswas') ? count(old('mahasiswas')) : 1 }};
+            let index = 1; // Mulai dari 1 karena 0 sudah ada di HTML statis
 
-            // --- FUNGSI BARU UNTUK FORMATTING ---
+            // Format No HP
             function formatPhoneNumber(input) {
-                let value = input.value;
-                if (value.startsWith('0')) {
-                    value = value.substring(1);
-                }
-                if (value.startsWith('+62')) {
-                    value = value.substring(3);
-                }
-                value = value.replace(/[^0-9]/g, '');
+                let value = input.value.replace(/[^0-9]/g, '');
+                if (value.startsWith('0')) value = value.substring(1);
+                if (value.startsWith('62')) value = value.substring(2);
                 input.value = value;
             }
 
-            // --- EVENT DELEGATION UNTUK INPUT BARU ---
+            // Event Listener untuk input HP (Delegation)
             list.addEventListener('input', function(e) {
                 if (e.target && e.target.name && e.target.name.includes('[no_telpon]')) {
                     formatPhoneNumber(e.target);
                 }
             });
 
-            // --- BERSIHKAN INPUT YANG SUDAH ADA (SAAT LOAD) ---
-            document.querySelectorAll('input[name*="[no_telpon]"]').forEach(function(input) {
-                formatPhoneNumber(input);
-            });
-
-            // --- KODE LAMA ANDA UNTUK TAMBAH BARIS ---
+            // Tambah Baris
             addButton.addEventListener('click', function() {
                 let newRowHtml = template.innerHTML.replace(/INDEX/g, index);
-                let newRow = document.createElement('div');
-                newRow.innerHTML = newRowHtml;
-                list.appendChild(newRow.firstElementChild);
+                // Gunakan DOMParser atau insertAdjacentHTML agar tidak merusak event listener yang ada
+                list.insertAdjacentHTML('beforeend', newRowHtml);
                 index++;
             });
 
-            // --- KODE LAMA ANDA UNTUK HAPUS BARIS (DENGAN SWEETALERT) ---
+            // Hapus Baris
             list.addEventListener('click', function(e) {
-                if (e.target && e.target.closest('.hapus-mahasiswa')) {
-
-                    if (list.getElementsByClassName('mahasiswa-row').length <= 1) {
+                const btn = e.target.closest('.hapus-mahasiswa');
+                if (btn) {
+                    if (list.querySelectorAll('.mahasiswa-row').length <= 1) {
                         Swal.fire({
                             icon: 'warning',
-                            title: 'Oops...',
+                            title: 'Tidak bisa menghapus',
                             text: 'Minimal harus ada 1 mahasiswa.',
                             confirmButtonColor: '#7c1316'
                         });
-                        return; // Jangan hapus
+                        return;
                     }
 
-                    // Tampilkan konfirmasi
                     Swal.fire({
                         title: 'Hapus baris ini?',
-                        text: "Data yang diisi akan hilang.",
                         icon: 'warning',
                         showCancelButton: true,
                         confirmButtonColor: '#7c1316',
-                        cancelButtonColor: '#6c757d',
+                        cancelButtonColor: 'grey',
                         confirmButtonText: 'Ya, hapus!',
                         cancelButtonText: 'Batal'
                     }).then((result) => {
                         if (result.isConfirmed) {
-                            e.target.closest('.mahasiswa-row').remove();
-                            // Tidak perlu alert 'Minimal 1' di sini lagi
+                            btn.closest('.mahasiswa-row').remove();
                         }
                     });
                 }

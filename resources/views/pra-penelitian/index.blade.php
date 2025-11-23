@@ -258,7 +258,7 @@
                             {{-- Asumsi kolom exp date di tabel MOU adalah 'tanggal_keluar' --}}
                             <td>{{ $item->mou->tanggal_keluar ? $item->mou->tanggal_keluar->format('d M Y') : 'N/A' }}</td>
                             <td>{{ $item->tanggal_mulai ? $item->tanggal_mulai->format('d M Y') : 'N/A' }}</td>
-                            <td class="text-center">{{ $item->mahasiswas_count }}</td>
+                            <td class="text-center">{{ $item->anggotas_count }}</td>
                             <td>
                                 {{-- Style badge disesuaikan --}}
                                 @php
@@ -295,7 +295,7 @@
                                 </form>
 
                                 {{-- Form untuk Batal (Disesuaikan) --}}
-                                @if ($item->status == 'Aktif')
+                                @if ($item->status == 'Pending')
                                     <form action="{{ route('pra-penelitian.batal', $item) }}" method="POST"
                                         class="d-inline batal-form">
                                         @csrf

@@ -9,6 +9,12 @@ class CheckPraPenelitian
 {
     public function handle($request, Closure $next)
     {
+        // Admin selalu boleh masuk
+        if (auth()->user()->role === 'admin') {
+            return $next($request);
+        }
+
+        // User biasa harus punya approve pra-penelitian
         $cek = Pengajuan::where('user_id', auth()->id())
             ->where('jenis', 'pra_penelitian')
             ->where('status', 'approved')
@@ -21,4 +27,3 @@ class CheckPraPenelitian
         return $next($request);
     }
 }
-

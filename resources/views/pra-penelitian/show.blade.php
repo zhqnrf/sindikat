@@ -10,336 +10,388 @@
             --custom-maroon-light: #a3191d;
             --custom-maroon-subtle: #fcf0f1;
             --text-dark: #2c3e50;
-            --text-muted: #95a5a6;
-            --card-radius: 12px;
+            --text-muted: #64748b;
+            --card-radius: 16px;
             --shadow-soft: 0 4px 20px rgba(0, 0, 0, 0.05);
             --transition: 0.3s ease;
         }
 
-        .header-section {
-            background: linear-gradient(135deg, var(--custom-maroon), var(--custom-maroon-light));
-            color: white;
+        /* --- Header --- */
+        .page-header-wrapper {
+            background: #fff;
             border-radius: var(--card-radius);
-            padding: 2rem;
-            margin-bottom: 2rem;
+            padding: 1.5rem;
             box-shadow: var(--shadow-soft);
-        }
-
-        .header-content {
+            margin-bottom: 2rem;
+            border-left: 5px solid var(--custom-maroon);
             display: flex;
             justify-content: space-between;
-            align-items: start;
-            gap: 2rem;
-            flex-wrap: wrap;
-        }
-
-        .header-title-group h1 {
-            font-size: 2rem;
-            font-weight: 700;
-            margin: 0 0 0.5rem 0;
-        }
-
-        .header-subtitle {
-            font-size: 0.95rem;
-            opacity: 0.9;
-        }
-
-        .header-actions {
-            display: flex;
-            gap: 1rem;
-            flex-wrap: wrap;
-        }
-
-        .btn-custom {
-            padding: 0.75rem 1.5rem;
-            border-radius: 8px;
-            text-decoration: none;
-            font-weight: 600;
-            transition: var(--transition);
-            display: inline-flex;
             align-items: center;
-            gap: 0.5rem;
-            border: none;
-            cursor: pointer;
-            font-size: 0.9rem;
+            flex-wrap: wrap;
+            gap: 1rem;
         }
 
-        .btn-edit {
-            background-color: #e3f2fd;
-            color: #1565c0;
-        }
-
-        .btn-edit:hover {
-            background-color: #bbdefb;
-        }
-
-        .btn-back {
-            background-color: rgba(255, 255, 255, 0.2);
-            color: white;
-            border: 1px solid rgba(255, 255, 255, 0.3);
-        }
-
-        .btn-back:hover {
-            background-color: rgba(255, 255, 255, 0.3);
-        }
-
+        /* --- Cards --- */
         .detail-card {
             background: #fff;
             border-radius: var(--card-radius);
             box-shadow: var(--shadow-soft);
-            margin-bottom: 2rem;
+            margin-bottom: 1.5rem;
+            border: none;
             overflow: hidden;
         }
 
-        .detail-card-header {
-            background-color: #f8f9fa;
-            border-bottom: 2px solid var(--custom-maroon);
+        .detail-header {
+            padding: 1.25rem 1.5rem;
+            border-bottom: 1px solid #f1f5f9;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .detail-header h5 {
+            margin: 0;
+            font-weight: 700;
+            color: var(--custom-maroon);
+            font-size: 1.1rem;
+        }
+
+        .detail-body {
             padding: 1.5rem;
         }
 
-        .detail-card-title {
-            font-size: 1.1rem;
-            font-weight: 700;
-            color: var(--custom-maroon);
-            margin: 0;
-        }
-
-        .detail-card-body {
-            padding: 2rem;
-        }
-
-        .detail-row {
-            display: grid;
-            grid-template-columns: 200px 1fr;
-            gap: 2rem;
-            margin-bottom: 1.5rem;
-            align-items: start;
-        }
-
-        @media (max-width: 768px) {
-            .detail-row {
-                grid-template-columns: 1fr;
-                gap: 0.5rem;
-            }
-        }
-
-        .detail-row:last-child {
-            margin-bottom: 0;
-        }
-
-        .detail-label {
+        /* --- Typography --- */
+        .label-text {
+            font-size: 0.8rem;
             font-weight: 600;
-            color: var(--text-dark);
-            font-size: 0.9rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 0.25rem;
         }
 
-        .detail-value {
+        .value-text {
+            font-size: 1rem;
             color: var(--text-dark);
-            font-size: 0.95rem;
+            font-weight: 500;
             line-height: 1.5;
         }
 
-        .detail-value.empty {
-            color: var(--text-muted);
-            font-style: italic;
-        }
-
-        /* Ini adalah style .pelatihan-badge dari target, kita gunakan untuk status */
-        .pelatihan-badge {
-            background-color: #e3f2fd;
-            color: #1565c0;
-            padding: 0.6rem 1rem;
-            border-radius: 8px;
-            font-size: 0.9rem;
-            display: inline-flex; /* Diubah agar pas */
-            width: auto; /* Diubah agar pas */
-            align-items: center;
-            gap: 0.5rem; /* Tambahan untuk ikon */
-        }
-
-        .divider {
-            border-bottom: 1px solid #e9ecef;
-            margin: 1.5rem 0;
-        }
-
-        /* Style untuk table (opsional, tapi agar lebih rapi) */
-        .table {
-            margin-bottom: 0;
-        }
-        .table thead th {
+        .main-title {
+            font-size: 1.4rem;
+            font-weight: 800;
             color: var(--text-dark);
-            font-weight: 600;
-            font-size: 0.9rem;
-            border-bottom-width: 2px;
+            line-height: 1.3;
         }
-        .table td, .table th {
-            vertical-align: middle;
+
+        /* --- File Cards --- */
+        .file-card {
+            display: flex;
+            align-items: center;
+            padding: 1rem;
+            background-color: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 12px;
+            margin-bottom: 1rem;
+            transition: var(--transition);
+            text-decoration: none;
         }
-        .table-hover tbody tr:hover {
+
+        .file-card:hover {
             background-color: var(--custom-maroon-subtle);
+            border-color: var(--custom-maroon-light);
+            transform: translateY(-2px);
         }
-        .text-center.empty {
+
+        .file-icon {
+            width: 40px;
+            height: 40px;
+            background-color: #ffebee;
+            color: #d32f2f;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            margin-right: 1rem;
+        }
+
+        .file-info {
+            flex: 1;
+            overflow: hidden;
+        }
+        
+        .file-name {
+            font-weight: 600;
+            color: var(--text-dark);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            font-size: 0.9rem;
+        }
+        
+        .file-action {
+            font-size: 0.75rem;
             color: var(--text-muted);
-            font-style: italic;
-            padding: 1.5rem;
         }
+
+        /* --- Badges --- */
+        .status-badge {
+            padding: 0.5rem 1rem;
+            border-radius: 50px;
+            font-weight: 600;
+            font-size: 0.85rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .bg-pending { background-color: #fff7ed; color: #c2410c; }
+        .bg-approved { background-color: #ecfdf5; color: #047857; }
+        .bg-rejected { background-color: #fef2f2; color: #b91c1c; }
+        .bg-active { background-color: #eff6ff; color: #1d4ed8; }
+
+        /* --- Buttons --- */
+        .btn-edit-custom {
+            background-color: var(--custom-maroon);
+            color: white;
+            padding: 0.6rem 1.5rem;
+            border-radius: 8px;
+            font-weight: 600;
+            border: none;
+            transition: var(--transition);
+            text-decoration: none;
+            display: inline-flex; align-items: center; gap: 0.5rem;
+        }
+        .btn-edit-custom:hover { background-color: var(--custom-maroon-light); color: white; transform: translateY(-2px); }
+
+        .btn-back-custom {
+            background-color: #fff;
+            color: var(--text-dark);
+            border: 1px solid #e2e8f0;
+            padding: 0.6rem 1.5rem;
+            border-radius: 8px;
+            font-weight: 600;
+            text-decoration: none;
+            transition: var(--transition);
+        }
+        .btn-back-custom:hover { background-color: #f8f9fa; border-color: #cbd5e1; color: var(--text-dark); }
+
+        /* --- Animation --- */
+        .animate-up {
+            animation: fadeInUp 0.6s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+            opacity: 0; transform: translateY(20px);
+        }
+        @keyframes fadeInUp { to { opacity: 1; transform: translateY(0); } }
     </style>
 
-    <div class="header-section">
-        <div class="header-content">
-            <div class="header-title-group">
-                <h1>
-                    <i class="fas fa-flask"></i> {{-- Ganti ikon jika perlu --}}
-                    Detail Pra Penelitian
-                </h1>
-                <p class="header-subtitle">
-                    {{ $praPenelitian->judul }}
-                </p>
+    {{-- Header --}}
+    <div class="page-header-wrapper animate-up">
+        <div>
+            <div class="d-flex align-items-center gap-2 mb-1">
+                <span class="badge rounded-pill text-uppercase
+                    {{ $praPenelitian->status == 'Pending' ? 'bg-pending' : 
+                      ($praPenelitian->status == 'Approved' ? 'bg-approved' : 
+                      ($praPenelitian->status == 'Rejected' ? 'bg-rejected' : 'bg-active')) }}">
+                    {{ $praPenelitian->status }}
+                </span>
+                <span class="text-muted small">| {{ $praPenelitian->jenis_penelitian }}</span>
             </div>
-            <div class="header-actions">
-                {{-- Asumsi ada route edit, sesuaikan jika perlu --}}
-                <a href="{{ route('pra-penelitian.edit', $praPenelitian->id) }}" class="btn-custom btn-edit">
-                    <i class="fas fa-edit"></i>
-                    Edit
+            <h2 class="main-title mb-0">{{ $praPenelitian->judul }}</h2>
+        </div>
+        <div class="d-flex gap-2">
+            <a href="{{ route('pra-penelitian.index') }}" class="btn-back-custom">
+                <i class="bi bi-arrow-left"></i> Kembali
+            </a>
+            {{-- Tampilkan tombol edit hanya jika status masih Pending atau user adalah admin --}}
+            @if($praPenelitian->status == 'Pending' || auth()->user()->role == 'admin')
+                <a href="{{ route('pra-penelitian.edit', $praPenelitian->id) }}" class="btn-edit-custom">
+                    <i class="bi bi-pencil-square"></i> Edit
                 </a>
-                <a href="{{ route('pra-penelitian.index') }}" class="btn-custom btn-back">
-                    <i class="fas fa-arrow-left"></i>
-                    Kembali
-                </a>
-            </div>
+            @endif
         </div>
     </div>
 
-    <div class="detail-card">
-        <div class="detail-card-header">
-            <h2 class="detail-card-title">
-                <i class="fas fa-info-circle"></i>
-                Informasi Penelitian
-            </h2>
-        </div>
-        <div class="detail-card-body">
-
-            <div class="detail-row">
-                <div class="detail-label">Judul</div>
-                <div class="detail-value">
-                    <strong>{{ $praPenelitian->judul }}</strong>
+    <div class="row animate-up" style="animation-delay: 0.1s;">
+        
+        {{-- KOLOM KIRI: Informasi Utama & Dosen --}}
+        <div class="col-lg-8">
+            
+            {{-- 1. Detail Informasi --}}
+            <div class="detail-card">
+                <div class="detail-header">
+                    <i class="bi bi-info-circle-fill fs-5"></i>
+                    <h5>Informasi Penelitian</h5>
+                </div>
+                <div class="detail-body">
+                    <div class="row g-4">
+                        <div class="col-md-6">
+                            <div class="label-text">Universitas</div>
+                            <div class="value-text fw-bold">
+                                <i class="bi bi-building me-1 text-muted"></i> 
+                                {{ $praPenelitian->mou->nama_universitas ?? '-' }}
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="label-text">Program Studi</div>
+                            <div class="value-text">{{ $praPenelitian->prodi }}</div>
+                        </div>
+                    </div>
                 </div>
             </div>
 
-            <div class="detail-row">
-                <div class="detail-label">Status</div>
-                <div class="detail-value">
-                    {{-- Menggunakan style badge yang mirip dari file target --}}
-                    @if ($praPenelitian->status == 'Aktif')
-                        <span class="pelatihan-badge" style="background-color: #d1fae5; color: #065f46;">
-                            <i class="fas fa-check-circle"></i>
-                            {{ $praPenelitian->status }}
-                        </span>
+            {{-- 2. Data Dosen Pembimbing --}}
+            <div class="detail-card">
+                <div class="detail-header">
+                    <i class="bi bi-person-badge-fill fs-5"></i>
+                    <h5>Dosen Pembimbing</h5>
+                </div>
+                <div class="detail-body">
+                    <div class="row g-4">
+                        {{-- Pembimbing 1 --}}
+                        <div class="col-md-6">
+                            <div class="p-3 bg-light rounded-3 border">
+                                <div class="label-text mb-2 text-primary">Pembimbing 1</div>
+                                <div class="value-text fw-bold mb-1">{{ $praPenelitian->dosen1_nama }}</div>
+                                <div class="value-text small text-muted">
+                                    <i class="bi bi-whatsapp me-1"></i> {{ $praPenelitian->dosen1_hp }}
+                                </div>
+                            </div>
+                        </div>
+                        {{-- Pembimbing 2 --}}
+                        <div class="col-md-6">
+                            <div class="p-3 bg-light rounded-3 border">
+                                <div class="label-text mb-2 text-primary">Pembimbing 2</div>
+                                <div class="value-text fw-bold mb-1">{{ $praPenelitian->dosen2_nama }}</div>
+                                <div class="value-text small text-muted">
+                                    <i class="bi bi-whatsapp me-1"></i> {{ $praPenelitian->dosen2_hp }}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            {{-- 3. Data Mahasiswa --}}
+            <div class="detail-card">
+                <div class="detail-header d-flex justify-content-between">
+                    <div class="d-flex align-items-center gap-2">
+                        <i class="bi bi-people-fill fs-5"></i>
+                        <h5>Anggota Tim</h5>
+                    </div>
+                    <span class="badge bg-secondary rounded-pill">{{ $praPenelitian->anggotas->count() }} Orang</span>
+                </div>
+                <div class="table-responsive">
+                    <table class="table table-hover mb-0 align-middle">
+                        <thead class="bg-light">
+                            <tr>
+                                <th class="ps-4">Nama Mahasiswa</th>
+                                <th>Jenjang</th>
+                                <th>Kontak (WA)</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach($praPenelitian->anggotas as $mhs)
+                            <tr>
+                                <td class="ps-4 fw-bold text-dark">{{ $mhs->nama }}</td>
+                                <td><span class="badge bg-light text-dark border">{{ $mhs->jenjang }}</span></td>
+                                <td>
+                                    <a href="https://wa.me/{{ preg_replace('/[^0-9]/', '', $mhs->no_telpon) }}" target="_blank" class="text-decoration-none text-success fw-medium">
+                                        <i class="bi bi-whatsapp me-1"></i> {{ $mhs->no_telpon }}
+                                    </a>
+                                </td>
+                            </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+        </div>
+
+        {{-- KOLOM KANAN: Timeline & File --}}
+        <div class="col-lg-4">
+            
+            {{-- 4. Timeline --}}
+            <div class="detail-card">
+                <div class="detail-header">
+                    <i class="bi bi-calendar-range-fill fs-5"></i>
+                    <h5>Timeline</h5>
+                </div>
+                <div class="detail-body">
+                    <div class="mb-4">
+                        <div class="label-text">Mulai Penelitian</div>
+                        <div class="value-text fs-5 fw-bold text-dark">
+                            {{ $praPenelitian->tanggal_mulai->format('d F Y') }}
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <div class="label-text">Rencana Skripsi</div>
+                        <div class="value-text text-dark">
+                            {{ $praPenelitian->tanggal_rencana_skripsi->format('d F Y') }}
+                        </div>
+                    </div>
+                    <hr>
+                    <div class="d-flex justify-content-between align-items-center">
+                        <small class="text-muted">Diajukan pada:</small>
+                        <small class="fw-bold">{{ $praPenelitian->created_at->format('d M Y') }}</small>
+                    </div>
+                </div>
+            </div>
+
+            {{-- 5. Berkas Lampiran --}}
+            <div class="detail-card">
+                <div class="detail-header">
+                    <i class="bi bi-paperclip fs-5"></i>
+                    <h5>Berkas Lampiran</h5>
+                </div>
+                <div class="detail-body">
+                    {{-- File Kerangka --}}
+                    @if($praPenelitian->file_kerangka)
+                    <a href="{{ asset($praPenelitian->file_kerangka) }}" target="_blank" class="file-card">
+                        <div class="file-icon">
+                            <i class="bi bi-file-earmark-pdf-fill"></i>
+                        </div>
+                        <div class="file-info">
+                            <div class="file-name">Kerangka Penelitian</div>
+                            <div class="file-action">Klik untuk melihat</div>
+                        </div>
+                        <i class="bi bi-box-arrow-up-right text-muted"></i>
+                    </a>
                     @else
-                        <span class="pelatihan-badge" style="background-color: #fef2f2; color: #b91c1c;">
-                            <i class="fas fa-times-circle"></i>
-                            {{ $praPenelitian->status }}
-                        </span>
+                        <div class="text-muted small mb-3 fst-italic">Tidak ada kerangka penelitian.</div>
+                    @endif
+
+                    {{-- File Surat --}}
+                    @if($praPenelitian->file_surat_pengantar)
+                    <a href="{{ asset($praPenelitian->file_surat_pengantar) }}" target="_blank" class="file-card mb-0">
+                        <div class="file-icon">
+                            <i class="bi bi-envelope-paper-fill"></i>
+                        </div>
+                        <div class="file-info">
+                            <div class="file-name">Surat Pengantar</div>
+                            <div class="file-action">Klik untuk melihat</div>
+                        </div>
+                        <i class="bi bi-box-arrow-up-right text-muted"></i>
+                    </a>
+                    @else
+                        <div class="text-muted small fst-italic">Tidak ada surat pengantar.</div>
                     @endif
                 </div>
             </div>
 
-            <div class="detail-row">
-                <div class="detail-label">Jenis Penelitian</div>
-                <div class="detail-value">
-                    {{ $praPenelitian->jenis_penelitian }}
-                </div>
+            {{-- Tombol Aksi Tambahan (Admin Only - Optional) --}}
+            @if(auth()->user()->role === 'admin' && $praPenelitian->status === 'Pending')
+            <div class="d-grid gap-2">
+                {{-- Jika Anda punya route untuk approve/reject di controller khusus --}}
+                {{-- 
+                <form action="{{ route('pengajuan.approve', $praPenelitian->id) }}" method="POST">
+                    @csrf
+                    <button class="btn btn-success w-100 fw-bold py-2">Setujui Pengajuan</button>
+                </form> 
+                --}}
             </div>
+            @endif
 
-            <div class="divider"></div>
-
-            <div class="detail-row">
-                <div class="detail-label">Universitas</div>
-                <div class="detail-value {{ empty($praPenelitian->mou->nama_universitas) ? 'empty' : '' }}">
-                    {{ $praPenelitian->mou->nama_universitas ?? 'N/A' }}
-                </div>
-            </div>
-
-            <div class="detail-row">
-                <div class="detail-label">Masa Berlaku MOU</div>
-                <div class="detail-value {{ empty($praPenelitian->mou->tanggal_keluar) ? 'empty' : '' }}">
-                    {{ optional(optional($praPenelitian->mou)->tanggal_keluar)->format('d M Y') ?? 'N/A' }}
-                </div>
-            </div>
-
-            <div class="detail-row">
-                <div class="detail-label">Tanggal Mulai</div>
-                <div class="detail-value {{ empty($praPenelitian->tanggal_mulai) ? 'empty' : '' }}">
-                    {{ $praPenelitian->tanggal_mulai ? $praPenelitian->tanggal_mulai->format('d M Y') : 'N/A' }}
-                </div>
-            </div>
-
-        </div>
-    </div>
-
-    <div class="detail-card">
-        <div class="detail-card-header">
-            <h2 class="detail-card-title">
-                <i class="fas fa-users"></i>
-                Daftar Mahasiswa ({{ $praPenelitian->mahasiswas->count() }})
-            </h2>
-        </div>
-        <div class="detail-card-body" style="padding: 0;"> {{-- Hapus padding agar table-responsive pas --}}
-            <div class="table-responsive">
-                <table class="table table-hover">
-                    <thead>
-                        <tr>
-                            <th>Nama</th>
-                            <th>Jenjang</th>
-                            <th>No. Telpon (WA)</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @forelse($praPenelitian->mahasiswas as $mhs)
-                        <tr>
-                            <td>{{ $mhs->nama }}</td>
-                            <td>{{ $mhs->jenjang }}</td>
-                            <td>
-                                <a href="https://wa.me/+62{{ preg_replace('/[^0-9]/', '', $mhs->no_telpon) }}" target="_blank">
-                                    {{ $mhs->no_telpon }}
-                                </a>
-                            </td>
-                        </tr>
-                        @empty
-                        <tr>
-                            <td colspan="3" class="text-center empty">
-                                <i class="fas fa-inbox"></i>
-                                Belum ada data mahasiswa
-                            </td>
-                        </tr>
-                        @endforelse
-                    </tbody>
-                </table>
-            </div>
-        </div>
-    </div>
-
-    <div class="detail-card">
-        <div class="detail-card-header">
-            <h2 class="detail-card-title">
-                <i class="fas fa-clock"></i>
-                Informasi Lainnya
-            </h2>
-        </div>
-        <div class="detail-card-body">
-            <div class="detail-row">
-                <div class="detail-label">Dibuat Pada</div>
-                <div class="detail-value">
-                    {{ $praPenelitian->created_at->format('d M Y H:i') }}
-                </div>
-            </div>
-
-            <div class="detail-row">
-                <div class="detail-label">Terakhir Diperbarui</div>
-                <div class="detail-value">
-                    {{ $praPenelitian->updated_at->format('d M Y H:i') }}
-                </div>
-            </div>
         </div>
     </div>
 

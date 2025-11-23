@@ -15,6 +15,7 @@
             --transition: 0.3s ease;
         }
 
+        /* --- Card Styling --- */
         .form-card {
             border: none;
             border-radius: var(--card-radius);
@@ -30,12 +31,7 @@
             border-bottom: 4px solid var(--custom-maroon-light);
         }
 
-        .card-header-title {
-            font-size: 1.3rem;
-            font-weight: 700;
-            margin: 0;
-        }
-
+        /* --- Form Styling --- */
         .form-label {
             font-weight: 600;
             color: var(--text-dark);
@@ -49,59 +45,68 @@
             color: var(--custom-maroon);
             border-top-left-radius: 10px;
             border-bottom-left-radius: 10px;
+            border-color: #dee2e6;
         }
 
-        .form-control,
-        .form-select,
-        textarea.form-control {
+        .form-control, .form-select {
             border-left: none;
             border-radius: 0 10px 10px 0;
             padding: 0.7rem 1rem;
             border-color: #dee2e6;
             box-shadow: none !important;
             transition: border-color 0.2s;
-            font-family: inherit;
+            color: var(--text-dark);
         }
 
-        .form-control[type="date"] {
-            border-left: 1px solid #dee2e6;
-            border-radius: 10px;
-        }
-
-        .input-group .form-control[type="date"] {
-             border-left: none;
-            border-radius: 0 10px 10px 0;
-        }
-
-        .form-control:focus,
-        .form-select:focus,
-        textarea.form-control:focus {
+        .form-control:focus, .form-select:focus {
             border-color: var(--custom-maroon-light);
-            box-shadow: 0 0 0 0.2rem rgba(124, 19, 22, 0.1) !important;
         }
 
-        .form-group {
+        /* --- Dynamic Section --- */
+        .dynamic-section {
+            background-color: #fff;
+            border: 2px dashed #e9ecef;
+            border-radius: 12px;
+            padding: 1.5rem;
             margin-bottom: 1.5rem;
+            position: relative;
+            transition: border-color 0.3s;
+        }
+        
+        .dynamic-section:hover {
+            border-color: var(--custom-maroon-light);
         }
 
-        .error-message {
-            color: #dc3545;
-            font-size: 0.85rem;
-            margin-top: 0.3rem;
+        .section-badge {
+            position: absolute;
+            top: -12px;
+            left: 20px;
+            background: var(--custom-maroon);
+            color: white;
+            padding: 2px 12px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
         }
 
-        .form-row-custom {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 1.5rem;
+        .current-file-badge {
+            display: inline-block;
+            margin-top: 5px;
+            font-size: 0.8rem;
+            background: #e9ecef;
+            padding: 4px 10px;
+            border-radius: 4px;
+            color: #495057;
+            text-decoration: none;
+        }
+        .current-file-badge:hover {
+            background: #dee2e6;
+            color: var(--custom-maroon);
         }
 
-        @media (max-width: 768px) {
-            .form-row-custom {
-                grid-template-columns: 1fr;
-            }
-        }
-
+        /* --- Buttons --- */
         .btn-maroon {
             background-color: var(--custom-maroon);
             color: white;
@@ -119,129 +124,70 @@
             color: white;
         }
 
-        .btn-secondary-custom {
+        .btn-light-custom {
+            background: #fff;
+            border: 1px solid #dee2e6;
+            color: var(--text-dark);
+            border-radius: 50px;
+            padding: 0.8rem 1.5rem;
+            font-weight: 600;
+        }
+        .btn-light-custom:hover {
+            background: #f8f9fa;
+            color: var(--custom-maroon);
+        }
+
+        .btn-add-row {
             background: #e9ecef;
             color: var(--text-dark);
             border: none;
-            padding: 0.8rem 2rem;
-            border-radius: 50px;
+            border-radius: 8px;
+            padding: 5px 12px;
+            font-size: 0.85rem;
             font-weight: 600;
             transition: var(--transition);
-            display: inline-block;
-            text-decoration: none;
         }
-
-        .btn-secondary-custom:hover {
-            background: #dee2e6;
-            color: var(--text-dark);
-        }
-
-        .button-group {
-            display: flex;
-            gap: 1rem;
-            justify-content: flex-start;
-            margin-top: 2rem;
-        }
-
-        .card-body-custom {
-            padding: 2rem;
-        }
-
-        .info-box {
-            background: var(--custom-maroon-subtle);
-            border: 1px dashed var(--custom-maroon-light);
-            border-radius: 10px;
-            padding: 1rem;
-            margin-bottom: 1.5rem;
-            font-size: 0.9rem;
-            color: var(--text-dark);
-        }
-
-        .info-box i {
-            margin-right: 0.5rem;
-            color: var(--custom-maroon);
-        }
-
-        .dynamic-section {
-            background: #f8f9fa;
-            border: 2px dashed var(--custom-maroon);
-            border-radius: 10px;
-            padding: 1.5rem;
-            margin-bottom: 1.5rem;
-        }
-
-        .dynamic-section-title {
-            font-weight: 700;
-            color: var(--custom-maroon);
-            margin-bottom: 1rem;
-            font-size: 1rem;
-        }
-
-        #tambah-mahasiswa {
+        .btn-add-row:hover {
             background: var(--custom-maroon);
             color: white;
-            border: none;
-            border-radius: 5px;
-            padding: 0.5rem 1rem;
-            font-size: 0.9rem;
-            transition: var(--transition);
-        }
-        #tambah-mahasiswa:hover {
-            background: var(--custom-maroon-light);
         }
 
-        .hapus-mahasiswa {
-            background: #e74c3c;
+        .btn-delete-row {
+            width: 40px;
+            height: 40px;
+            border-radius: 8px;
+            border: 1px solid #fee2e2;
+            background: #fff;
+            color: #dc2626;
+            display: flex; align-items: center; justify-content: center;
+            transition: var(--transition);
+        }
+        .btn-delete-row:hover {
+            background: #dc2626;
             color: white;
-            border: none;
-            border-radius: 5px;
-            width: 38px;
-            height: 38px;
-            line-height: 38px;
-            text-align: center;
-            padding: 0;
-            transition: var(--transition);
-        }
-        .hapus-mahasiswa:hover {
-            background: #c0392b;
         }
 
-        #mahasiswa-list .form-control {
-            border-left: 1px solid #dee2e6;
-            border-radius: 10px;
+        /* Animation */
+        .animate-up {
+            animation: fadeInUp 0.6s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+            opacity: 0; transform: translateY(20px);
         }
-
-        #mahasiswa-list .input-group .form-control {
-            border-left: none;
-            border-radius: 0 10px 10px 0;
-        }
-
-        #mahasiswa-list .input-group-text {
-            background-color: #f8f9fa;
-            border-right: none;
-            color: var(--custom-maroon);
-            border-top-left-radius: 10px;
-            border-bottom-left-radius: 10px;
-        }
-
+        @keyframes fadeInUp { to { opacity: 1; transform: translateY(0); } }
     </style>
 
-    <div class="row justify-content-center">
+    <div class="row justify-content-center animate-up">
         <div class="col-lg-10">
             <div class="form-card">
                 <div class="card-header-custom">
-                    <h2 class="card-header-title">
-                        <i class="fas fa-edit"></i> {{-- Icon diganti edit --}}
-                        Edit Pengajuan Pra Penelitian
-                    </h2>
+                    <h4 class="mb-0 fw-bold"><i class="bi bi-pencil-square me-2"></i> Edit Pengajuan Pra Penelitian</h4>
+                    <p class="mb-0 small opacity-75">Perbarui data pengajuan jika ada kesalahan.</p>
                 </div>
 
-                <div class="card-body-custom">
-
+                <div class="card-body p-4 p-md-5">
+                    
                     @if ($errors->any())
-                        <div class="alert alert-danger" role="alert">
-                            <strong>Terjadi kesalahan!</strong>
-                            <ul style="margin: 0.5rem 0 0 0;">
+                        <div class="alert alert-danger rounded-3 shadow-sm mb-4">
+                            <ul class="mb-0 small">
                                 @foreach ($errors->all() as $error)
                                     <li>{{ $error }}</li>
                                 @endforeach
@@ -249,134 +195,169 @@
                         </div>
                     @endif
 
-                    <div class="info-box">
-                        <i class="fas fa-info-circle"></i>
-                        Silakan ubah data yang diperlukan. Pastikan data mahasiswa tetap terisi minimal 1 orang.
-                    </div>
-
-                    {{-- Form diarahkan ke route UPDATE --}}
-                    <form action="{{ route('pra-penelitian.update', $praPenelitian->id) }}" method="POST">
+                    <form action="{{ route('pra-penelitian.update', $praPenelitian->id) }}" method="POST" enctype="multipart/form-data">
                         @csrf
-                        @method('PUT') {{-- Wajib ada untuk proses Edit --}}
+                        @method('PUT')
 
-                        {{-- Data Penelitian Utama --}}
-                        <div class="form-row-custom">
-                            <div class="form-group">
-                                <label for="judul" class="form-label">
-                                    <i class="fas fa-file-alt"></i> Judul Pra Penelitian
-                                </label>
+                        {{-- 1. DATA PENELITIAN --}}
+                        <div class="row g-3 mb-4">
+                            <div class="col-12">
+                                <label class="form-label">Judul Pra Penelitian <span class="text-danger">*</span></label>
                                 <div class="input-group">
-                                    <span class="input-group-text"><i class="fas fa-file-alt"></i></span>
-                                    {{-- VALUE: Menggunakan old atau data dari database --}}
-                                    <input type="text" class="form-control @error('judul') is-invalid @enderror"
-                                           id="judul" name="judul" value="{{ old('judul', $praPenelitian->judul) }}" placeholder="Masukkan judul" required>
+                                    <span class="input-group-text"><i class="bi bi-type-h1"></i></span>
+                                    <input type="text" name="judul" class="form-control" 
+                                           value="{{ old('judul', $praPenelitian->judul) }}" required>
                                 </div>
-                                @error('judul') <div class="error-message">{{ $message }}</div> @enderror
                             </div>
-
-                            <div class="form-group">
-                                <label for="mou_id" class="form-label">
-                                    <i class="fas fa-university"></i> Universitas (MOU)
-                                </label>
+                            
+                            <div class="col-md-6">
+                                <label class="form-label">Universitas <span class="text-danger">*</span></label>
                                 <div class="input-group">
-                                    <span class="input-group-text"><i class="fas fa-university"></i></span>
-                                    <select name="mou_id" id="mou_id" class="form-select @error('mou_id') is-invalid @enderror" required>
-                                        <option value="">Pilih Universitas</option>
+                                    <span class="input-group-text"><i class="bi bi-building"></i></span>
+                                    <select name="mou_id" class="form-select" required>
+                                        <option value="">-- Pilih Universitas --</option>
                                         @foreach ($mous as $mou)
-                                            {{-- SELECTED LOGIC: Cek old atau data DB --}}
-                                            <option value="{{ $mou->id }}" {{ old('mou_id', $praPenelitian->mou_id) == $mou->id ? 'selected' : '' }}>
-                                                {{ $mou->nama_universitas }} (Exp: {{ $mou->tanggal_keluar->format('d M Y') }})
+                                            <option value="{{ $mou->id }}" 
+                                                {{ old('mou_id', $praPenelitian->mou_id) == $mou->id ? 'selected' : '' }}>
+                                                {{ $mou->nama_universitas }}
                                             </option>
                                         @endforeach
                                     </select>
                                 </div>
-                                @error('mou_id') <div class="error-message">{{ $message }}</div> @enderror
                             </div>
-                        </div>
 
-                        <div class="form-row-custom">
-                            <div class="form-group">
-                                <label for="jenis_penelitian" class="form-label">
-                                    <i class="fas fa-tasks"></i> Jenis Penelitian
-                                </label>
+                            <div class="col-md-6">
+                                <label class="form-label">Jenis Penelitian <span class="text-danger">*</span></label>
                                 <div class="input-group">
-                                    <span class="input-group-text"><i class="fas fa-tasks"></i></span>
-                                    <select name="jenis_penelitian" id="jenis_penelitian" class="form-select @error('jenis_penelitian') is-invalid @enderror" required>
-                                        {{-- SELECTED LOGIC --}}
+                                    <span class="input-group-text"><i class="bi bi-grid"></i></span>
+                                    <select name="jenis_penelitian" class="form-select" required>
                                         <option value="Data Awal" {{ old('jenis_penelitian', $praPenelitian->jenis_penelitian) == 'Data Awal' ? 'selected' : '' }}>Data Awal</option>
                                         <option value="Uji Validitas" {{ old('jenis_penelitian', $praPenelitian->jenis_penelitian) == 'Uji Validitas' ? 'selected' : '' }}>Uji Validitas</option>
                                         <option value="Penelitian" {{ old('jenis_penelitian', $praPenelitian->jenis_penelitian) == 'Penelitian' ? 'selected' : '' }}>Penelitian</option>
                                     </select>
                                 </div>
-                                @error('jenis_penelitian') <div class="error-message">{{ $message }}</div> @enderror
-                            </div>
-
-                            <div class="form-group">
-                                <label for="tanggal_mulai" class="form-label">
-                                    <i class="fas fa-calendar-alt"></i> Tanggal Mulai Penelitian
-                                </label>
-                                {{-- VALUE: Menggunakan format Y-m-d untuk input date --}}
-                                <input type="date" class="form-control @error('tanggal_mulai') is-invalid @enderror"
-                                       id="tanggal_mulai" name="tanggal_mulai" value="{{ old('tanggal_mulai', $praPenelitian->tanggal_mulai->format('Y-m-d')) }}" required>
-                                @error('tanggal_mulai') <div class="error-message">{{ $message }}</div> @enderror
                             </div>
                         </div>
 
+                        <div class="row g-3 mb-4">
+                            <div class="col-md-6">
+                                <label class="form-label">Program Studi</label>
+                                <div class="input-group">
+                                    <span class="input-group-text"><i class="bi bi-book"></i></span>
+                                    <input type="text" name="prodi" class="form-control" 
+                                           value="{{ old('prodi', $praPenelitian->prodi) }}" required>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Tanggal Mulai Penelitian</label>
+                                <div class="input-group">
+                                    <span class="input-group-text"><i class="bi bi-calendar-event"></i></span>
+                                    <input type="date" name="tanggal_mulai" class="form-control" 
+                                           value="{{ old('tanggal_mulai', $praPenelitian->tanggal_mulai->format('Y-m-d')) }}" required>
+                                </div>
+                            </div>
+                        </div>
 
-                        {{-- Data Mahasiswa Dinamis --}}
+                        {{-- 2. DATA TAMBAHAN (BERKAS) --}}
+                        <div class="row g-3 mb-5">
+                            <div class="col-md-4">
+                                <label class="form-label">Tgl. Rencana Skripsi</label>
+                                <div class="input-group">
+                                    <span class="input-group-text"><i class="bi bi-calendar-check"></i></span>
+                                    <input type="date" name="tanggal_rencana_skripsi" class="form-control" 
+                                           value="{{ old('tanggal_rencana_skripsi', $praPenelitian->tanggal_rencana_skripsi->format('Y-m-d')) }}" required>
+                                </div>
+                            </div>
+                            
+                            {{-- File Kerangka --}}
+                            <div class="col-md-4">
+                                <label class="form-label">Update Kerangka (PDF)</label>
+                                <div class="input-group">
+                                    <span class="input-group-text"><i class="bi bi-file-earmark-pdf"></i></span>
+                                    <input type="file" name="kerangka_penelitian" class="form-control" accept="application/pdf">
+                                </div>
+                                @if($praPenelitian->file_kerangka)
+                                    <a href="{{ asset($praPenelitian->file_kerangka) }}" target="_blank" class="current-file-badge">
+                                        <i class="bi bi-eye"></i> Lihat File Saat Ini
+                                    </a>
+                                @endif
+                            </div>
+
+                            {{-- File Surat --}}
+                            <div class="col-md-4">
+                                <label class="form-label">Update Surat Pengantar (PDF)</label>
+                                <div class="input-group">
+                                    <span class="input-group-text"><i class="bi bi-envelope-paper"></i></span>
+                                    <input type="file" name="surat_pengantar" class="form-control" accept="application/pdf">
+                                </div>
+                                @if($praPenelitian->file_surat_pengantar)
+                                    <a href="{{ asset($praPenelitian->file_surat_pengantar) }}" target="_blank" class="current-file-badge">
+                                        <i class="bi bi-eye"></i> Lihat File Saat Ini
+                                    </a>
+                                @endif
+                            </div>
+                        </div>
+
+                        {{-- 3. SECTION DATA MAHASISWA (DINAMIS) --}}
                         <div class="dynamic-section">
-                            <div class="dynamic-section-title d-flex justify-content-between align-items-center">
-                                <span><i class="fas fa-users"></i> Data Mahasiswa</span>
-                                <button type="button" id="tambah-mahasiswa" class="btn-sm">
-                                    <i class="fas fa-plus"></i> Tambah Mahasiswa
+                            <span class="section-badge">Data Mahasiswa</span>
+                            
+                            <div class="d-flex justify-content-end mb-3">
+                                <button type="button" id="tambah-mahasiswa" class="btn-add-row">
+                                    <i class="bi bi-plus-lg"></i> Tambah Anggota
                                 </button>
                             </div>
 
-                            <div id="mahasiswa-list">
-                                <div class="row g-3 mb-2 d-none d-md-flex" style="font-weight: 600; font-size: 0.9rem; color: var(--text-dark);">
-                                    <div class="col-md-3">Nama Mahasiswa</div>
-                                    <div class="col-md-3">No. Telpon (+62)</div>
-                                    <div class="col-md-3">Jenjang</div>
-                                    <div class="col-md-3">Aksi</div>
-                                </div>
-                                <hr class="d-none d-md-block mt-0 mb-3">
+                            <div class="row g-3 mb-2 d-none d-md-flex px-2 text-muted fw-bold small text-uppercase">
+                                <div class="col-md-4">Nama Mahasiswa</div>
+                                <div class="col-md-4">No. WhatsApp</div>
+                                <div class="col-md-3">Jenjang (S1/D3)</div>
+                                <div class="col-md-1 text-center">Aksi</div>
+                            </div>
 
-                                {{-- LOGIKA PENTING UNTUK EDIT DATA DINAMIS --}}
+                            <div id="mahasiswa-list">
+                                {{-- 
+                                    LOGIKA PENTING: 
+                                    Ambil data dari 'old' jika validasi gagal.
+                                    Jika tidak, ambil dari database relasi 'anggotas'.
+                                --}}
                                 @php
-                                    // Jika ada error validasi, gunakan data old.
-                                    // Jika tidak, gunakan data dari database ($praPenelitian->mahasiswas)
-                                    $mahasiswas = old('mahasiswas') ?? $praPenelitian->mahasiswas;
+                                    $dataAnggota = old('mahasiswas') ?? $praPenelitian->anggotas;
                                 @endphp
 
-                                @foreach ($mahasiswas as $i => $mhs)
-                                    {{-- Penanganan perbedaan struktur data antara Array (old) dan Object Collection (Database) --}}
+                                @foreach($dataAnggota as $index => $mhs)
+                                    {{-- Handle perbedaan struktur array (old) vs object (DB) --}}
                                     @php
                                         $nama = is_array($mhs) ? $mhs['nama'] : $mhs->nama;
-                                        $no_telpon = is_array($mhs) ? $mhs['no_telpon'] : $mhs->no_telpon;
+                                        $telp = is_array($mhs) ? $mhs['no_telpon'] : $mhs->no_telpon;
                                         $jenjang = is_array($mhs) ? $mhs['jenjang'] : $mhs->jenjang;
                                     @endphp
 
-                                    <div class="row g-3 mb-2 align-items-center mahasiswa-row">
-                                        <div class="col-md-3">
-                                            <input type="text" name="mahasiswas[{{ $i }}][nama]" class="form-control"
-                                                   placeholder="Nama Mahasiswa" value="{{ $nama }}" required>
+                                    <div class="row g-3 mb-3 align-items-center mahasiswa-row">
+                                        <div class="col-md-4">
+                                            <div class="input-group">
+                                                <span class="input-group-text"><i class="bi bi-person"></i></span>
+                                                <input type="text" name="mahasiswas[{{ $index }}][nama]" class="form-control" 
+                                                       value="{{ $nama }}" placeholder="Nama Lengkap" required>
+                                            </div>
                                         </div>
-                                        <div class="col-md-3">
+                                        <div class="col-md-4">
                                             <div class="input-group">
                                                 <span class="input-group-text">+62</span>
-                                                <input type="tel" name="mahasiswas[{{ $i }}][no_telpon]" class="form-control"
-                                                       placeholder="812..." value="{{ $no_telpon }}" required>
+                                                <input type="tel" name="mahasiswas[{{ $index }}][no_telpon]" class="form-control" 
+                                                       value="{{ $telp }}" placeholder="812xxxx" required>
                                             </div>
                                         </div>
                                         <div class="col-md-3">
-                                            <input type="text" name="mahasiswas[{{ $i }}][jenjang]" class="form-control"
-                                                   placeholder="Jenjang (S1/D3/S2)" value="{{ $jenjang }}" required>
+                                            <div class="input-group">
+                                                <span class="input-group-text"><i class="bi bi-mortarboard"></i></span>
+                                                <input type="text" name="mahasiswas[{{ $index }}][jenjang]" class="form-control" 
+                                                       value="{{ $jenjang }}" placeholder="S1" required>
+                                            </div>
                                         </div>
-                                        <div class="col-md-3">
-                                            {{-- Tombol hapus hanya muncul jika bukan baris pertama saat edit? Terserah aturan bisnis Anda.
-                                                 Tapi di sini kita izinkan hapus, nanti JS menjaga minimal 1. --}}
-                                            <button type="button" class="hapus-mahasiswa">
-                                                <i class="fas fa-trash"></i>
+                                        <div class="col-md-1 text-center">
+                                            <button type="button" class="btn-delete-row hapus-mahasiswa">
+                                                <i class="bi bi-trash"></i>
                                             </button>
                                         </div>
                                     </div>
@@ -384,42 +365,99 @@
                             </div>
                         </div>
 
-                        <div class="button-group">
-                            <button type="submit" class="btn-maroon">
-                                <i class="fas fa-save"></i>
-                                Simpan Perubahan
-                            </button>
-                            <a href="{{ route('pra-penelitian.index') }}" class="btn-secondary-custom">
-                                <i class="fas fa-arrow-left"></i>
-                                Kembali
-                            </a>
+                        {{-- 4. SECTION DOSEN PEMBIMBING --}}
+                        <div class="dynamic-section">
+                            <span class="section-badge">Dosen Pembimbing</span>
+                            
+                            <div class="row g-3 mt-1">
+                                {{-- Dosen 1 --}}
+                                <div class="col-md-6">
+                                    <div class="p-3 bg-light rounded-3 border">
+                                        <h6 class="fw-bold text-dark mb-3"><i class="bi bi-1-circle-fill text-secondary me-2"></i> Pembimbing 1</h6>
+                                        <div class="mb-3">
+                                            <label class="small text-muted fw-bold">Nama Lengkap</label>
+                                            <div class="input-group">
+                                                <span class="input-group-text"><i class="bi bi-person-badge"></i></span>
+                                                <input type="text" name="dosen1_nama" class="form-control" 
+                                                       value="{{ old('dosen1_nama', $praPenelitian->dosen1_nama) }}" required>
+                                            </div>
+                                        </div>
+                                        <div>
+                                            <label class="small text-muted fw-bold">Nomor HP</label>
+                                            <div class="input-group">
+                                                <span class="input-group-text">+62</span>
+                                                <input type="tel" name="dosen1_hp" class="form-control" 
+                                                       value="{{ old('dosen1_hp', $praPenelitian->dosen1_hp) }}" required>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {{-- Dosen 2 --}}
+                                <div class="col-md-6">
+                                    <div class="p-3 bg-light rounded-3 border">
+                                        <h6 class="fw-bold text-dark mb-3"><i class="bi bi-2-circle-fill text-secondary me-2"></i> Pembimbing 2</h6>
+                                        <div class="mb-3">
+                                            <label class="small text-muted fw-bold">Nama Lengkap</label>
+                                            <div class="input-group">
+                                                <span class="input-group-text"><i class="bi bi-person-badge"></i></span>
+                                                <input type="text" name="dosen2_nama" class="form-control" 
+                                                       value="{{ old('dosen2_nama', $praPenelitian->dosen2_nama) }}" required>
+                                            </div>
+                                        </div>
+                                        <div>
+                                            <label class="small text-muted fw-bold">Nomor HP</label>
+                                            <div class="input-group">
+                                                <span class="input-group-text">+62</span>
+                                                <input type="tel" name="dosen2_hp" class="form-control" 
+                                                       value="{{ old('dosen2_hp', $praPenelitian->dosen2_hp) }}" required>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
+
+                        {{-- Footer Action --}}
+                        <div class="d-flex justify-content-between align-items-center pt-3">
+                            <a href="{{ route('pra-penelitian.index') }}" class="btn btn-light-custom shadow-sm">
+                                <i class="bi bi-arrow-left me-2"></i> Kembali
+                            </a>
+                            <button type="submit" class="btn btn-maroon">
+                                Simpan Perubahan <i class="bi bi-check-lg ms-2"></i>
+                            </button>
+                        </div>
+
                     </form>
                 </div>
             </div>
         </div>
     </div>
 
+    {{-- TEMPLATE ROW JS (Sama persis dengan create) --}}
     <template id="mahasiswa-template">
-        <div class="row g-3 mb-2 align-items-center mahasiswa-row">
-            <div class="col-md-3">
-                <input type="text" name="mahasiswas[INDEX][nama]" class="form-control"
-                       placeholder="Nama Mahasiswa" required>
+        <div class="row g-3 mb-3 align-items-center mahasiswa-row animate-up" style="animation-duration: 0.3s;">
+            <div class="col-md-4">
+                <div class="input-group">
+                    <span class="input-group-text"><i class="bi bi-person"></i></span>
+                    <input type="text" name="mahasiswas[INDEX][nama]" class="form-control" placeholder="Nama Lengkap" required>
+                </div>
             </div>
-            <div class="col-md-3">
+            <div class="col-md-4">
                 <div class="input-group">
                     <span class="input-group-text">+62</span>
-                    <input type="tel" name="mahasiswas[INDEX][no_telpon]" class="form-control"
-                           placeholder="812..." required>
+                    <input type="tel" name="mahasiswas[INDEX][no_telpon]" class="form-control" placeholder="812xxxx" required>
                 </div>
             </div>
             <div class="col-md-3">
-                <input type="text" name="mahasiswas[INDEX][jenjang]" class="form-control"
-                       placeholder="Jenjang (S1/D3/S2)" required>
+                <div class="input-group">
+                    <span class="input-group-text"><i class="bi bi-mortarboard"></i></span>
+                    <input type="text" name="mahasiswas[INDEX][jenjang]" class="form-control" placeholder="S1" required>
+                </div>
             </div>
-            <div class="col-md-3">
-                <button type="button" class="hapus-mahasiswa">
-                     <i class="fas fa-trash"></i>
+            <div class="col-md-1 text-center">
+                <button type="button" class="btn-delete-row hapus-mahasiswa">
+                    <i class="bi bi-trash"></i>
                 </button>
             </div>
         </div>
@@ -429,54 +467,45 @@
 
 @section('scripts')
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             const list = document.getElementById('mahasiswa-list');
             const addButton = document.getElementById('tambah-mahasiswa');
             const template = document.getElementById('mahasiswa-template');
+            
+            // Start index dari jumlah data yg ada agar ID unik tidak bentrok
+            let index = {{ count($mahasiswa ?? []) > 0 ? count($mahasiswa) : 100 }}; 
 
-            // --- PERUBAHAN PENTING UNTUK EDIT ---
-            // Index dimulai dari jumlah mahasiswa yang sudah ada agar tidak menimpa name="" yang lama
-            // Jika validasi gagal (old ada), pakai count old. Jika load awal, pakai count DB.
-            let index = {{ old('mahasiswas') ? count(old('mahasiswas')) : $praPenelitian->mahasiswas->count() }};
-
-            // --- FUNGSI FORMAT NO HP ---
+            // Format No HP
             function formatPhoneNumber(input) {
-                let value = input.value;
+                let value = input.value.replace(/[^0-9]/g, '');
                 if (value.startsWith('0')) value = value.substring(1);
-                if (value.startsWith('+62')) value = value.substring(3);
-                value = value.replace(/[^0-9]/g, '');
+                if (value.startsWith('62')) value = value.substring(2);
                 input.value = value;
             }
 
+            // Event Listener untuk input HP (Delegation)
             list.addEventListener('input', function(e) {
                 if (e.target && e.target.name && e.target.name.includes('[no_telpon]')) {
                     formatPhoneNumber(e.target);
                 }
             });
 
-            // Format ulang data yang diambil dari DB saat halaman pertama kali dimuat
-            document.querySelectorAll('input[name*="[no_telpon]"]').forEach(function(input) {
-                formatPhoneNumber(input);
-            });
-
-            // --- TAMBAH BARIS ---
+            // Tambah Baris
             addButton.addEventListener('click', function() {
                 let newRowHtml = template.innerHTML.replace(/INDEX/g, index);
-                let newRow = document.createElement('div');
-                newRow.innerHTML = newRowHtml;
-                list.appendChild(newRow.firstElementChild);
+                list.insertAdjacentHTML('beforeend', newRowHtml);
                 index++;
             });
 
-            // --- HAPUS BARIS ---
+            // Hapus Baris
             list.addEventListener('click', function(e) {
-                if (e.target && e.target.closest('.hapus-mahasiswa')) {
-                    if (list.getElementsByClassName('mahasiswa-row').length <= 1) {
-                         Swal.fire({
+                const btn = e.target.closest('.hapus-mahasiswa');
+                if (btn) {
+                    if (list.querySelectorAll('.mahasiswa-row').length <= 1) {
+                        Swal.fire({
                             icon: 'warning',
-                            title: 'Oops...',
+                            title: 'Tidak bisa menghapus',
                             text: 'Minimal harus ada 1 mahasiswa.',
                             confirmButtonColor: '#7c1316'
                         });
@@ -485,16 +514,15 @@
 
                     Swal.fire({
                         title: 'Hapus baris ini?',
-                        text: "Data yang diisi akan hilang.",
                         icon: 'warning',
                         showCancelButton: true,
-                        confirmButtonColor: '#7c1316',
-                        cancelButtonColor: '#6c757d',
+                        confirmButtonColor: '#d33',
+                        cancelButtonColor: '#3085d6',
                         confirmButtonText: 'Ya, hapus!',
                         cancelButtonText: 'Batal'
                     }).then((result) => {
                         if (result.isConfirmed) {
-                             e.target.closest('.mahasiswa-row').remove();
+                            btn.closest('.mahasiswa-row').remove();
                         }
                     });
                 }

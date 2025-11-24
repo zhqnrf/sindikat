@@ -94,10 +94,7 @@
                     </form>
 
                     <div class="mt-4 pt-3 border-top">
-                        <p class="mb-2 text-muted">Data belum terdaftar?</p>
-                        <a href="{{ route('public.pelatihan.create') }}" class="btn btn-outline-maroon">
-                            <i class="fas fa-plus-circle me-2"></i> Input Data Baru
-                        </a>
+                        <p class="mb-2 text-muted">Butuh memperbarui data pelatihan? Gunakan tombol Perbarui pada hasil pencarian.</p>
                     </div>
                 </div>
 
@@ -143,6 +140,11 @@
                                                             <span class="badge bg-secondary">Non-PNS</span>
                                                             <div class="small text-muted mt-1">NIRP: {{ $pelatihan->nirp }}</div>
                                                         @endif
+                                                    </div>
+                                                    <div class="mt-3">
+                                                        <a href="{{ route('public.pelatihan.edit', $pelatihan->id) }}" class="btn btn-outline-maroon btn-sm">
+                                                            <i class="fas fa-edit me-1"></i> Perbarui Pelatihan
+                                                        </a>
                                                     </div>
                                                 </td>
 
@@ -231,7 +233,7 @@
                     @else
                         <div class="alert alert-warning text-center">
                             <i class="fas fa-exclamation-triangle fa-lg mb-2"></i><br>
-                            Data tidak ditemukan. Silakan klik tombol <strong>Input Data Baru</strong> di atas.
+                            Data tidak ditemukan. Periksa kembali NIP / NIRP yang dimasukkan.
                         </div>
                     @endif
                 @endif

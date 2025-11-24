@@ -17,7 +17,7 @@ class PelatihanController extends Controller
                 abort(403, 'Akses ditolak.');
             }
             return $next($request);
-        })->except(['publicCreate', 'publicStore', 'publicSearch', 'publicIndex']);
+        })->except(['publicIndex', 'publicEdit', 'publicUpdate']);
         // Pastikan 'publicIndex' juga masuk except jika itu nama methodnya sekarang
     }
 
@@ -440,9 +440,10 @@ class PelatihanController extends Controller
         return view('pelatihan.public_index', compact('keyword', 'searchPerformed', 'pelatihans'));
     }
 
-    public function publicCreate()
+    public function publicEdit($id)
     {
-        return view('pelatihan.public_create');
+        $pelatihan = Pelatihan::findOrFail($id);
+        return view('pelatihan.public_edit', compact('pelatihan'));
     }
 
     public function publicStore(Request $request)
@@ -531,6 +532,116 @@ class PelatihanController extends Controller
         // Redirect ke public index dengan keyword agar user bisa langsung lihat datanya
         return redirect()->route('public.pelatihan.index', ['keyword' => $request->nip ?? $request->nirp])
             ->with('success', 'Data berhasil disimpan! Silakan cek data Anda di bawah.');
+    }
+
+    public function publicUpdate(Request $request, $id)
+    {
+        $pelatihan = Pelatihan::findOrFail($id);
+
+        $data = $request->validate([
+            'pelatihan_dasar' => 'nullable|array',
+            'pelatihan_dasar.*' => 'nullable|string',
+            'pelatihan_tahun_dasar' => 'nullable|array',
+            'pelatihan_tahun_dasar.*' => 'nullable|string',
+            'pelatihan_file_dasar' => 'nullable|array',
+            'pelatihan_file_dasar.*' => 'nullable|file|mimes:pdf|max:2048',
+            'pelatihan_existing_file_dasar' => 'nullable|array',
+
+            'pelatihan_kompetensi' => 'nullable|array',
+            'pelatihan_kompetensi.*' => 'nullable|string',
+            'pelatihan_tahun_kompetensi' => 'nullable|array',
+            'pelatihan_tahun_kompetensi.*' => 'nullable|string',
+            'pelatihan_file_kompetensi' => 'nullable|array',
+            'pelatihan_file_kompetensi.*' => 'nullable|file|mimes:pdf|max:2048',
+            'pelatihan_existing_file_kompetensi' => 'nullable|array',
+        ]);
+
+        // --- PROSES PELATIHAN DASAR ---
+        $daftarPelatihanDasar = [];
+        if ($request->has('pelatihan_dasar')) {
+            $namaPelatihan = $request->input('pelatihan_dasar');
+            $tahunPelatihan = $request->input('pelatihan_tahun_dasar');
+            $filePelatihanBaru = $request->file('pelatihan_file_dasar');
+            $fileLama = $request->input('pelatihan_existing_file_dasar', []);
+
+            foreach ($namaPelatihan as $index => $nama) {
+                if (!empty($nama)) {
+                    $filePath = $fileLama[$index] ?? null;
+                    if (isset($filePelatihanBaru[$index]) && $filePelatihanBaru[$index]->isValid()) {
+                        $file = $filePelatihanBaru[$index];
+                        if ($filePath && Storage::disk('public')->exists($filePath)) {
+                            Storage::disk('public')->delete($filePath);
+                        }
+                        $fileName = time() . '_dasar_' . $index . '_' . $file->getClientOriginalName();
+                        $filePath = $file->storeAs('pelatihan_pdf', $fileName, 'public');
+                    }
+
+                    $daftarPelatihanDasar[] = [
+                        'nama' => $nama,
+                        'tahun' => $tahunPelatihan[$index] ?? null,
+                        'file' => $filePath,
+                    ];
+                }
+            }
+
+            $submittedPaths = collect($daftarPelatihanDasar)->pluck('file')->filter();
+            $originalPaths = collect($pelatihan->pelatihan_dasar)->pluck('file')->filter();
+            $filesToDelete = $originalPaths->diff($submittedPaths);
+            foreach ($filesToDelete as $file) {
+                if ($file && Storage::disk('public')->exists($file)) {
+                    Storage::disk('public')->delete($file);
+                }
+            }
+        } else {
+            $daftarPelatihanDasar = $pelatihan->pelatihan_dasar ?? [];
+        }
+
+        // --- PROSES PELATIHAN KOMPETENSI ---
+        $daftarPelatihanKompetensi = [];
+        if ($request->has('pelatihan_kompetensi')) {
+            $namaKompetensi = $request->input('pelatihan_kompetensi');
+            $tahunKompetensi = $request->input('pelatihan_tahun_kompetensi');
+            $fileKompetensiBaru = $request->file('pelatihan_file_kompetensi');
+            $fileLamaKompetensi = $request->input('pelatihan_existing_file_kompetensi', []);
+
+            foreach ($namaKompetensi as $index => $nama) {
+                if (!empty($nama)) {
+                    $filePath = $fileLamaKompetensi[$index] ?? null;
+                    if (isset($fileKompetensiBaru[$index]) && $fileKompetensiBaru[$index]->isValid()) {
+                        $file = $fileKompetensiBaru[$index];
+                        if ($filePath && Storage::disk('public')->exists($filePath)) {
+                            Storage::disk('public')->delete($filePath);
+                        }
+                        $fileName = time() . '_komp_' . $index . '_' . $file->getClientOriginalName();
+                        $filePath = $file->storeAs('pelatihan_pdf', $fileName, 'public');
+                    }
+
+                    $daftarPelatihanKompetensi[] = [
+                        'nama' => $nama,
+                        'tahun' => $tahunKompetensi[$index] ?? null,
+                        'file' => $filePath,
+                    ];
+                }
+            }
+
+            $submittedPaths = collect($daftarPelatihanKompetensi)->pluck('file')->filter();
+            $originalPaths = collect($pelatihan->pelatihan_peningkatan_kompetensi)->pluck('file')->filter();
+            $filesToDelete = $originalPaths->diff($submittedPaths);
+            foreach ($filesToDelete as $file) {
+                if ($file && Storage::disk('public')->exists($file)) {
+                    Storage::disk('public')->delete($file);
+                }
+            }
+        } else {
+            $daftarPelatihanKompetensi = $pelatihan->pelatihan_peningkatan_kompetensi ?? [];
+        }
+
+        $pelatihan->pelatihan_dasar = $daftarPelatihanDasar;
+        $pelatihan->pelatihan_peningkatan_kompetensi = $daftarPelatihanKompetensi;
+        $pelatihan->save();
+
+        return redirect()->route('public.pelatihan.index', ['keyword' => $pelatihan->nip ?? $pelatihan->nirp])
+            ->with('success', 'Data pelatihan berhasil diperbarui.');
     }
 
     public function import_excel(Request $request)

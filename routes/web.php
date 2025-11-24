@@ -22,13 +22,14 @@ use App\Http\Controllers\UserController;
 
 Route::get('/', fn() => redirect()->route('login'));
 
-// Public Pelatihan Routes
+// Public Pelatihan Routes (search + public update of pelatihan arrays)
 Route::get('/cek-data-pelatihan', [PelatihanController::class, 'publicIndex'])
     ->name('public.pelatihan.index');
-Route::get('/input-data-pelatihan', [PelatihanController::class, 'publicCreate'])
-    ->name('public.pelatihan.create');
-Route::post('/input-data-pelatihan', [PelatihanController::class, 'publicStore'])
-    ->name('public.pelatihan.store');
+// Public edit (update only pelatihan dasar & peningkatan kompetensi)
+Route::get('/input-data-pelatihan/{pelatihan}/edit', [PelatihanController::class, 'publicEdit'])
+    ->name('public.pelatihan.edit');
+Route::put('/input-data-pelatihan/{pelatihan}', [PelatihanController::class, 'publicUpdate'])
+    ->name('public.pelatihan.update');
 
 // Authentication
 Route::get('/login', [AuthController::class, 'showLoginForm'])->name('login');
@@ -91,7 +92,7 @@ Route::middleware(['auth'])->group(function () {
 // 2. ROUTES KHUSUS ADMIN
 // =========================================================================
 Route::middleware(['auth', 'admin'])->group(function () {
-    
+
     // Pengajuan Routes Admin
     Route::prefix('admin/pengajuan')->name('admin.pengajuan.')->group(function () {
         Route::get('/', [PengajuanController::class, 'adminIndex'])->name('index');

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Pengajuan;
+use App\Models\PraPenelitian;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 
@@ -10,19 +11,17 @@ class PengajuanController extends Controller
 {
     public function index()
     {
-        // Cek apakah ada pengajuan pra-penelitian
+        // ✅ BENAR - Tanpa with('praPenelitian')
         $pra = Pengajuan::where('user_id', auth()->id())
             ->where('jenis', 'pra_penelitian')
             ->latest()
             ->first();
 
-        // Cek apakah ada pengajuan magang
         $magang = Pengajuan::where('user_id', auth()->id())
             ->where('jenis', 'magang')
             ->latest()
             ->first();
 
-        // Kirim kedua variabel ke view
         return view('pengajuan.index', compact('pra', 'magang'));
     }
 
@@ -69,7 +68,7 @@ class PengajuanController extends Controller
     }
 
     // ========== MAHASISWA METHODS ==========
-    
+
     /**
      * Upload bukti pembayaran
      */
@@ -106,7 +105,7 @@ class PengajuanController extends Controller
     }
 
     // ========== ADMIN METHODS ==========
-    
+
     public function adminIndex()
     {
         $data = Pengajuan::with('user')->latest()->get();
@@ -130,12 +129,20 @@ class PengajuanController extends Controller
      */
     public function kirimGalasan(Request $request, Pengajuan $pengajuan)
     {
+        // Cek apakah ada pra_penelitian yang sudah approved
+        $praPenelitian = PraPenelitian::where('user_id', $pengajuan->user_id)
+            ->where('status', 'Approved')
+            ->first();
+
+        if (!$praPenelitian) {
+            return back()->with('error', 'Form pra penelitian belum di-approve.');
+        }
+
         $request->validate([
             'surat_balasan' => 'required|file|mimes:pdf|max:2048',
             'invoice' => 'required|file|mimes:pdf|max:2048',
         ]);
 
-        // Upload files
         $suratPath = $request->file('surat_balasan')->store('surat_balasan', 'public');
         $invoicePath = $request->file('invoice')->store('invoice', 'public');
 

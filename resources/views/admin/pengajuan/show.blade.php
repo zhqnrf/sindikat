@@ -82,6 +82,74 @@
             </div>
         </div>
 
+        <!-- Info Status Form Pra Penelitian -->
+<div class="col-lg-12 mb-4">
+    <div class="card border-0 shadow-sm">
+        <div class="card-header bg-info text-white">
+            <h5 class="mb-0">
+                <i class="bi bi-clipboard-check me-2"></i>Status Form Pra Penelitian
+            </h5>
+        </div>
+        <div class="card-body">
+            @php
+                $praPenelitian = App\Models\PraPenelitian::where('user_id', $pengajuan->user_id)->first();
+            @endphp
+
+            @if (!$praPenelitian)
+                <div class="alert alert-warning mb-0">
+                    <i class="bi bi-exclamation-triangle me-2"></i>
+                    Mahasiswa belum mengisi form pra penelitian
+                </div>
+            @else
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <small class="text-muted d-block">Judul Penelitian</small>
+                        <strong>{{ $praPenelitian->judul }}</strong>
+                    </div>
+                    <div class="col-md-6">
+                        <small class="text-muted d-block">Jenis Penelitian</small>
+                        <strong>{{ $praPenelitian->jenis_penelitian }}</strong>
+                    </div>
+                    <div class="col-md-6">
+                        <small class="text-muted d-block">Status Form</small>
+                        @if ($praPenelitian->status === 'Pending')
+                            <span class="badge bg-warning text-dark">Menunggu Approval</span>
+                        @elseif ($praPenelitian->status === 'Approved')
+                            <span class="badge bg-success">Approved</span>
+                        @elseif ($praPenelitian->status === 'Rejected')
+                            <span class="badge bg-danger">Rejected</span>
+                        @endif
+                    </div>
+                    <div class="col-md-6">
+                        <small class="text-muted d-block">Surat Pengantar</small>
+                        <a href="{{ Storage::url($praPenelitian->file_surat_pengantar) }}" target="_blank" class="btn btn-sm btn-outline-primary">
+                            <i class="bi bi-file-pdf me-1"></i> Lihat Surat
+                        </a>
+                    </div>
+                </div>
+
+                @if ($praPenelitian->status === 'Pending')
+                    <hr>
+                    <div class="d-flex gap-2">
+                        <form action="{{ route('pra-penelitian.approve', $praPenelitian->id) }}" method="POST">
+                            @csrf
+                            <button type="submit" class="btn btn-success btn-sm" onclick="return confirm('Approve form pra penelitian?')">
+                                <i class="bi bi-check-lg me-1"></i> Approve Form
+                            </button>
+                        </form>
+                        <form action="{{ route('pra-penelitian.reject', $praPenelitian->id) }}" method="POST">
+                            @csrf
+                            <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('Reject form pra penelitian?')">
+                                <i class="bi bi-x-lg me-1"></i> Reject Form
+                            </button>
+                        </form>
+                    </div>
+                @endif
+            @endif
+        </div>
+    </div>
+</div>
+
         {{-- Area Proses Galasan + Pembayaran --}}
         <div class="col-lg-8">
 

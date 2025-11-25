@@ -258,6 +258,24 @@ class PraPenelitianController extends Controller
     }
 
     /**
+     * Approve form pra penelitian (approve surat pengantar)
+     */
+    public function approveForm(PraPenelitian $praPenelitian)
+    {
+        $praPenelitian->update(['status' => 'Approved']);
+        return back()->with('success', 'Form pra penelitian berhasil di-approve.');
+    }
+
+    /**
+     * Reject form pra penelitian
+     */
+    public function rejectForm(PraPenelitian $praPenelitian)
+    {
+        $praPenelitian->update(['status' => 'Rejected']);
+        return back()->with('success', 'Form pra penelitian ditolak.');
+    }
+
+    /**
      * Helper: Delete File
      */
     private function deleteFile($path)

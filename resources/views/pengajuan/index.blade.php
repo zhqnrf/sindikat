@@ -268,88 +268,133 @@
                                 </button>
                             </form>
                         @elseif ($pra->status === 'approved')
-                            {{-- SECTION GALASAN & UPLOAD BUKTI PEMBAYARAN --}}
-                            @if ($pra->status_galasan === 'sent')
-                                <div class="alert alert-info small py-2 mt-3">
-                                    <i class="bi bi-file-earmark-text me-1"></i> Galasan telah dikirim oleh admin
+                            {{-- CEK APAKAH SUDAH ISI FORM PRA PENELITIAN --}}
+                            @php
+                                $praPenelitian = App\Models\PraPenelitian::where('user_id', auth()->id())->first();
+                            @endphp
+
+                            @if (!$praPenelitian)
+                                {{-- Belum isi form pra penelitian --}}
+                                <div class="alert alert-info small py-2">
+                                    <i class="bi bi-info-circle me-1"></i> Silakan isi form pra penelitian terlebih dahulu
                                 </div>
+                                <div class="text-center mt-3">
+                                    <a href="{{ route('pra-penelitian.create') }}" class="btn btn-maroon btn-sm w-100">
+                                        <i class="bi bi-pencil-square me-1"></i> Isi Form Pra Penelitian
+                                    </a>
+                                </div>
+
+                            @elseif ($praPenelitian->status === 'Pending')
+                                {{-- Sudah isi form, tapi belum di-approve admin --}}
+                                <div class="alert alert-warning small py-2">
+                                    <i class="bi bi-clock-history me-1"></i> Form pra penelitian sedang ditinjau admin
+                                </div>
+                                <div class="text-center mt-2">
+                                    <small class="text-muted">Menunggu approval surat pengantar</small>
+                                </div>
+
+                            @elseif ($praPenelitian->status === 'Rejected')
+                                {{-- Form ditolak --}}
+                                <div class="alert alert-danger small py-2">
+                                    <i class="bi bi-x-circle me-1"></i> Form pra penelitian ditolak. Silakan perbaiki.
+                                </div>
+                                <div class="text-center mt-3">
+                                    <a href="{{ route('pra-penelitian.edit', $praPenelitian->id) }}" class="btn btn-outline-danger btn-sm w-100">
+                                        <i class="bi bi-pencil-square me-1"></i> Edit Form
+                                    </a>
+                                </div>
+
+                            @elseif ($praPenelitian->status === 'Approved')
+                                {{-- Form sudah di-approve, lanjut ke proses galasan --}}
                                 
-                                {{-- Download Surat & Invoice --}}
-                                <div class="d-flex gap-2 mb-3">
-                                    @if ($pra->surat_balasan)
-                                        <a href="{{ Storage::url($pra->surat_balasan) }}" target="_blank" class="btn btn-sm btn-outline-primary flex-fill">
-                                            <i class="bi bi-file-earmark-pdf me-1"></i> Surat
-                                        </a>
-                                    @endif
-                                    @if ($pra->invoice)
-                                        <a href="{{ Storage::url($pra->invoice) }}" target="_blank" class="btn btn-sm btn-outline-primary flex-fill">
-                                            <i class="bi bi-receipt me-1"></i> Invoice
-                                        </a>
-                                    @endif
-                                </div>
-
-                                {{-- Upload Bukti Pembayaran --}}
-                                @if ($pra->status_pembayaran === 'pending')
-                                    <form action="{{ route('pengajuan.upload-bukti', $pra->id) }}" method="POST" enctype="multipart/form-data">
-                                        @csrf
-                                        <div class="mb-2">
-                                            <label class="form-label small fw-bold">Upload Bukti Pembayaran</label>
-                                            <input type="file" name="bukti_pembayaran" class="form-control form-control-sm" accept=".pdf,.jpg,.jpeg,.png" required>
-                                            <small class="text-muted">Format: PDF/JPG/PNG (Max 2MB)</small>
-                                        </div>
-                                        <button type="submit" class="btn btn-maroon btn-sm w-100">
-                                            <i class="bi bi-upload me-1"></i> Upload Bukti
-                                        </button>
-                                    </form>
-                                @elseif ($pra->status_pembayaran === 'uploaded')
-                                    <div class="alert alert-warning small py-2">
-                                        <i class="bi bi-clock-history me-1"></i> Menunggu verifikasi pembayaran
+                                @if ($pra->status_galasan === 'pending')
+                                    {{-- Menunggu admin kirim galasan --}}
+                                    <div class="alert alert-info small py-2">
+                                        <i class="bi bi-hourglass-split me-1"></i> Menunggu admin mengirim galasan
                                     </div>
-                                @elseif ($pra->status_pembayaran === 'verified')
+
+                                @elseif ($pra->status_galasan === 'sent')
+                                    {{-- Galasan sudah dikirim --}}
                                     <div class="alert alert-success small py-2">
-                                        <i class="bi bi-check-circle me-1"></i> Pembayaran terverifikasi
+                                        <i class="bi bi-file-earmark-text me-1"></i> Galasan telah dikirim
+                                    </div>
+                                    
+                                    {{-- Download Surat & Invoice --}}
+                                    <div class="d-flex gap-2 mb-3">
+                                        @if ($pra->surat_balasan)
+                                            <a href="{{ Storage::url($pra->surat_balasan) }}" target="_blank" class="btn btn-sm btn-outline-primary flex-fill">
+                                                <i class="bi bi-file-earmark-pdf me-1"></i> Surat
+                                            </a>
+                                        @endif
+                                        @if ($pra->invoice)
+                                            <a href="{{ Storage::url($pra->invoice) }}" target="_blank" class="btn btn-sm btn-outline-primary flex-fill">
+                                                <i class="bi bi-receipt me-1"></i> Invoice
+                                            </a>
+                                        @endif
                                     </div>
 
-                                    {{-- TAMPILKAN INFO CI DAN RUANGAN --}}
-                                    @if ($pra->ci_nama)
-                                        <div class="card border-0 shadow-sm mt-3" style="background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);">
-                                            <div class="card-body p-3">
-                                                <h6 class="fw-bold mb-3 text-maroon">
-                                                    <i class="bi bi-person-badge me-2"></i>Informasi Pembimbing
-                                                </h6>
-                                                <div class="mb-2">
-                                                    <small class="text-muted d-block">Nama Pembimbing (CI)</small>
-                                                    <strong>{{ $pra->ci_nama }}</strong>
-                                                </div>
-                                                <div class="mb-2">
-                                                    <small class="text-muted d-block">No. HP</small>
-                                                    <a href="tel:{{ $pra->ci_no_hp }}" class="text-decoration-none fw-bold">
-                                                        <i class="bi bi-telephone-fill me-1"></i>{{ $pra->ci_no_hp }}
-                                                    </a>
-                                                </div>
-                                                <div class="mb-2">
-                                                    <small class="text-muted d-block">Bidang</small>
-                                                    <strong>{{ $pra->ci_bidang }}</strong>
-                                                </div>
-                                                <div>
-                                                    <small class="text-muted d-block">Ruangan</small>
-                                                    <strong class="text-maroon">{{ $pra->ruangan }}</strong>
+                                    {{-- PROSES PEMBAYARAN --}}
+                                    @if ($pra->status_pembayaran === 'pending')
+                                        {{-- Form upload bukti pembayaran --}}
+                                        <form action="{{ route('pengajuan.upload-bukti', $pra->id) }}" method="POST" enctype="multipart/form-data">
+                                            @csrf
+                                            <div class="mb-2">
+                                                <label class="form-label small fw-bold">Upload Bukti Pembayaran</label>
+                                                <input type="file" name="bukti_pembayaran" class="form-control form-control-sm" accept=".pdf,.jpg,.jpeg,.png" required>
+                                                <small class="text-muted">Format: PDF/JPG/PNG (Max 2MB)</small>
+                                            </div>
+                                            <button type="submit" class="btn btn-maroon btn-sm w-100">
+                                                <i class="bi bi-upload me-1"></i> Upload Bukti
+                                            </button>
+                                        </form>
+
+                                    @elseif ($pra->status_pembayaran === 'uploaded')
+                                        {{-- Menunggu verifikasi --}}
+                                        <div class="alert alert-warning small py-2">
+                                            <i class="bi bi-clock-history me-1"></i> Menunggu verifikasi pembayaran
+                                        </div>
+
+                                    @elseif ($pra->status_pembayaran === 'verified')
+                                        {{-- Pembayaran terverifikasi - TAMPILKAN INFO CI --}}
+                                        <div class="alert alert-success small py-2 mb-3">
+                                            <i class="bi bi-check-circle me-1"></i> Pembayaran terverifikasi
+                                        </div>
+
+                                        {{-- INFO CI DAN RUANGAN --}}
+                                        @if ($pra->ci_nama)
+                                            <div class="card border-0 shadow-sm" style="background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);">
+                                                <div class="card-body p-3">
+                                                    <h6 class="fw-bold mb-3" style="color: var(--custom-maroon);">
+                                                        <i class="bi bi-person-badge me-2"></i>Informasi Pembimbing
+                                                    </h6>
+                                                    <div class="mb-2">
+                                                        <small class="text-muted d-block">Nama Pembimbing (CI)</small>
+                                                        <strong>{{ $pra->ci_nama }}</strong>
+                                                    </div>
+                                                    <div class="mb-2">
+                                                        <small class="text-muted d-block">No. HP</small>
+                                                        <a href="tel:{{ $pra->ci_no_hp }}" class="text-decoration-none fw-bold">
+                                                            <i class="bi bi-telephone-fill me-1"></i>{{ $pra->ci_no_hp }}
+                                                        </a>
+                                                    </div>
+                                                    <div class="mb-2">
+                                                        <small class="text-muted d-block">Bidang</small>
+                                                        <strong>{{ $pra->ci_bidang }}</strong>
+                                                    </div>
+                                                    <div>
+                                                        <small class="text-muted d-block">Ruangan</small>
+                                                        <strong style="color: var(--custom-maroon);">{{ $pra->ruangan }}</strong>
+                                                    </div>
                                                 </div>
                                             </div>
-                                        </div>
-                                    @endif
 
-                                    {{-- Link ke Jurnal --}}
-                                    <div class="text-center mt-3">
-                                        <a href="{{ route('pra-penelitian.create') }}" class="btn btn-maroon btn-sm w-100">
-                                            Isi Jurnal & Kegiatan <i class="bi bi-arrow-right ms-1"></i>
-                                        </a>
-                                    </div>
+                                            <div class="alert alert-info small py-2 mt-3 mb-0">
+                                                <i class="bi bi-info-circle me-1"></i> 
+                                                Silakan hubungi pembimbing untuk memulai penelitian
+                                            </div>
+                                        @endif
+                                    @endif
                                 @endif
-                            @else
-                                <div class="alert alert-light text-center small text-muted mb-0">
-                                    Menunggu admin mengirim galasan (surat & invoice)
-                                </div>
                             @endif
                         @else
                             <div class="alert alert-light text-center small text-muted mb-0">

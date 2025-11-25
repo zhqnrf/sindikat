@@ -125,6 +125,8 @@ Route::middleware(['auth', 'admin'])->group(function () {
         Route::put('/{pra_penelitian}', [PraPenelitianController::class, 'update'])->name('update');
         Route::delete('/{pra_penelitian}', [PraPenelitianController::class, 'destroy'])->name('destroy');
         Route::patch('/{pra_penelitian}/batal', [PraPenelitianController::class, 'batal'])->name('batal');
+        Route::post('/pra-penelitian/{praPenelitian}/approve-form', [PraPenelitianController::class, 'approveForm'])->name('approve');
+        Route::post('/pra-penelitian/{praPenelitian}/reject-form', [PraPenelitianController::class, 'rejectForm'])->name('reject');
     });
 
     // Ruangan

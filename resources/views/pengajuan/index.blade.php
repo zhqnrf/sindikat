@@ -79,6 +79,7 @@
             box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
             overflow: hidden;
             border-top: 5px solid var(--custom-maroon);
+            height: 100%;
         }
 
         .status-header {
@@ -99,27 +100,12 @@
         .detail-row {
             display: flex;
             justify-content: space-between;
-            padding: 1rem 0;
+            padding: 0.8rem 0;
             border-bottom: 1px solid #f0f0f0;
-        }
-
-        .ftr {
-            text-align: center;
         }
 
         .detail-row:last-child {
             border-bottom: none;
-        }
-
-        .detail-label {
-            color: var(--text-muted);
-            font-weight: 500;
-        }
-
-        .detail-value {
-            font-weight: 700;
-            color: var(--text-dark);
-            text-transform: capitalize;
         }
 
         /* --- Badges --- */
@@ -133,23 +119,9 @@
             gap: 0.5rem;
         }
 
-        .bg-pending {
-            background-color: #fff7ed;
-            color: #c2410c;
-            border: 1px solid #ffedd5;
-        }
-
-        .bg-approved {
-            background-color: #f0fdf4;
-            color: #15803d;
-            border: 1px solid #dcfce7;
-        }
-
-        .bg-rejected {
-            background-color: #fef2f2;
-            color: #b91c1c;
-            border: 1px solid #fee2e2;
-        }
+        .bg-pending { background-color: #fff7ed; color: #c2410c; border: 1px solid #ffedd5; }
+        .bg-approved { background-color: #f0fdf4; color: #15803d; border: 1px solid #dcfce7; }
+        .bg-rejected { background-color: #fef2f2; color: #b91c1c; border: 1px solid #fee2e2; }
 
         /* --- Buttons --- */
         .btn-maroon {
@@ -181,10 +153,7 @@
         }
 
         @keyframes fadeInUp {
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
+            to { opacity: 1; transform: translateY(0); }
         }
     </style>
 
@@ -230,28 +199,28 @@
 
             @if ($pra)
                 {{-- JIKA SUDAH ADA DATA PRA PENELITIAN -> TAMPILKAN STATUS --}}
-                <div class="status-card h-100">
+                <div class="status-card">
                     <div class="status-header text-center">
                         <h5 class="fw-bold mb-3">Pra Penelitian</h5>
 
                         @if ($pra->status === 'pending')
                             <div class="status-icon-large text-warning mb-2"><i class="bi bi-hourglass-split"></i></div>
-                            <span class="badge bg-warning text-dark px-3 py-2 rounded-pill">Menunggu Persetujuan</span>
+                            <span class="badge-lg bg-pending">Menunggu Persetujuan</span>
                         @elseif ($pra->status === 'approved')
                             <div class="status-icon-large text-success mb-2"><i class="bi bi-check-circle-fill"></i></div>
-                            <span class="badge bg-success px-3 py-2 rounded-pill">Disetujui</span>
+                            <span class="badge-lg bg-approved">Disetujui</span>
                         @elseif ($pra->status === 'rejected')
                             <div class="status-icon-large text-danger mb-2"><i class="bi bi-x-circle-fill"></i></div>
-                            <span class="badge bg-danger px-3 py-2 rounded-pill">Ditolak</span>
+                            <span class="badge-lg bg-rejected">Ditolak</span>
                         @endif
                     </div>
 
                     <div class="status-body mt-3">
-                        <div class="detail-row d-flex justify-content-between mb-2 border-bottom pb-2">
+                        <div class="detail-row">
                             <span class="text-muted small">Tanggal Pengajuan</span>
                             <span class="fw-bold small">{{ $pra->created_at->format('d M Y') }}</span>
                         </div>
-                        <div class="detail-row d-flex justify-content-between mb-3 border-bottom pb-2">
+                        <div class="detail-row">
                             <span class="text-muted small">Update Terakhir</span>
                             <span class="fw-bold small">{{ $pra->updated_at->diffForHumans() }}</span>
                         </div>
@@ -268,58 +237,58 @@
                                 </button>
                             </form>
                         @elseif ($pra->status === 'approved')
-                            {{-- CEK APAKAH SUDAH ISI FORM PRA PENELITIAN --}}
+                            
+                            {{-- CEK STATUS FORM DETAIL --}}
                             @php
                                 $praPenelitian = App\Models\PraPenelitian::where('user_id', auth()->id())->first();
                             @endphp
 
                             @if (!$praPenelitian)
-                                {{-- Belum isi form pra penelitian --}}
-                                <div class="alert alert-info small py-2">
-                                    <i class="bi bi-info-circle me-1"></i> Silakan isi form pra penelitian terlebih dahulu
+                                {{-- CASE A: Belum isi form detail --}}
+                                <div class="alert alert-info small py-2 mt-3">
+                                    <i class="bi bi-info-circle me-1"></i> Langkah selanjutnya: Isi biodata lengkap.
                                 </div>
-                                <div class="text-center mt-3">
-                                    <a href="{{ route('pra-penelitian.create') }}" class="btn btn-maroon btn-sm w-100">
+                                <div class="text-center mt-2">
+                                    <a href="{{ route('pra-penelitian.create') }}" class="btn btn-maroon btn-sm w-100 shadow-sm">
                                         <i class="bi bi-pencil-square me-1"></i> Isi Form Pra Penelitian
                                     </a>
                                 </div>
 
                             @elseif ($praPenelitian->status === 'Pending')
-                                {{-- Sudah isi form, tapi belum di-approve admin --}}
-                                <div class="alert alert-warning small py-2">
-                                    <i class="bi bi-clock-history me-1"></i> Form pra penelitian sedang ditinjau admin
+                                {{-- CASE B: Sudah isi, menunggu review admin --}}
+                                <div class="alert alert-warning small py-2 mt-3">
+                                    <i class="bi bi-clock-history me-1"></i> Biodata sedang ditinjau oleh Admin.
                                 </div>
-                                <div class="text-center mt-2">
-                                    <small class="text-muted">Menunggu approval surat pengantar</small>
+                                <div class="text-center">
+                                    <small class="text-muted fst-italic">Mohon menunggu validasi surat pengantar.</small>
                                 </div>
 
                             @elseif ($praPenelitian->status === 'Rejected')
-                                {{-- Form ditolak --}}
-                                <div class="alert alert-danger small py-2">
-                                    <i class="bi bi-x-circle me-1"></i> Form pra penelitian ditolak. Silakan perbaiki.
+                                {{-- CASE C: Form ditolak --}}
+                                <div class="alert alert-danger small py-2 mt-3">
+                                    <i class="bi bi-x-circle me-1"></i> Data Anda ditolak. Silakan perbaiki.
                                 </div>
-                                <div class="text-center mt-3">
+                                <div class="text-center mt-2">
                                     <a href="{{ route('pra-penelitian.edit', $praPenelitian->id) }}" class="btn btn-outline-danger btn-sm w-100">
-                                        <i class="bi bi-pencil-square me-1"></i> Edit Form
+                                        <i class="bi bi-pencil-square me-1"></i> Perbaiki Data
                                     </a>
                                 </div>
 
                             @elseif ($praPenelitian->status === 'Approved')
-                                {{-- Form sudah di-approve, lanjut ke proses galasan --}}
+                                {{-- CASE D: Form disetujui, cek Galasan & Pembayaran --}}
                                 
                                 @if ($pra->status_galasan === 'pending')
-                                    {{-- Menunggu admin kirim galasan --}}
-                                    <div class="alert alert-info small py-2">
-                                        <i class="bi bi-hourglass-split me-1"></i> Menunggu admin mengirim galasan
+                                    {{-- D.1 Menunggu Admin Kirim Surat --}}
+                                    <div class="alert alert-info small py-2 mt-3">
+                                        <i class="bi bi-hourglass-split me-1"></i> Menunggu Admin mengirim Surat Balasan & Invoice.
                                     </div>
 
                                 @elseif ($pra->status_galasan === 'sent')
-                                    {{-- Galasan sudah dikirim --}}
-                                    <div class="alert alert-success small py-2">
-                                        <i class="bi bi-file-earmark-text me-1"></i> Galasan telah dikirim
+                                    {{-- D.2 Surat Ada, Cek Pembayaran --}}
+                                    <div class="alert alert-success small py-2 mt-3 border-0 bg-success bg-opacity-10 text-success">
+                                        <i class="bi bi-envelope-check-fill me-1"></i> Surat Balasan diterima!
                                     </div>
                                     
-                                    {{-- Download Surat & Invoice --}}
                                     <div class="d-flex gap-2 mb-3">
                                         @if ($pra->surat_balasan)
                                             <a href="{{ Storage::url($pra->surat_balasan) }}" target="_blank" class="btn btn-sm btn-outline-primary flex-fill">
@@ -327,75 +296,62 @@
                                             </a>
                                         @endif
                                         @if ($pra->invoice)
-                                            <a href="{{ Storage::url($pra->invoice) }}" target="_blank" class="btn btn-sm btn-outline-primary flex-fill">
+                                            <a href="{{ Storage::url($pra->invoice) }}" target="_blank" class="btn btn-sm btn-outline-warning flex-fill text-dark">
                                                 <i class="bi bi-receipt me-1"></i> Invoice
                                             </a>
                                         @endif
                                     </div>
 
-                                    {{-- PROSES PEMBAYARAN --}}
+                                    {{-- Status Pembayaran --}}
                                     @if ($pra->status_pembayaran === 'pending')
-                                        {{-- Form upload bukti pembayaran --}}
-                                        <form action="{{ route('pengajuan.upload-bukti', $pra->id) }}" method="POST" enctype="multipart/form-data">
+                                        <form action="{{ route('pengajuan.upload-bukti', $pra->id) }}" method="POST" enctype="multipart/form-data" class="p-3 bg-light rounded border">
                                             @csrf
-                                            <div class="mb-2">
-                                                <label class="form-label small fw-bold">Upload Bukti Pembayaran</label>
-                                                <input type="file" name="bukti_pembayaran" class="form-control form-control-sm" accept=".pdf,.jpg,.jpeg,.png" required>
-                                                <small class="text-muted">Format: PDF/JPG/PNG (Max 2MB)</small>
-                                            </div>
+                                            <label class="form-label small fw-bold mb-2">Upload Bukti Pembayaran</label>
+                                            <input type="file" name="bukti_pembayaran" class="form-control form-control-sm mb-2" accept=".pdf,.jpg,.jpeg,.png" required>
                                             <button type="submit" class="btn btn-maroon btn-sm w-100">
-                                                <i class="bi bi-upload me-1"></i> Upload Bukti
+                                                <i class="bi bi-upload me-1"></i> Kirim Bukti
                                             </button>
                                         </form>
 
                                     @elseif ($pra->status_pembayaran === 'uploaded')
-                                        {{-- Menunggu verifikasi --}}
-                                        <div class="alert alert-warning small py-2">
-                                            <i class="bi bi-clock-history me-1"></i> Menunggu verifikasi pembayaran
+                                        <div class="alert alert-warning small py-2 mb-0">
+                                            <i class="bi bi-clock me-1"></i> Pembayaran sedang diverifikasi.
                                         </div>
 
                                     @elseif ($pra->status_pembayaran === 'verified')
-                                        {{-- Pembayaran terverifikasi - TAMPILKAN INFO CI --}}
-                                        <div class="alert alert-success small py-2 mb-3">
-                                            <i class="bi bi-check-circle me-1"></i> Pembayaran terverifikasi
+                                        <div class="alert alert-success small py-2 mb-3 border-0 bg-success text-white">
+                                            <i class="bi bi-check-all me-1"></i> <strong>LUNAS & TERVERIFIKASI</strong>
                                         </div>
 
-                                        {{-- INFO CI DAN RUANGAN --}}
+                                        {{-- INFO PEMBIMBING (CI) --}}
                                         @if ($pra->ci_nama)
-                                            <div class="card border-0 shadow-sm" style="background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);">
+                                            <div class="card border-0 shadow-sm bg-light">
                                                 <div class="card-body p-3">
-                                                    <h6 class="fw-bold mb-3" style="color: var(--custom-maroon);">
-                                                        <i class="bi bi-person-badge me-2"></i>Informasi Pembimbing
-                                                    </h6>
-                                                    <div class="mb-2">
-                                                        <small class="text-muted d-block">Nama Pembimbing (CI)</small>
-                                                        <strong>{{ $pra->ci_nama }}</strong>
+                                                    <h6 class="fw-bold mb-2 text-dark border-bottom pb-2">Data Pembimbing</h6>
+                                                    <div class="d-flex justify-content-between mb-1">
+                                                        <span class="small text-muted">Nama:</span>
+                                                        <span class="small fw-bold">{{ $pra->ci_nama }}</span>
                                                     </div>
-                                                    <div class="mb-2">
-                                                        <small class="text-muted d-block">No. HP</small>
-                                                        <a href="tel:{{ $pra->ci_no_hp }}" class="text-decoration-none fw-bold">
-                                                            <i class="bi bi-telephone-fill me-1"></i>{{ $pra->ci_no_hp }}
-                                                        </a>
+                                                    <div class="d-flex justify-content-between mb-1">
+                                                        <span class="small text-muted">Kontak:</span>
+                                                        <a href="tel:{{ $pra->ci_no_hp }}" class="small fw-bold text-decoration-none">{{ $pra->ci_no_hp }}</a>
                                                     </div>
-                                                    <div class="mb-2">
-                                                        <small class="text-muted d-block">Bidang</small>
-                                                        <strong>{{ $pra->ci_bidang }}</strong>
-                                                    </div>
-                                                    <div>
-                                                        <small class="text-muted d-block">Ruangan</small>
-                                                        <strong style="color: var(--custom-maroon);">{{ $pra->ruangan }}</strong>
+                                                    <div class="d-flex justify-content-between mb-1">
+                                                        <span class="small text-muted">Ruangan:</span>
+                                                        <span class="small fw-bold text-custom-maroon">{{ $pra->ruangan }}</span>
                                                     </div>
                                                 </div>
                                             </div>
-
-                                            <div class="alert alert-info small py-2 mt-3 mb-0">
-                                                <i class="bi bi-info-circle me-1"></i> 
-                                                Silakan hubungi pembimbing untuk memulai penelitian
+                                            <div class="mt-3 text-center">
+                                                <a href="https://wa.me/{{ preg_replace('/[^0-9]/', '', $pra->ci_no_hp) }}" target="_blank" class="btn btn-success btn-sm w-100">
+                                                    <i class="bi bi-whatsapp me-1"></i> Hubungi Pembimbing
+                                                </a>
                                             </div>
                                         @endif
                                     @endif
                                 @endif
                             @endif
+
                         @else
                             <div class="alert alert-light text-center small text-muted mb-0">
                                 Mohon menunggu verifikasi admin.
@@ -404,8 +360,8 @@
                     </div>
                 </div>
             @else
-                {{-- JIKA BELUM ADA DATA -> TAMPILKAN TOMBOL PENGAJUAN --}}
-                <div class="option-card h-100 d-flex flex-column">
+                {{-- JIKA BELUM ADA DATA -> TAMPILKAN MENU PENGAJUAN --}}
+                <div class="option-card">
                     <div class="icon-circle align-self-center mb-3">
                         <i class="bi bi-journal-richtext"></i>
                     </div>
@@ -428,36 +384,35 @@
         <div class="col-md-6 col-lg-5 animate-up" style="animation-delay: 0.2s;">
 
             @if ($magang)
-                {{-- JIKA SUDAH ADA DATA MAGANG -> TAMPILKAN STATUS --}}
-                <div class="status-card h-100">
+                <div class="status-card">
                     <div class="status-header text-center">
                         <h5 class="fw-bold mb-3">Magang / PKL</h5>
 
                         @if ($magang->status === 'pending')
                             <div class="status-icon-large text-warning mb-2"><i class="bi bi-hourglass-split"></i></div>
-                            <span class="badge bg-warning text-dark px-3 py-2 rounded-pill">Menunggu Persetujuan</span>
+                            <span class="badge-lg bg-pending">Menunggu Persetujuan</span>
                         @elseif ($magang->status === 'approved')
                             <div class="status-icon-large text-success mb-2"><i class="bi bi-check-circle-fill"></i></div>
-                            <span class="badge bg-success px-3 py-2 rounded-pill">Disetujui</span>
+                            <span class="badge-lg bg-approved">Disetujui</span>
                         @elseif ($magang->status === 'rejected')
                             <div class="status-icon-large text-danger mb-2"><i class="bi bi-x-circle-fill"></i></div>
-                            <span class="badge bg-danger px-3 py-2 rounded-pill">Ditolak</span>
+                            <span class="badge-lg bg-rejected">Ditolak</span>
                         @endif
                     </div>
 
                     <div class="status-body mt-3">
-                        <div class="detail-row d-flex justify-content-between mb-2 border-bottom pb-2">
+                        <div class="detail-row">
                             <span class="text-muted small">Tanggal Pengajuan</span>
                             <span class="fw-bold small">{{ $magang->created_at->format('d M Y') }}</span>
                         </div>
-                        <div class="detail-row d-flex justify-content-between mb-3 border-bottom pb-2">
+                        <div class="detail-row">
                             <span class="text-muted small">Update Terakhir</span>
                             <span class="fw-bold small">{{ $magang->updated_at->diffForHumans() }}</span>
                         </div>
 
                         @if ($magang->status === 'rejected')
                             <div class="alert alert-danger small py-2 mt-3">
-                                <i class="bi bi-info-circle me-1"></i> Pengajuan Anda ditolak. Silakan ajukan ulang.
+                                <i class="bi bi-info-circle me-1"></i> Pengajuan Anda ditolak.
                             </div>
                             <form action="{{ route('pengajuan.magang') }}" method="POST" class="w-100 mt-3">
                                 @csrf
@@ -467,22 +422,23 @@
                                 </button>
                             </form>
                         @elseif ($magang->status === 'approved')
-                            <div class="text-center mt-3">
-                                <small class="text-muted d-block mb-2">Menu Tersedia:</small>
-                                <a href="{{ route('mahasiswa.create') }}" class="btn btn-maroon btn-sm w-100">
+                            <div class="alert alert-success small py-2 mt-3 border-0 bg-success bg-opacity-10 text-success">
+                                <i class="bi bi-check-lg me-1"></i> Pengajuan diterima.
+                            </div>
+                            <div class="text-center mt-2">
+                                <a href="{{ route('mahasiswa.create') }}" class="btn btn-maroon btn-sm w-100 shadow-sm">
                                     Lengkapi Biodata Magang <i class="bi bi-arrow-right ms-1"></i>
                                 </a>
                             </div>
                         @else
-                            <div class="alert alert-light text-center small text-muted mb-0">
+                            <div class="alert alert-light text-center small text-muted mb-0 mt-3">
                                 Mohon menunggu verifikasi admin.
                             </div>
                         @endif
                     </div>
                 </div>
             @else
-                {{-- JIKA BELUM ADA DATA -> TAMPILKAN TOMBOL PENGAJUAN --}}
-                <div class="option-card h-100 d-flex flex-column">
+                <div class="option-card">
                     <div class="icon-circle align-self-center mb-3">
                         <i class="bi bi-briefcase"></i>
                     </div>

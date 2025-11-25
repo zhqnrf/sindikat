@@ -50,6 +50,7 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/', [PengajuanController::class, 'index'])->name('index');
         Route::post('/pra', [PengajuanController::class, 'ajukanPra'])->name('pra');
         Route::post('/magang', [PengajuanController::class, 'ajukanMagang'])->name('magang');
+        Route::post('/{pengajuan}/upload-bukti', [PengajuanController::class, 'uploadBuktiPembayaran'])->name('upload-bukti');
     });
 
     // --- MAHASISWA (Akses User setelah approved magang) ---
@@ -98,6 +99,9 @@ Route::middleware(['auth', 'admin'])->group(function () {
         Route::get('/', [PengajuanController::class, 'adminIndex'])->name('index');
         Route::post('/{pengajuan}/approve', [PengajuanController::class, 'approve'])->name('approve');
         Route::post('/{pengajuan}/reject', [PengajuanController::class, 'reject'])->name('reject');
+        Route::post('/{pengajuan}/kirim-galasan', [PengajuanController::class, 'kirimGalasan'])->name('kirim-galasan');
+        Route::post('/{pengajuan}/approve-pembayaran', [PengajuanController::class, 'approvePembayaran'])->name('approve-pembayaran');
+        Route::get('/{pengajuan}', [PengajuanController::class, 'show'])->name('show');
     });
 
     // Mahasiswa (Admin Features)

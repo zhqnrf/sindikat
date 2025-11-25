@@ -108,117 +108,145 @@
         @keyframes fadeInUp { to { opacity: 1; transform: translateY(0); } }
     </style>
 
-    <!-- Header Section -->
-    <div class="page-header-wrapper animate-up">
-        <div>
-            <h4 class="fw-bold mb-1" style="color: var(--custom-maroon);">Daftar Pengajuan</h4>
-            <small class="text-muted">Kelola persetujuan pengajuan dari pengguna.</small>
-        </div>
+<!-- Header Section -->
+<div class="page-header-wrapper animate-up">
+    <div>
+        <h4 class="fw-bold mb-1" style="color: var(--custom-maroon);">Daftar Pengajuan</h4>
+        <small class="text-muted">Kelola persetujuan pengajuan dari pengguna.</small>
     </div>
+</div>
 
-    <!-- Alert Messages -->
-    @if (session('success'))
-        <div class="alert alert-success alert-dismissible fade show animate-up" role="alert" style="border-radius: 12px;">
-            <i class="bi bi-check-circle-fill me-2"></i> {{ session('success') }}
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-        </div>
-    @endif
+<!-- Alert Messages -->
+@if (session('success'))
+    <div class="alert alert-success alert-dismissible fade show animate-up" role="alert" style="border-radius: 12px;">
+        <i class="bi bi-check-circle-fill me-2"></i> {{ session('success') }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+@endif
 
-    @if (session('error'))
-        <div class="alert alert-danger alert-dismissible fade show animate-up" role="alert" style="border-radius: 12px;">
-            <i class="bi bi-exclamation-triangle-fill me-2"></i> {{ session('error') }}
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-        </div>
-    @endif
+@if (session('error'))
+    <div class="alert alert-danger alert-dismissible fade show animate-up" role="alert" style="border-radius: 12px;">
+        <i class="bi bi-exclamation-triangle-fill me-2"></i> {{ session('error') }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+@endif
 
-    <!-- Table Section -->
-    <div class="custom-table-card animate-up" style="animation-delay: 0.1s;">
-        <div class="table-responsive">
-            <table class="table table-hover mb-0">
-                <thead>
+<!-- Table Section -->
+<div class="custom-table-card animate-up" style="animation-delay: 0.1s;">
+    <div class="table-responsive">
+        <table class="table table-hover mb-0">
+            <thead>
+                <tr>
+                    <th class="text-center" width="5%">No</th>
+                    <th>Nama Pengguna</th>
+                    <th>Asal Universitas</th>
+                    <th>Jenis Pengajuan</th>
+                    <th>Tanggal</th>
+                    <th class="text-center">Status</th>
+                    <th class="text-center">Status Galasan</th>
+                    <th class="text-center">Status Pembayaran</th>
+                    <th class="text-center" width="15%">Aksi</th>
+                </tr>
+            </thead>
+            <tbody>
+                @forelse ($data as $p)
                     <tr>
-                        <th class="text-center" width="5%">No</th>
-                        <th>Nama Pengguna</th>
-                        <th>Asal Universitas</th>
-                        <th>Jenis Pengajuan</th>
-                        <th>Tanggal</th>
-                        <th class="text-center">Status</th>
-                        <th class="text-center" width="15%">Aksi</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @forelse ($data as $p)
-                        <tr>
-                            <td class="text-center text-muted fw-bold">{{ $loop->iteration }}</td>
-                            <td>
-                                <div class="d-flex flex-column">
-                                    <span class="fw-bold text-dark">{{ $p->user->name ?? 'User Terhapus' }}</span>
-                                    <small class="text-muted">{{ $p->user->email ?? '-' }}</small>
-                                </div>
-                            </td>
-                            <td>{{ $p->user->mou ? $p->user->mou->nama_universitas : '-' }}</td>
-                            <td>
-                                <span class="fw-medium text-dark">{{ ucwords(str_replace('_', ' ', $p->jenis)) }}</span>
-                            </td>
-                            <td>
-                                <small class="text-muted">
-                                    <i class="bi bi-calendar3 me-1"></i> {{ $p->created_at->format('d M Y') }}
-                                </small>
-                            </td>
-                            <td class="text-center">
-                                @if ($p->status === 'pending')
-                                    <span class="badge-status status-pending">
-                                        <i class="bi bi-hourglass-split"></i> Pending
-                                    </span>
-                                @elseif ($p->status === 'approved')
-                                    <span class="badge-status status-approved">
-                                        <i class="bi bi-check-circle-fill"></i> Disetujui
-                                    </span>
-                                @elseif ($p->status === 'rejected')
-                                    <span class="badge-status status-rejected">
-                                        <i class="bi bi-x-circle-fill"></i> Ditolak
-                                    </span>
+                        <td class="text-center text-muted fw-bold">{{ $loop->iteration }}</td>
+                        <td>
+                            <div class="d-flex flex-column">
+                                <span class="fw-bold text-dark">{{ $p->user->name ?? 'User Terhapus' }}</span>
+                                <small class="text-muted">{{ $p->user->email ?? '-' }}</small>
+                            </div>
+                        </td>
+                        <td>{{ $p->user->mou ? $p->user->mou->nama_universitas : '-' }}</td>
+                        <td>
+                            <span class="fw-medium text-dark">{{ ucwords(str_replace('_', ' ', $p->jenis)) }}</span>
+                        </td>
+                        <td>
+                            <small class="text-muted">
+                                <i class="bi bi-calendar3 me-1"></i> {{ $p->created_at->format('d M Y') }}
+                            </small>
+                        </td>
+                        <td class="text-center">
+                            @if ($p->status === 'pending')
+                                <span class="badge-status status-pending">
+                                    <i class="bi bi-hourglass-split"></i> Pending
+                                </span>
+                            @elseif ($p->status === 'approved')
+                                <span class="badge-status status-approved">
+                                    <i class="bi bi-check-circle-fill"></i> Disetujui
+                                </span>
+                            @elseif ($p->status === 'rejected')
+                                <span class="badge-status status-rejected">
+                                    <i class="bi bi-x-circle-fill"></i> Ditolak
+                                </span>
+                            @endif
+                        </td>
+                        <td class="text-center">
+                            @if ($p->status === 'approved')
+                                @if ($p->status_galasan === 'pending')
+                                    <span class="badge bg-secondary">Belum Kirim</span>
                                 @else
-                                    <span class="badge bg-light text-dark border">{{ ucfirst($p->status) }}</span>
+                                    <span class="badge bg-info">Sudah Kirim</span>
                                 @endif
-                            </td>
-                            <td class="text-center">
-                                @if ($p->status === 'pending')
-                                    <div class="d-flex justify-content-center gap-2">
-                                        {{-- Tombol Approve --}}
-                                        <form action="{{ route('admin.pengajuan.approve', $p->id) }}" method="POST">
-                                            @csrf
-                                            <button type="submit" class="btn-action btn-approve" title="Setujui" onclick="return confirm('Yakin ingin menyetujui pengajuan ini?')">
-                                                <i class="bi bi-check-lg fs-5"></i>
-                                            </button>
-                                        </form>
+                            @else
+                                <span class="text-muted">-</span>
+                            @endif
+                        </td>
+                        <td class="text-center">
+                            @if ($p->status === 'approved' && $p->status_galasan === 'sent')
+                                @if ($p->status_pembayaran === 'pending')
+                                    <span class="badge bg-warning text-dark">Menunggu Upload</span>
+                                @elseif ($p->status_pembayaran === 'uploaded')
+                                    <span class="badge bg-primary">Perlu Verifikasi</span>
+                                @elseif ($p->status_pembayaran === 'verified')
+                                    <span class="badge bg-success">Terverifikasi</span>
+                                @endif
+                            @else
+                                <span class="text-muted">-</span>
+                            @endif
+                        </td>
+                        <td class="text-center">
+                            @if ($p->status === 'pending')
+                                <div class="d-flex justify-content-center gap-2">
+                                    {{-- Tombol Approve --}}
+                                    <form action="{{ route('admin.pengajuan.approve', $p->id) }}" method="POST">
+                                        @csrf
+                                        <button type="submit" class="btn-action btn-approve" title="Setujui" onclick="return confirm('Yakin ingin menyetujui pengajuan ini?')">
+                                            <i class="bi bi-check-lg fs-5"></i>
+                                        </button>
+                                    </form>
 
-                                        {{-- Tombol Reject --}}
-                                        <form action="{{ route('admin.pengajuan.reject', $p->id) }}" method="POST">
-                                            @csrf
-                                            <button type="submit" class="btn-action btn-reject" title="Tolak" onclick="return confirm('Yakin ingin menolak pengajuan ini?')">
-                                                <i class="bi bi-x-lg"></i>
-                                            </button>
-                                        </form>
-                                    </div>
-                                @else
-                                    <span class="text-muted small fst-italic">Selesai</span>
-                                @endif
-                            </td>
-                        </tr>
-                    @empty
-                        <tr>
-                            <td colspan="6" class="text-center py-5">
-                                <div class="d-flex flex-column align-items-center">
-                                    <i class="bi bi-inbox display-4 text-muted mb-3 opacity-50"></i>
-                                    <h5 class="text-muted fw-bold">Tidak ada pengajuan baru</h5>
-                                    <p class="text-muted small">Daftar pengajuan akan muncul di sini.</p>
+                                    {{-- Tombol Reject --}}
+                                    <form action="{{ route('admin.pengajuan.reject', $p->id) }}" method="POST">
+                                        @csrf
+                                        <button type="submit" class="btn-action btn-reject" title="Tolak" onclick="return confirm('Yakin ingin menolak pengajuan ini?')">
+                                            <i class="bi bi-x-lg"></i>
+                                        </button>
+                                    </form>
                                 </div>
-                            </td>
-                        </tr>
-                    @endforelse
-                </tbody>
-            </table>
-        </div>
+                            @elseif ($p->status === 'approved')
+                                <a href="{{ route('admin.pengajuan.show', $p->id) }}" class="btn btn-sm btn-outline-primary">
+                                    <i class="bi bi-eye me-1"></i> Lihat Detail
+                                </a>
+                            @else
+                                <span class="text-muted small fst-italic">Selesai</span>
+                            @endif
+                        </td>
+                    </tr>
+                @empty
+                    <tr>
+                        <td colspan="9" class="text-center py-5">
+                            <div class="d-flex flex-column align-items-center">
+                                <i class="bi bi-inbox display-4 text-muted mb-3 opacity-50"></i>
+                                <h5 class="text-muted fw-bold">Tidak ada pengajuan baru</h5>
+                                <p class="text-muted small">Daftar pengajuan akan muncul di sini.</p>
+                            </div>
+                        </td>
+                    </tr>
+                @endforelse
+            </tbody>
+        </table>
     </div>
+</div>
 @endsection

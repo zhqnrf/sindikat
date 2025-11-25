@@ -188,198 +188,273 @@
         }
     </style>
 
-    <div class="container py-4">
+<div class="container py-4">
 
-        {{-- Alert Success --}}
-        @if (session('success'))
-            <div class="alert alert-success alert-dismissible fade show animate-up mb-4" role="alert"
-                style="border-radius: 12px; box-shadow: 0 4px 15px rgba(16, 185, 129, 0.1);">
-                <div class="d-flex align-items-center">
-                    <i class="bi bi-check-circle-fill fs-4 me-3"></i>
-                    <div>
-                        <strong>Berhasil!</strong> {{ session('success') }}
+    {{-- Alert Success --}}
+    @if (session('success'))
+        <div class="alert alert-success alert-dismissible fade show animate-up mb-4" role="alert"
+            style="border-radius: 12px; box-shadow: 0 4px 15px rgba(16, 185, 129, 0.1);">
+            <div class="d-flex align-items-center">
+                <i class="bi bi-check-circle-fill fs-4 me-3"></i>
+                <div>
+                    <strong>Berhasil!</strong> {{ session('success') }}
+                </div>
+            </div>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    @endif
+
+    {{-- Alert Error --}}
+    @if (session('error'))
+        <div class="alert alert-danger alert-dismissible fade show animate-up mb-4" role="alert"
+            style="border-radius: 12px;">
+            <div class="d-flex align-items-center">
+                <i class="bi bi-exclamation-triangle-fill fs-4 me-3"></i>
+                <div>
+                    <strong>Gagal!</strong> {{ session('error') }}
+                </div>
+            </div>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    @endif
+
+    <div class="text-center mb-5 animate-up">
+        <h2 class="fw-bold" style="color: var(--text-dark);">Dashboard Pengajuan</h2>
+        <p class="text-muted">Kelola pengajuan Pra-Penelitian dan Magang Anda di sini.</p>
+    </div>
+
+    <div class="row justify-content-center g-4">
+
+        {{-- ========================== KOLOM 1: PRA PENELITIAN ========================== --}}
+        <div class="col-md-6 col-lg-5 animate-up" style="animation-delay: 0.1s;">
+
+            @if ($pra)
+                {{-- JIKA SUDAH ADA DATA PRA PENELITIAN -> TAMPILKAN STATUS --}}
+                <div class="status-card h-100">
+                    <div class="status-header text-center">
+                        <h5 class="fw-bold mb-3">Pra Penelitian</h5>
+
+                        @if ($pra->status === 'pending')
+                            <div class="status-icon-large text-warning mb-2"><i class="bi bi-hourglass-split"></i></div>
+                            <span class="badge bg-warning text-dark px-3 py-2 rounded-pill">Menunggu Persetujuan</span>
+                        @elseif ($pra->status === 'approved')
+                            <div class="status-icon-large text-success mb-2"><i class="bi bi-check-circle-fill"></i></div>
+                            <span class="badge bg-success px-3 py-2 rounded-pill">Disetujui</span>
+                        @elseif ($pra->status === 'rejected')
+                            <div class="status-icon-large text-danger mb-2"><i class="bi bi-x-circle-fill"></i></div>
+                            <span class="badge bg-danger px-3 py-2 rounded-pill">Ditolak</span>
+                        @endif
+                    </div>
+
+                    <div class="status-body mt-3">
+                        <div class="detail-row d-flex justify-content-between mb-2 border-bottom pb-2">
+                            <span class="text-muted small">Tanggal Pengajuan</span>
+                            <span class="fw-bold small">{{ $pra->created_at->format('d M Y') }}</span>
+                        </div>
+                        <div class="detail-row d-flex justify-content-between mb-3 border-bottom pb-2">
+                            <span class="text-muted small">Update Terakhir</span>
+                            <span class="fw-bold small">{{ $pra->updated_at->diffForHumans() }}</span>
+                        </div>
+
+                        @if ($pra->status === 'rejected')
+                            <div class="alert alert-danger small py-2 mt-3">
+                                <i class="bi bi-info-circle me-1"></i> Pengajuan Anda ditolak. Silakan ajukan ulang.
+                            </div>
+                            <form action="{{ route('pengajuan.pra') }}" method="POST" class="w-100 mt-3">
+                                @csrf
+                                <button type="submit" class="btn btn-outline-danger w-100 btn-sm"
+                                    onclick="return confirm('Ajukan Ulang Pra Penelitian?')">
+                                    <i class="bi bi-arrow-repeat me-1"></i> Ajukan Ulang
+                                </button>
+                            </form>
+                        @elseif ($pra->status === 'approved')
+                            {{-- SECTION GALASAN & UPLOAD BUKTI PEMBAYARAN --}}
+                            @if ($pra->status_galasan === 'sent')
+                                <div class="alert alert-info small py-2 mt-3">
+                                    <i class="bi bi-file-earmark-text me-1"></i> Galasan telah dikirim oleh admin
+                                </div>
+                                
+                                {{-- Download Surat & Invoice --}}
+                                <div class="d-flex gap-2 mb-3">
+                                    @if ($pra->surat_balasan)
+                                        <a href="{{ Storage::url($pra->surat_balasan) }}" target="_blank" class="btn btn-sm btn-outline-primary flex-fill">
+                                            <i class="bi bi-file-earmark-pdf me-1"></i> Surat
+                                        </a>
+                                    @endif
+                                    @if ($pra->invoice)
+                                        <a href="{{ Storage::url($pra->invoice) }}" target="_blank" class="btn btn-sm btn-outline-primary flex-fill">
+                                            <i class="bi bi-receipt me-1"></i> Invoice
+                                        </a>
+                                    @endif
+                                </div>
+
+                                {{-- Upload Bukti Pembayaran --}}
+                                @if ($pra->status_pembayaran === 'pending')
+                                    <form action="{{ route('pengajuan.upload-bukti', $pra->id) }}" method="POST" enctype="multipart/form-data">
+                                        @csrf
+                                        <div class="mb-2">
+                                            <label class="form-label small fw-bold">Upload Bukti Pembayaran</label>
+                                            <input type="file" name="bukti_pembayaran" class="form-control form-control-sm" accept=".pdf,.jpg,.jpeg,.png" required>
+                                            <small class="text-muted">Format: PDF/JPG/PNG (Max 2MB)</small>
+                                        </div>
+                                        <button type="submit" class="btn btn-maroon btn-sm w-100">
+                                            <i class="bi bi-upload me-1"></i> Upload Bukti
+                                        </button>
+                                    </form>
+                                @elseif ($pra->status_pembayaran === 'uploaded')
+                                    <div class="alert alert-warning small py-2">
+                                        <i class="bi bi-clock-history me-1"></i> Menunggu verifikasi pembayaran
+                                    </div>
+                                @elseif ($pra->status_pembayaran === 'verified')
+                                    <div class="alert alert-success small py-2">
+                                        <i class="bi bi-check-circle me-1"></i> Pembayaran terverifikasi
+                                    </div>
+
+                                    {{-- TAMPILKAN INFO CI DAN RUANGAN --}}
+                                    @if ($pra->ci_nama)
+                                        <div class="card border-0 shadow-sm mt-3" style="background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);">
+                                            <div class="card-body p-3">
+                                                <h6 class="fw-bold mb-3 text-maroon">
+                                                    <i class="bi bi-person-badge me-2"></i>Informasi Pembimbing
+                                                </h6>
+                                                <div class="mb-2">
+                                                    <small class="text-muted d-block">Nama Pembimbing (CI)</small>
+                                                    <strong>{{ $pra->ci_nama }}</strong>
+                                                </div>
+                                                <div class="mb-2">
+                                                    <small class="text-muted d-block">No. HP</small>
+                                                    <a href="tel:{{ $pra->ci_no_hp }}" class="text-decoration-none fw-bold">
+                                                        <i class="bi bi-telephone-fill me-1"></i>{{ $pra->ci_no_hp }}
+                                                    </a>
+                                                </div>
+                                                <div class="mb-2">
+                                                    <small class="text-muted d-block">Bidang</small>
+                                                    <strong>{{ $pra->ci_bidang }}</strong>
+                                                </div>
+                                                <div>
+                                                    <small class="text-muted d-block">Ruangan</small>
+                                                    <strong class="text-maroon">{{ $pra->ruangan }}</strong>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    @endif
+
+                                    {{-- Link ke Jurnal --}}
+                                    <div class="text-center mt-3">
+                                        <a href="{{ route('pra-penelitian.create') }}" class="btn btn-maroon btn-sm w-100">
+                                            Isi Jurnal & Kegiatan <i class="bi bi-arrow-right ms-1"></i>
+                                        </a>
+                                    </div>
+                                @endif
+                            @else
+                                <div class="alert alert-light text-center small text-muted mb-0">
+                                    Menunggu admin mengirim galasan (surat & invoice)
+                                </div>
+                            @endif
+                        @else
+                            <div class="alert alert-light text-center small text-muted mb-0">
+                                Mohon menunggu verifikasi admin.
+                            </div>
+                        @endif
                     </div>
                 </div>
-                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-            </div>
-        @endif
-
-        {{-- Alert Error (Untuk validasi jika user maksa submit 2x) --}}
-        @if (session('error'))
-            <div class="alert alert-danger alert-dismissible fade show animate-up mb-4" role="alert"
-                style="border-radius: 12px;">
-                <div class="d-flex align-items-center">
-                    <i class="bi bi-exclamation-triangle-fill fs-4 me-3"></i>
-                    <div>
-                        <strong>Gagal!</strong> {{ session('error') }}
+            @else
+                {{-- JIKA BELUM ADA DATA -> TAMPILKAN TOMBOL PENGAJUAN --}}
+                <div class="option-card h-100 d-flex flex-column">
+                    <div class="icon-circle align-self-center mb-3">
+                        <i class="bi bi-journal-richtext"></i>
                     </div>
+                    <h4 class="option-title text-center">Pra Penelitian</h4>
+                    <p class="option-desc text-center text-muted mb-4">
+                        Ajukan permohonan untuk melakukan observasi, pengambilan data awal, atau survei pendahuluan.
+                    </p>
+                    <form action="{{ route('pengajuan.pra') }}" method="POST" class="w-100 mt-auto">
+                        @csrf
+                        <button type="submit" class="btn btn-maroon w-100"
+                            onclick="return confirm('Ajukan Pra Penelitian?')">
+                            Pilih Layanan <i class="bi bi-arrow-right ms-2"></i>
+                        </button>
+                    </form>
                 </div>
-                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-            </div>
-        @endif
-
-        <div class="text-center mb-5 animate-up">
-            <h2 class="fw-bold" style="color: var(--text-dark);">Dashboard Pengajuan</h2>
-            <p class="text-muted">Kelola pengajuan Pra-Penelitian dan Magang Anda di sini.</p>
+            @endif
         </div>
 
-        <div class="row justify-content-center g-4">
+        {{-- ========================== KOLOM 2: MAGANG ========================== --}}
+        <div class="col-md-6 col-lg-5 animate-up" style="animation-delay: 0.2s;">
 
-            {{-- ========================== KOLOM 1: PRA PENELITIAN ========================== --}}
-            <div class="col-md-6 col-lg-5 animate-up" style="animation-delay: 0.1s;">
+            @if ($magang)
+                {{-- JIKA SUDAH ADA DATA MAGANG -> TAMPILKAN STATUS --}}
+                <div class="status-card h-100">
+                    <div class="status-header text-center">
+                        <h5 class="fw-bold mb-3">Magang / PKL</h5>
 
-                @if ($pra)
-                    {{-- JIKA SUDAH ADA DATA PRA PENELITIAN -> TAMPILKAN STATUS --}}
-                    <div class="status-card h-100">
-                        <div class="status-header text-center">
-                            <h5 class="fw-bold mb-3">Pra Penelitian</h5>
-
-                            @if ($pra->status === 'pending')
-                                <div class="status-icon-large text-warning mb-2"><i class="bi bi-hourglass-split"></i></div>
-                                <span class="badge bg-warning text-dark px-3 py-2 rounded-pill">Menunggu Persetujuan</span>
-                            @elseif ($pra->status === 'approved')
-                                <div class="status-icon-large text-success mb-2"><i class="bi bi-check-circle-fill"></i>
-                                </div>
-                                <span class="badge bg-success px-3 py-2 rounded-pill">Disetujui</span>
-                            @elseif ($pra->status === 'rejected')
-                                <div class="status-icon-large text-danger mb-2"><i class="bi bi-x-circle-fill"></i></div>
-                                <span class="badge bg-danger px-3 py-2 rounded-pill">Ditolak</span>
-                            @endif
-                        </div>
-
-                        <div class="status-body mt-3">
-                            <div class="detail-row d-flex justify-content-between mb-2 border-bottom pb-2">
-                                <span class="text-muted small">Tanggal Pengajuan</span>
-                                <span class="fw-bold small">{{ $pra->created_at->format('d M Y') }}</span>
-                            </div>
-                            <div class="detail-row d-flex justify-content-between mb-3 border-bottom pb-2">
-                                <span class="text-muted small">Update Terakhir</span>
-                                <span class="fw-bold small">{{ $pra->updated_at->diffForHumans() }}</span>
-                            </div>
-
-                            @if ($pra->status === 'rejected')
-                                <div class="alert alert-danger small py-2 mt-3">
-                                    <i class="bi bi-info-circle me-1"></i> Pengajuan Anda ditolak. Silakan ajukan ulang.
-                                </div>
-                                <form action="{{ route('pengajuan.pra') }}" method="POST" class="w-100 mt-3">
-                                    @csrf
-                                    <button type="submit" class="btn btn-outline-danger w-100 btn-sm"
-                                        onclick="return confirm('Ajukan Ulang Pra Penelitian?')">
-                                        <i class="bi bi-arrow-repeat me-1"></i> Ajukan Ulang
-                                    </button>
-                                </form>
-                            @elseif ($pra->status === 'approved')
-                                <div class="text-center mt-3">
-                                    <small class="text-muted d-block mb-2">Menu Tersedia:</small>
-                                    <a href="{{ route('pra-penelitian.create') }}" class="btn btn-maroon btn-sm w-100">
-                                        Isi Jurnal & Kegiatan <i class="bi bi-arrow-right ms-1"></i>
-                                    </a>
-                                </div>
-                            @else
-                                <div class="alert alert-light text-center small text-muted mb-0">
-                                    Mohon menunggu verifikasi admin.
-                                </div>
-                            @endif
-                        </div>
+                        @if ($magang->status === 'pending')
+                            <div class="status-icon-large text-warning mb-2"><i class="bi bi-hourglass-split"></i></div>
+                            <span class="badge bg-warning text-dark px-3 py-2 rounded-pill">Menunggu Persetujuan</span>
+                        @elseif ($magang->status === 'approved')
+                            <div class="status-icon-large text-success mb-2"><i class="bi bi-check-circle-fill"></i></div>
+                            <span class="badge bg-success px-3 py-2 rounded-pill">Disetujui</span>
+                        @elseif ($magang->status === 'rejected')
+                            <div class="status-icon-large text-danger mb-2"><i class="bi bi-x-circle-fill"></i></div>
+                            <span class="badge bg-danger px-3 py-2 rounded-pill">Ditolak</span>
+                        @endif
                     </div>
-                @else
-                    {{-- JIKA BELUM ADA DATA -> TAMPILKAN TOMBOL PENGAJUAN --}}
-                    <div class="option-card h-100 d-flex flex-column">
-                        <div class="icon-circle align-self-center mb-3">
-                            <i class="bi bi-journal-richtext"></i>
+
+                    <div class="status-body mt-3">
+                        <div class="detail-row d-flex justify-content-between mb-2 border-bottom pb-2">
+                            <span class="text-muted small">Tanggal Pengajuan</span>
+                            <span class="fw-bold small">{{ $magang->created_at->format('d M Y') }}</span>
                         </div>
-                        <h4 class="option-title text-center">Pra Penelitian</h4>
-                        <p class="option-desc text-center text-muted mb-4">
-                            Ajukan permohonan untuk melakukan observasi, pengambilan data awal, atau survei pendahuluan.
-                        </p>
-                        <form action="{{ route('pengajuan.pra') }}" method="POST" class="w-100 mt-auto">
-                            @csrf
-                            <button type="submit" class="btn btn-maroon w-100"
-                                onclick="return confirm('Ajukan Pra Penelitian?')">
-                                Pilih Layanan <i class="bi bi-arrow-right ms-2"></i>
-                            </button>
-                        </form>
-                    </div>
-                @endif
-            </div>
-
-            {{-- ========================== KOLOM 2: MAGANG ========================== --}}
-            <div class="col-md-6 col-lg-5 animate-up" style="animation-delay: 0.2s;">
-
-                @if ($magang)
-                    {{-- JIKA SUDAH ADA DATA MAGANG -> TAMPILKAN STATUS --}}
-                    <div class="status-card h-100">
-                        <div class="status-header text-center">
-                            <h5 class="fw-bold mb-3">Magang / PKL</h5>
-
-                            @if ($magang->status === 'pending')
-                                <div class="status-icon-large text-warning mb-2"><i class="bi bi-hourglass-split"></i></div>
-                                <span class="badge bg-warning text-dark px-3 py-2 rounded-pill">Menunggu Persetujuan</span>
-                            @elseif ($magang->status === 'approved')
-                                <div class="status-icon-large text-success mb-2"><i class="bi bi-check-circle-fill"></i>
-                                </div>
-                                <span class="badge bg-success px-3 py-2 rounded-pill">Disetujui</span>
-                            @elseif ($magang->status === 'rejected')
-                                <div class="status-icon-large text-danger mb-2"><i class="bi bi-x-circle-fill"></i></div>
-                                <span class="badge bg-danger px-3 py-2 rounded-pill">Ditolak</span>
-                            @endif
+                        <div class="detail-row d-flex justify-content-between mb-3 border-bottom pb-2">
+                            <span class="text-muted small">Update Terakhir</span>
+                            <span class="fw-bold small">{{ $magang->updated_at->diffForHumans() }}</span>
                         </div>
 
-                        <div class="status-body mt-3">
-                            <div class="detail-row d-flex justify-content-between mb-2 border-bottom pb-2">
-                                <span class="text-muted small">Tanggal Pengajuan</span>
-                                <span class="fw-bold small">{{ $magang->created_at->format('d M Y') }}</span>
+                        @if ($magang->status === 'rejected')
+                            <div class="alert alert-danger small py-2 mt-3">
+                                <i class="bi bi-info-circle me-1"></i> Pengajuan Anda ditolak. Silakan ajukan ulang.
                             </div>
-                            <div class="detail-row d-flex justify-content-between mb-3 border-bottom pb-2">
-                                <span class="text-muted small">Update Terakhir</span>
-                                <span class="fw-bold small">{{ $magang->updated_at->diffForHumans() }}</span>
+                            <form action="{{ route('pengajuan.magang') }}" method="POST" class="w-100 mt-3">
+                                @csrf
+                                <button type="submit" class="btn btn-outline-danger w-100 btn-sm"
+                                    onclick="return confirm('Ajukan Ulang Magang?')">
+                                    <i class="bi bi-arrow-repeat me-1"></i> Ajukan Ulang
+                                </button>
+                            </form>
+                        @elseif ($magang->status === 'approved')
+                            <div class="text-center mt-3">
+                                <small class="text-muted d-block mb-2">Menu Tersedia:</small>
+                                <a href="{{ route('mahasiswa.create') }}" class="btn btn-maroon btn-sm w-100">
+                                    Lengkapi Biodata Magang <i class="bi bi-arrow-right ms-1"></i>
+                                </a>
                             </div>
-
-                            @if ($magang->status === 'rejected')
-                                <div class="alert alert-danger small py-2 mt-3">
-                                    <i class="bi bi-info-circle me-1"></i> Pengajuan Anda ditolak. Silakan ajukan ulang.
-                                </div>
-                                <form action="{{ route('pengajuan.magang') }}" method="POST" class="w-100 mt-3">
-                                    @csrf
-                                    <button type="submit" class="btn btn-outline-danger w-100 btn-sm"
-                                        onclick="return confirm('Ajukan Ulang Magang?')">
-                                        <i class="bi bi-arrow-repeat me-1"></i> Ajukan Ulang
-                                    </button>
-                                </form>
-                            @elseif ($magang->status === 'approved')
-                                <div class="text-center mt-3">
-                                    <small class="text-muted d-block mb-2">Menu Tersedia:</small>
-                                    <a href="{{ route('mahasiswa.create') }}" class="btn btn-maroon btn-sm w-100">
-                                        Lengkapi Biodata Magang <i class="bi bi-arrow-right ms-1"></i>
-                                    </a>
-                                </div>
-                            @else
-                                <div class="alert alert-light text-center small text-muted mb-0">
-                                    Mohon menunggu verifikasi admin.
-                                </div>
-                            @endif
-                        </div>
+                        @else
+                            <div class="alert alert-light text-center small text-muted mb-0">
+                                Mohon menunggu verifikasi admin.
+                            </div>
+                        @endif
                     </div>
-                @else
-                    {{-- JIKA BELUM ADA DATA -> TAMPILKAN TOMBOL PENGAJUAN --}}
-                    <div class="option-card h-100 d-flex flex-column">
-                        <div class="icon-circle align-self-center mb-3">
-                            <i class="bi bi-briefcase"></i>
-                        </div>
-                        <h4 class="option-title text-center">Magang / PKL</h4>
-                        <p class="option-desc text-center text-muted mb-4">
-                            Ajukan permohonan resmi untuk pelaksanaan Praktik Kerja Lapangan (PKL) atau Magang.
-                        </p>
-                        <form action="{{ route('pengajuan.magang') }}" method="POST" class="w-100 mt-auto">
-                            @csrf
-                            <button type="submit" class="btn btn-maroon w-100"
-                                onclick="return confirm('Ajukan Magang?')">
-                                Pilih Layanan <i class="bi bi-arrow-right ms-2"></i>
-                            </button>
-                        </form>
+                </div>
+            @else
+                {{-- JIKA BELUM ADA DATA -> TAMPILKAN TOMBOL PENGAJUAN --}}
+                <div class="option-card h-100 d-flex flex-column">
+                    <div class="icon-circle align-self-center mb-3">
+                        <i class="bi bi-briefcase"></i>
                     </div>
-                @endif
-            </div>
+                    <h4 class="option-title text-center">Magang / PKL</h4>
+                    <p class="option-desc text-center text-muted mb-4">
+                        Ajukan permohonan resmi untuk pelaksanaan Praktik Kerja Lapangan (PKL) atau Magang.
+                    </p>
+                    <form action="{{ route('pengajuan.magang') }}" method="POST" class="w-100 mt-auto">
+                        @csrf
+                        <button type="submit" class="btn btn-maroon w-100"
+                            onclick="return confirm('Ajukan Magang?')">
+                            Pilih Layanan <i class="bi bi-arrow-right ms-2"></i>
+                        </button>
+                    </form>
+                </div>
+            @endif
         </div>
     </div>
+</div>
 @endsection

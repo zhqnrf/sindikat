@@ -12,6 +12,7 @@ use App\Http\Controllers\NoteController;
 use App\Http\Controllers\SuratBalasanController;
 use App\Http\Controllers\MouController;
 use App\Http\Controllers\PengajuanController;
+use App\Http\Controllers\ProgresController;
 use App\Http\Controllers\UserController;
 
 /*
@@ -51,6 +52,12 @@ Route::middleware(['auth'])->group(function () {
         Route::post('/pra', [PengajuanController::class, 'ajukanPra'])->name('pra');
         Route::post('/magang', [PengajuanController::class, 'ajukanMagang'])->name('magang');
         Route::post('/{pengajuan}/upload-bukti', [PengajuanController::class, 'uploadBuktiPembayaran'])->name('upload-bukti');
+    });
+
+    // Progress Pengajuan
+    Route::prefix('progres')->name('progres.')->group(function () {
+        Route::get('/mahasiswa', [ProgresController::class, 'mahasiswa_index'])->name('mahasiswa.index');
+        Route::get('/penelitian', [ProgresController::class, 'penelitian_index'])->name('penelitian.index');
     });
 
     // --- MAHASISWA (Akses User setelah approved magang) ---

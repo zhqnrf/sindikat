@@ -176,7 +176,7 @@
                 {{-- 2. MENU AKSES (Hanya muncul jika Approved) --}}
 
                 {{-- Akses Magang --}}
-                @if ($hasMagangAccess)
+                {{-- @if ($hasMagangAccess)
                     <div class="sidebar-heading mt-2">
                         <span class="sidebar-text">Aktivitas Magang</span>
                     </div>
@@ -185,10 +185,10 @@
                         <i class="bi bi-briefcase"></i>
                         <span class="sidebar-text">Biodata Magang</span>
                     </a>
-                @endif
+                @endif --}}
 
                 {{-- Akses Pra-Penelitian --}}
-                @if ($hasPraAccess)
+                {{-- @if ($hasPraAccess)
                     <div class="sidebar-heading mt-2">
                         <span class="sidebar-text">Aktivitas Penelitian</span>
                     </div>
@@ -197,7 +197,7 @@
                         <i class="bi bi-journal-check"></i>
                         <span class="sidebar-text">Data Pra-Penelitian</span>
                     </a>
-                @endif
+                @endif --}}
 
             @endif
 

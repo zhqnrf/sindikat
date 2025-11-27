@@ -12,6 +12,15 @@ class Pengajuan extends Model
         'user_id',
         'jenis',
         'status',
+        'surat_balasan',
+        'invoice',
+        'bukti_pembayaran',
+        'ci_nama',
+        'ci_no_hp',
+        'ci_bidang',
+        'ruangan',
+        'status_galasan',
+        'status_pembayaran',
     ];
 
     public function user()

@@ -16,6 +16,7 @@ class Mahasiswa extends Model
         'nm_mahasiswa',
         'mou_id',
         'prodi',
+        'no_hp',
         'nm_ruangan',
         'ruangan_id',
         'status',

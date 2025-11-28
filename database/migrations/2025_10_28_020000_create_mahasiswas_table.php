@@ -21,6 +21,7 @@ class CreateMahasiswasTable extends Migration
                 ->constrained('mous') // Menyambung ke tabel 'mous'
                 ->onDelete('set null');
             $table->string('prodi')->nullable();
+            $table->string('no_hp', 20);
             $table->string('nm_ruangan')->nullable();
             $table->unsignedBigInteger('ruangan_id')->nullable();
             $table->date('tanggal_mulai')->nullable();

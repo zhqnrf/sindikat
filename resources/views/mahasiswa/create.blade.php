@@ -59,7 +59,8 @@
 
         /* Styling khusus untuk input Readonly */
         .form-control[readonly] {
-            background-color: #e9ecef; /* Abu-abu */
+            background-color: #e9ecef;
+            /* Abu-abu */
             color: #6c757d;
             cursor: not-allowed;
         }
@@ -109,7 +110,10 @@
         }
 
         @keyframes fadeInUp {
-            to { opacity: 1; transform: translateY(0); }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
     </style>
 
@@ -139,7 +143,8 @@
                         </div>
                     @endif
 
-                    <form action="{{ route('mahasiswa.store') }}" method="POST" id="form-mahasiswa" enctype="multipart/form-data">
+                    <form action="{{ route('mahasiswa.store') }}" method="POST" id="form-mahasiswa"
+                        enctype="multipart/form-data">
                         @csrf
 
                         <h6 class="text-muted text-uppercase fw-bold mb-3" style="font-size: 0.75rem; letter-spacing: 1px;">
@@ -180,6 +185,19 @@
                                         value="{{ auth()->user()->program_studi }}" readonly>
                                 </div>
                             </div>
+                        </div>
+
+                        {{-- NOMOR HP / WHATSAPP --}}
+                        <div class="mb-3">
+                            <label class="form-label">Nomor WhatsApp / HP <span class="text-danger">*</span></label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="bi bi-whatsapp"></i></span>
+                                <input type="number" name="no_hp" class="form-control" placeholder="Contoh: 081234567890"
+                                    value="{{ old('no_hp') }}" required>
+                            </div>
+                            @error('no_hp')
+                                <div class="text-danger small mt-1">{{ $message }}</div>
+                            @enderror
                         </div>
 
                         <hr class="my-4 border-light">

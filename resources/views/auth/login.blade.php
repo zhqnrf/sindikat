@@ -5,10 +5,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Masisma - Login & Register</title>
-    
+
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
-    
+
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/choices.js/public/assets/styles/choices.min.css" />
 
     <style>
@@ -125,7 +125,7 @@
             padding: 10px 15px;
             font-size: 0.9rem;
         }
-        
+
         /* Highlight saat hover item */
         .choices__list--dropdown .choices__item--selectable.is-highlighted {
             background-color: var(--warna-tertiary);
@@ -137,9 +137,9 @@
             color: #6c757d;
             opacity: 1;
         }
-        
+
         /* Hapus focus outline bawaan choices (kita pakai focus-within parent) */
-        .is-focused .choices__inner, 
+        .is-focused .choices__inner,
         .is-open .choices__inner {
             border: none;
             box-shadow: none;
@@ -193,7 +193,7 @@
 
 <body>
     <div class="login-wrapper">
-        
+
         {{-- Login Form --}}
         <div id="loginForm">
             <div class="login-header text-center">
@@ -212,12 +212,12 @@
                     <span class="input-group-text"><i class="bi bi-envelope-fill"></i></span>
                     <input type="email" name="email" class="form-control" placeholder="Email" required>
                 </div>
-                
+
                 <div class="input-group">
                     <span class="input-group-text"><i class="bi bi-lock-fill"></i></span>
                     <input type="password" name="password" class="form-control" placeholder="Password" required>
                 </div>
-                
+
                 <button type="submit" class="btn btn-login w-100">LOGIN</button>
             </form>
 
@@ -226,7 +226,7 @@
             </div>
         </div>
 
-        {{-- Register Form --}}
+       {{-- Register Form --}}
         <div id="registerForm" style="display: none;">
             <div class="login-header text-center mb-4">
                 <h2 class="fw-bold">REGISTER</h2>
@@ -239,13 +239,15 @@
                     <span class="input-group-text"><i class="bi bi-person-fill"></i></span>
                     <input type="text" name="name" class="form-control" placeholder="Nama Lengkap" required>
                 </div>
-                
+
                 <div class="input-group">
                     <span class="input-group-text"><i class="bi bi-envelope-fill"></i></span>
                     <input type="email" name="email" class="form-control" placeholder="Email" required>
                 </div>
 
-                <div class="input-group" style="overflow: visible;"> <span class="input-group-text"><i class="bi bi-building-fill"></i></span>
+                {{-- Input Universitas --}}
+                <div class="input-group" style="overflow: visible;">
+                    <span class="input-group-text"><i class="bi bi-building-fill"></i></span>
                     <select name="mou_id" class="form-select" id="universitas-select" required>
                         <option value="" placeholder>Pilih Universitas</option>
                         @foreach ($universitas as $u)
@@ -254,11 +256,18 @@
                     </select>
                 </div>
 
+                {{-- BARU: Input Program Studi --}}
+                <div class="input-group">
+                    <span class="input-group-text"><i class="bi bi-mortarboard-fill"></i></span>
+                    <input type="text" name="program_studi" class="form-control" placeholder="Program Studi" required>
+                </div>
+                {{-- -------------------------- --}}
+
                 <div class="input-group">
                     <span class="input-group-text"><i class="bi bi-lock-fill"></i></span>
                     <input type="password" name="password" class="form-control" placeholder="Password" required>
                 </div>
-                
+
                 <div class="input-group">
                     <span class="input-group-text"><i class="bi bi-lock"></i></span>
                     <input type="password" name="password_confirmation" class="form-control" placeholder="Konfirmasi Password" required>
@@ -287,7 +296,7 @@
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/choices.js/public/assets/scripts/choices.min.js"></script>
-    
+
     <script>
         // Inisialisasi Choices.js
         document.addEventListener('DOMContentLoaded', function() {

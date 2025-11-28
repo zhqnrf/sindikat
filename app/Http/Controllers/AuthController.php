@@ -54,6 +54,7 @@ class AuthController extends Controller
             'email'    => 'required|string|email|max:255|unique:users',
             'mou_id'   => 'required|exists:mous,id',
             'password' => 'required|string|min:6|confirmed',
+            'program_studi' => 'required|string|max:255',
         ]);
 
         $user = User::create([
@@ -62,6 +63,7 @@ class AuthController extends Controller
             'password' => Hash::make($request->password),
             'role'     => 'user',
             'mou_id'   => $request->mou_id,
+            'program_studi' => $request->program_studi,
         ]);
 
         Auth::login($user);

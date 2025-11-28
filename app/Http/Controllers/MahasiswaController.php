@@ -237,8 +237,8 @@ class MahasiswaController extends Controller
             'prodi' => 'nullable|string|max:255',
             'nm_ruangan' => 'nullable|string|max:255',
             'ruangan_id' => 'nullable|exists:ruangans,id',
-            'tanggal_mulai' => 'required|date',
-            'tanggal_berakhir' => 'required|date|after:tanggal_mulai',
+            'tanggal_mulai' => 'date',
+            'tanggal_berakhir' => 'date|after:tanggal_mulai',
             'weekend_aktif' => 'nullable|boolean',
             'foto' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
         ]);

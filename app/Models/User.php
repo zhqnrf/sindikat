@@ -15,7 +15,8 @@ class User extends Authenticatable
         'password',
         'role',
         'mou_id',
-        'is_approved'
+        'is_approved',
+        'program_studi'
     ];
 
     protected $hidden = [

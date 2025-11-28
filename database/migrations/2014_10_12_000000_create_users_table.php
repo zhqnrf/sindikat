@@ -22,6 +22,7 @@ class CreateUsersTable extends Migration
             $table->boolean('is_approved')->default(false);
             $table->foreignId('mou_id')->nullable()->constrained('mous')->onDelete('cascade');
             $table->string('password');
+            $table->string('program_studi')->nullable();
             $table->rememberToken();
             $table->timestamps();
         });

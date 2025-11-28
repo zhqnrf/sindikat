@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Absensi;
 use App\Models\Mahasiswa;
 use App\Models\Ruangan;
 use App\Models\RuanganKetersediaan;
@@ -233,7 +234,7 @@ class MahasiswaController extends Controller
     {
         $data = $request->validate([
             'nm_mahasiswa' => 'required|string|max:255',
-            'mou_id' => 'nullable|exists:mous,id', // Validasi ke tabel MOU
+            'mou_id' => 'nullable|exists:mous,id',
             'prodi' => 'nullable|string|max:255',
             'nm_ruangan' => 'nullable|string|max:255',
             'ruangan_id' => 'nullable|exists:ruangans,id',
@@ -243,6 +244,7 @@ class MahasiswaController extends Controller
             'foto' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
         ]);
 
+        $data['user_id'] = auth()->id(); // TAMBAHKAN INI
         $data['status'] = 'aktif';
         $data['weekend_aktif'] = $request->boolean('weekend_aktif');
 
@@ -282,7 +284,7 @@ class MahasiswaController extends Controller
         }
 
         Mahasiswa::create($data);
-        return redirect()->route('mahasiswa.create')->with('success', 'Mahasiswa berhasil ditambahkan.');
+        return redirect()->route('mahasiswa.dashboard')->with('success', 'Biodata berhasil disimpan!'); // REDIRECT KE DASHBOARD
     }
 
     public function edit($id)
@@ -535,5 +537,64 @@ class MahasiswaController extends Controller
             }
         }
         return $days;
+    }
+
+    public function dashboard()
+    {
+        // Ambil data mahasiswa berdasarkan user_id
+        $mahasiswa = Mahasiswa::where('user_id', auth()->id())->firstOrFail();
+
+        // Hitung total hari kerja
+        $tanggalMulai = Carbon::parse($mahasiswa->tanggal_mulai);
+        $tanggalBerakhir = Carbon::parse($mahasiswa->tanggal_berakhir); // GANTI dari tanggal_selesai ke tanggal_berakhir
+
+        // Hitung total hari (termasuk weekend atau tidak)
+        if ($mahasiswa->weekend_aktif) {
+            // Kalau weekend aktif, hitung semua hari
+            $totalHari = $tanggalMulai->diffInDays($tanggalBerakhir) + 1;
+        } else {
+            // Kalau weekend tidak aktif, hitung hanya weekdays
+            $totalHari = $tanggalMulai->diffInWeekdays($tanggalBerakhir) + 1;
+        }
+
+        // Ambil data absensi
+        $absensi = Absensi::where('mahasiswa_id', $mahasiswa->id)
+            ->orderBy('created_at', 'desc') // GANTI dari tanggal ke created_at
+            ->get();
+
+        // Hitung total hadir (yang punya jam_masuk & jam_keluar)
+        $totalHadir = $absensi->filter(function ($abs) {
+            return !is_null($abs->jam_masuk) && !is_null($abs->jam_keluar);
+        })->count();
+
+        // Hitung persentase kehadiran
+        $persentase = $totalHari > 0 ? round(($totalHadir / $totalHari) * 100, 1) : 0;
+
+        // Data untuk chart (7 hari terakhir)
+        $chartLabels = [];
+        $chartData = [];
+
+        for ($i = 6; $i >= 0; $i--) {
+            $date = Carbon::now()->subDays($i);
+            $chartLabels[] = $date->format('d M');
+
+            $count = $absensi->filter(function ($abs) use ($date) {
+                return Carbon::parse($abs->created_at)->format('Y-m-d') === $date->format('Y-m-d')
+                    && !is_null($abs->jam_masuk)
+                    && !is_null($abs->jam_keluar);
+            })->count();
+
+            $chartData[] = $count;
+        }
+
+        return view('mahasiswa.dashboard', compact(
+            'mahasiswa',
+            'totalHari',
+            'totalHadir',
+            'persentase',
+            'absensi',
+            'chartLabels',
+            'chartData'
+        ));
     }
 }

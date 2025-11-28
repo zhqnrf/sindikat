@@ -176,31 +176,29 @@
                 {{-- 2. MENU AKSES (Hanya muncul jika Approved) --}}
 
                 {{-- Akses Magang --}}
-                {{-- @if ($hasMagangAccess)
+                @if ($hasMagangAccess)
                     <div class="sidebar-heading mt-2">
                         <span class="sidebar-text">Aktivitas Magang</span>
                     </div>
-                    <a class="nav-link {{ request()->routeIs('mahasiswa.create') ? 'active' : '' }}"
-                        href="{{ route('mahasiswa.create') }}">
+                    <a class="nav-link {{ request()->routeIs('mahasiswa.dashboard') ? 'active' : '' }}"
+                        href="{{ route('mahasiswa.dashboard') }}">
                         <i class="bi bi-briefcase"></i>
-                        <span class="sidebar-text">Biodata Magang</span>
+                        <span class="sidebar-text">Dashboard Mahasiswa</span>
                     </a>
-                @endif --}}
+                @endif
 
                 {{-- Akses Pra-Penelitian --}}
-                {{-- @if ($hasPraAccess)
+                @if ($hasPraAccess)
                     <div class="sidebar-heading mt-2">
                         <span class="sidebar-text">Aktivitas Penelitian</span>
                     </div>
-                    <a class="nav-link {{ request()->routeIs('pra-penelitian.create') ? 'active' : '' }}"
-                        href="{{ route('pra-penelitian.create') }}">
-                        <i class="bi bi-journal-check"></i>
-                        <span class="sidebar-text">Data Pra-Penelitian</span>
+                    <a class="nav-link {{ request()->is('progres/penelitian*') ? 'active' : '' }}"
+                        href="{{ route('pengajuan.detail', ['id' => $pra->id, 'jenis' => 'pra_penelitian']) }}') }}">
+                        <i class="bi bi-bar-chart-line"></i>
+                        <span class="sidebar-text">Progres Penelitian</span>
                     </a>
-                @endif --}}
-
+                @endif
             @endif
-
         </nav>
     </div>
 

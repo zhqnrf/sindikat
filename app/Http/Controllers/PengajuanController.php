@@ -185,4 +185,17 @@ class PengajuanController extends Controller
     {
         return view('admin.pengajuan.show', compact('pengajuan'));
     }
+
+    /**
+     * Tampilkan detail pengajuan (untuk mahasiswa)
+     */
+    public function detail($jenis)
+    {
+        $pengajuan = Pengajuan::where('user_id', auth()->id())
+            ->where('jenis', $jenis)
+            ->where('status', 'approved')
+            ->firstOrFail();
+
+        return view('pengajuan.detail', compact('pengajuan', 'jenis'));
+    }
 }

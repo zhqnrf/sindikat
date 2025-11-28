@@ -13,6 +13,7 @@ class Mahasiswa extends Model
     protected $table = 'mahasiswas';
 
     protected $fillable = [
+        'user_id',
         'nm_mahasiswa',
         'mou_id',
         'prodi',
@@ -52,6 +53,11 @@ class Mahasiswa extends Model
                 $model->share_token = (string) Str::uuid();
             }
         });
+    }
+
+    public function user()
+    {
+        return $this->belongsTo(\App\Models\User::class);
     }
 
     public function absensis()

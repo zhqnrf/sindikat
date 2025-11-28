@@ -49,15 +49,10 @@ Route::middleware(['auth'])->group(function () {
     // Pengajuan Routes (User mengajukan pra-penelitian atau magang)
     Route::prefix('pengajuan')->name('pengajuan.')->group(function () {
         Route::get('/', [PengajuanController::class, 'index'])->name('index');
+        Route::get('/detail/{jenis}', [PengajuanController::class, 'detail'])->name('detail'); // TAMBAHKAN INI
         Route::post('/pra', [PengajuanController::class, 'ajukanPra'])->name('pra');
         Route::post('/magang', [PengajuanController::class, 'ajukanMagang'])->name('magang');
         Route::post('/{pengajuan}/upload-bukti', [PengajuanController::class, 'uploadBuktiPembayaran'])->name('upload-bukti');
-    });
-
-    // Progress Pengajuan
-    Route::prefix('progres')->name('progres.')->group(function () {
-        Route::get('/mahasiswa', [ProgresController::class, 'mahasiswa_index'])->name('mahasiswa.index');
-        Route::get('/penelitian', [ProgresController::class, 'penelitian_index'])->name('penelitian.index');
     });
 
     // --- MAHASISWA (Akses User setelah approved magang) ---
@@ -81,10 +76,13 @@ Route::middleware(['auth'])->group(function () {
 
     Route::middleware(['auth', 'magang'])->group(function () {
         Route::prefix('mahasiswa')->name('mahasiswa.')->group(function () {
+            Route::get('/dashboard', [MahasiswaController::class, 'dashboard'])->name('dashboard'); // TAMBAHKAN INI
             Route::get('/create', [MahasiswaController::class, 'create'])->name('create');
             Route::post('/', [MahasiswaController::class, 'store'])->name('store');
+            Route::get('/{mahasiswa}/edit', [MahasiswaController::class, 'edit'])->name('edit');
+            Route::put('/{mahasiswa}', [MahasiswaController::class, 'update'])->name('update');
 
-            // Helper Routes (AJAX untuk Form) - PENTING: Harus bisa diakses User
+            // Helper Routes
             Route::get('/ruangan-info/{id}', [MahasiswaController::class, 'getRuanganInfo'])->name('ruangan.info');
             Route::get('/search/universitas', [MahasiswaController::class, 'searchUniversitas'])->name('search.universitas');
         });
@@ -119,8 +117,6 @@ Route::middleware(['auth', 'admin'])->group(function () {
         Route::get('/links', [MahasiswaController::class, 'copyLinks'])->name('links');
         Route::get('/{id}/sertifikat/summary', [MahasiswaController::class, 'showSertifikatSummary'])->name('sertifikat.summary');
         Route::get('/{mahasiswa}', [MahasiswaController::class, 'show'])->name('show');
-        Route::get('/{mahasiswa}/edit', [MahasiswaController::class, 'edit'])->name('edit');
-        Route::put('/{mahasiswa}', [MahasiswaController::class, 'update'])->name('update');
         Route::delete('/{mahasiswa}', [MahasiswaController::class, 'destroy'])->name('destroy');
     });
 

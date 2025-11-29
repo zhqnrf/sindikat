@@ -384,12 +384,55 @@
                                             </div>
                                         </div>
                                     @endif
-
+                                    
                                 @endif
                             </div>
                         </div>
                     @endif
-
+                    {{-- Step 3: Info CI & Ruangan --}}
+@if ($pengajuan->status_pembayaran === 'verified' && $pengajuan->ci_nama)
+    <div class="card border-0 shadow-sm">
+        <div class="card-header" style="background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%); color: white;">
+            <h5 class="mb-0">
+                <i class="bi bi-3-circle me-2"></i>Step 3: Informasi Pembimbing & Konsultasi
+            </h5>
+        </div>
+        <div class="card-body">
+            <div class="row g-3">
+                <div class="col-md-6">
+                    <small class="text-muted d-block">Nama Pembimbing (CI)</small>
+                    <strong>{{ $pengajuan->ci_nama }}</strong>
+                </div>
+                <div class="col-md-6">
+                    <small class="text-muted d-block">No. HP</small>
+                    <a href="tel:{{ $pengajuan->ci_no_hp }}" class="text-decoration-none fw-bold">
+                        <i class="bi bi-telephone-fill me-1"></i>{{ $pengajuan->ci_no_hp }}
+                    </a>
+                </div>
+                <div class="col-md-6">
+                    <small class="text-muted d-block">Bidang</small>
+                    <strong>{{ $pengajuan->ci_bidang }}</strong>
+                </div>
+                <div class="col-md-6">
+                    <small class="text-muted d-block">Ruangan</small>
+                    <strong class="text-maroon">{{ $pengajuan->ruangan }}</strong>
+                </div>
+            </div>
+            
+            <hr>
+            
+            {{-- Link ke Halaman Konsultasi --}}
+            <div class="alert alert-info mb-3">
+                <i class="bi bi-info-circle me-2"></i> 
+                Silakan lakukan konsultasi minimal 2x dengan pembimbing Anda
+            </div>
+            
+            <a href="{{ route('konsultasi.index') }}" class="btn btn-primary w-100">
+                <i class="bi bi-chat-dots me-1"></i> Mulai Konsultasi
+            </a>
+        </div>
+    </div>
+@endif
                 </div>
             </div>
             @endif

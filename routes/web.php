@@ -8,6 +8,7 @@ use App\Http\Controllers\RuanganController;
 use App\Http\Controllers\PraPenelitianController;
 use App\Http\Controllers\PelatihanController;
 use App\Http\Controllers\AbsensiController;
+use App\Http\Controllers\KonsultasiController;
 use App\Http\Controllers\NoteController;
 use App\Http\Controllers\SuratBalasanController;
 use App\Http\Controllers\MouController;
@@ -83,6 +84,16 @@ Route::middleware(['auth'])->group(function () {
     Route::middleware(['pra'])->prefix('pra-penelitian')->name('pra-penelitian.')->group(function () {
         Route::get('/create', [PraPenelitianController::class, 'create'])->name('create');
         Route::post('/', [PraPenelitianController::class, 'store'])->name('store');
+    });
+
+    // --- AKSES KONSULTASI ---
+    // Konsultasi (hanya untuk yang sudah dapat CI)
+    Route::prefix('konsultasi')->name('konsultasi.')->group(function () {
+        Route::get('/', [KonsultasiController::class, 'index'])->name('index');
+        Route::post('/', [KonsultasiController::class, 'store'])->name('store');
+        Route::get('/{id}/edit', [KonsultasiController::class, 'edit'])->name('edit');
+        Route::put('/{id}', [KonsultasiController::class, 'update'])->name('update');
+        Route::delete('/{id}', [KonsultasiController::class, 'destroy'])->name('destroy');
     });
 });
 

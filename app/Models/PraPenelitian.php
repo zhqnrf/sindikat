@@ -38,6 +38,11 @@ class PraPenelitian extends Model
         return $this->belongsTo(User::class);
     }
 
+    public function konsultasi()
+    {
+        return $this->hasMany(Konsultasi::class);
+    }
+
     // Relasi ke Universitas (MOU)
     public function mou()
     {

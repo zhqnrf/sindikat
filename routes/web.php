@@ -23,14 +23,10 @@ use App\Http\Controllers\UserController;
 
 Route::get('/', fn() => redirect()->route('login'));
 
-// Public Pelatihan Routes (search + public update of pelatihan arrays)
-Route::get('/cek-data-pelatihan', [PelatihanController::class, 'publicIndex'])
-    ->name('public.pelatihan.index');
-// Public edit (update only pelatihan dasar & peningkatan kompetensi)
-Route::get('/input-data-pelatihan/{pelatihan}/edit', [PelatihanController::class, 'publicEdit'])
-    ->name('public.pelatihan.edit');
-Route::put('/input-data-pelatihan/{pelatihan}', [PelatihanController::class, 'publicUpdate'])
-    ->name('public.pelatihan.update');
+// --- PUBLIC ROUTES (Pelatihan & Auth) ---
+Route::get('/cek-data-pelatihan', [PelatihanController::class, 'publicIndex'])->name('public.pelatihan.index');
+Route::get('/input-data-pelatihan/{pelatihan}/edit', [PelatihanController::class, 'publicEdit'])->name('public.pelatihan.edit');
+Route::put('/input-data-pelatihan/{pelatihan}', [PelatihanController::class, 'publicUpdate'])->name('public.pelatihan.update');
 
 // Authentication
 Route::get('/login', [AuthController::class, 'showLoginForm'])->name('login');
@@ -38,68 +34,65 @@ Route::post('/register', [AuthController::class, 'register'])->name('register.po
 Route::post('/login', [AuthController::class, 'login'])->name('login.post');
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
+
 // =========================================================================
-// 1. ROUTES UNTUK SEMUA USER (USER BIASA & ADMIN)
+// 1. ROUTES UNTUK USER LOGIN (UMUM)
 // =========================================================================
 Route::middleware(['auth'])->group(function () {
 
-    // Dashboard
+    // Dashboard Utama (Redirect based on role usually happens here)
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
-    // Pengajuan Routes (User mengajukan pra-penelitian atau magang)
+    // Pengajuan (Pra-Penelitian & Magang)
     Route::prefix('pengajuan')->name('pengajuan.')->group(function () {
         Route::get('/', [PengajuanController::class, 'index'])->name('index');
-        Route::get('/detail/{jenis}', [PengajuanController::class, 'detail'])->name('detail'); // TAMBAHKAN INI
+        Route::get('/detail/{jenis}', [PengajuanController::class, 'detail'])->name('detail');
         Route::post('/pra', [PengajuanController::class, 'ajukanPra'])->name('pra');
         Route::post('/magang', [PengajuanController::class, 'ajukanMagang'])->name('magang');
         Route::post('/{pengajuan}/upload-bukti', [PengajuanController::class, 'uploadBuktiPembayaran'])->name('upload-bukti');
     });
 
-    // --- MAHASISWA (Akses User setelah approved magang) ---
-    Route::middleware(['magang'])->group(function () {
-        Route::prefix('mahasiswa')->name('mahasiswa.')->group(function () {
-            Route::get('/create', [MahasiswaController::class, 'create'])->name('create');
-            Route::post('/', [MahasiswaController::class, 'store'])->name('store');
-            Route::get('/ruangan-info/{id}', [MahasiswaController::class, 'getRuanganInfo'])->name('ruangan.info');
-            Route::get('/search/universitas', [MahasiswaController::class, 'searchUniversitas'])->name('search.universitas');
-        });
-    });
-
-
-    // access after approval
-    Route::middleware(['auth', 'pra'])->group(function () {
-        Route::prefix('pra-penelitian')->name('pra-penelitian.')->group(function () {
-            Route::get('/create', [PraPenelitianController::class, 'create'])->name('create');
-            Route::post('/', [PraPenelitianController::class, 'store'])->name('store');
-        });
-    });
-
-    Route::middleware(['auth', 'magang'])->group(function () {
-        Route::prefix('mahasiswa')->name('mahasiswa.')->group(function () {
-            Route::get('/dashboard', [MahasiswaController::class, 'dashboard'])->name('dashboard'); // TAMBAHKAN INI
-            Route::get('/create', [MahasiswaController::class, 'create'])->name('create');
-            Route::post('/', [MahasiswaController::class, 'store'])->name('store');
-            Route::get('/{mahasiswa}/edit', [MahasiswaController::class, 'edit'])->name('edit');
-            Route::put('/{mahasiswa}', [MahasiswaController::class, 'update'])->name('update');
-
-            // Helper Routes
-            Route::get('/ruangan-info/{id}', [MahasiswaController::class, 'getRuanganInfo'])->name('ruangan.info');
-            Route::get('/search/universitas', [MahasiswaController::class, 'searchUniversitas'])->name('search.universitas');
-        });
-    });
-
-    // --- SERTIFIKAT & ABSENSI (Public/Shared) ---
+    // Sertifikat & Absensi (User View)
     Route::get('/sertifikat/download/{token}', [AbsensiController::class, 'generateSertifikatPublik'])->name('sertifikat.download');
     Route::get('/absensi/{token}', [AbsensiController::class, 'card'])->name('absensi.card');
     Route::post('/absensi/{token}/toggle', [AbsensiController::class, 'toggle'])->name('absensi.toggle');
+
+    // --- AKSES MAHASISWA / MAGANG (User Biasa) ---
+    // Middleware 'magang' diasumsikan untuk user yang sudah diterima/aktif
+    Route::middleware(['magang'])->prefix('mahasiswa')->name('mahasiswa.')->group(function () {
+        
+        // 1. Dashboard Khusus Mahasiswa
+        Route::get('/dashboard', [MahasiswaController::class, 'dashboard'])->name('dashboard');
+
+        // 2. Helper (AJAX/Info)
+        Route::get('/ruangan-info/{id}', [MahasiswaController::class, 'getRuanganInfo'])->name('ruangan.info');
+        Route::get('/search/universitas', [MahasiswaController::class, 'searchUniversitas'])->name('search.universitas');
+
+        // 3. Edit & Update Profil (User edit diri sendiri & Admin edit user)
+        // Ditaruh di sini agar User bisa akses. Admin juga bisa akses karena Admin biasanya lolos middleware auth.
+        // Pastikan Controller membatasi User A tidak bisa edit User B.
+        Route::get('/{mahasiswa}/edit', [MahasiswaController::class, 'edit'])->name('edit');
+        Route::put('/{mahasiswa}', [MahasiswaController::class, 'update'])->name('update');
+        
+        // Create/Store (Jika pendaftaran dilakukan mandiri setelah login)
+        Route::get('/create', [MahasiswaController::class, 'create'])->name('create');
+        Route::post('/', [MahasiswaController::class, 'store'])->name('store');
+    });
+
+    // --- AKSES PRA-PENELITIAN ---
+    Route::middleware(['pra'])->prefix('pra-penelitian')->name('pra-penelitian.')->group(function () {
+        Route::get('/create', [PraPenelitianController::class, 'create'])->name('create');
+        Route::post('/', [PraPenelitianController::class, 'store'])->name('store');
+    });
 });
 
+
 // =========================================================================
-// 2. ROUTES KHUSUS ADMIN
+// 2. ROUTES KHUSUS ADMIN (FULL CONTROL)
 // =========================================================================
 Route::middleware(['auth', 'admin'])->group(function () {
 
-    // Pengajuan Routes Admin
+    // 1. Pengajuan (Approval)
     Route::prefix('admin/pengajuan')->name('admin.pengajuan.')->group(function () {
         Route::get('/', [PengajuanController::class, 'adminIndex'])->name('index');
         Route::post('/{pengajuan}/approve', [PengajuanController::class, 'approve'])->name('approve');
@@ -109,18 +102,21 @@ Route::middleware(['auth', 'admin'])->group(function () {
         Route::get('/{pengajuan}', [PengajuanController::class, 'show'])->name('show');
     });
 
-    // Mahasiswa (Admin Features)
+    // 2. Manajemen Mahasiswa (Admin View)
+    // Note: Edit & Update ada di group atas (shared), Index & Delete khusus Admin
     Route::prefix('mahasiswa')->name('mahasiswa.')->group(function () {
-        Route::get('/', [MahasiswaController::class, 'index'])->name('index');
+        Route::get('/', [MahasiswaController::class, 'index'])->name('index'); // LIST SEMUA
         Route::post('/import-excel', [MahasiswaController::class, 'importExcel'])->name('import_excel');
         Route::get('/export', [MahasiswaController::class, 'export'])->name('export');
         Route::get('/links', [MahasiswaController::class, 'copyLinks'])->name('links');
         Route::get('/{id}/sertifikat/summary', [MahasiswaController::class, 'showSertifikatSummary'])->name('sertifikat.summary');
         Route::get('/{mahasiswa}', [MahasiswaController::class, 'show'])->name('show');
         Route::delete('/{mahasiswa}', [MahasiswaController::class, 'destroy'])->name('destroy');
+        // Admin Generate Sertifikat
+        Route::get('/{id}/sertifikat', [MahasiswaController::class, 'generateSertifikat'])->name('sertifikat');
     });
 
-    // Pra-penelitian (Admin Features)
+    // 3. Manajemen Pra-Penelitian
     Route::prefix('pra-penelitian')->name('pra-penelitian.')->group(function () {
         Route::get('/', [PraPenelitianController::class, 'index'])->name('index');
         Route::get('/{pra_penelitian}', [PraPenelitianController::class, 'show'])->name('show');
@@ -128,21 +124,14 @@ Route::middleware(['auth', 'admin'])->group(function () {
         Route::put('/{pra_penelitian}', [PraPenelitianController::class, 'update'])->name('update');
         Route::delete('/{pra_penelitian}', [PraPenelitianController::class, 'destroy'])->name('destroy');
         Route::patch('/{pra_penelitian}/batal', [PraPenelitianController::class, 'batal'])->name('batal');
-        Route::post('/pra-penelitian/{praPenelitian}/approve-form', [PraPenelitianController::class, 'approveForm'])->name('approve');
-        Route::post('/pra-penelitian/{praPenelitian}/reject-form', [PraPenelitianController::class, 'rejectForm'])->name('reject');
+        Route::post('/{praPenelitian}/approve-form', [PraPenelitianController::class, 'approveForm'])->name('approve');
+        Route::post('/{praPenelitian}/reject-form', [PraPenelitianController::class, 'rejectForm'])->name('reject');
     });
 
-    // Ruangan
-    Route::prefix('ruangan')->name('ruangan.')->group(function () {
-        Route::get('/', [RuanganController::class, 'index'])->name('index');
-        Route::get('/create', [RuanganController::class, 'create'])->name('create');
-        Route::post('/', [RuanganController::class, 'store'])->name('store');
-        Route::get('/{ruangan}/edit', [RuanganController::class, 'edit'])->name('edit');
-        Route::put('/{ruangan}', [RuanganController::class, 'update'])->name('update');
-        Route::delete('/{ruangan}', [RuanganController::class, 'destroy'])->name('destroy');
-    });
+    // 4. Manajemen Ruangan
+    Route::resource('ruangan', RuanganController::class);
 
-    // Pelatihan
+    // 5. Manajemen Pelatihan
     Route::prefix('pelatihan')->name('pelatihan.')->group(function () {
         Route::get('/', [PelatihanController::class, 'index'])->name('index');
         Route::get('/create', [PelatihanController::class, 'create'])->name('create');
@@ -155,18 +144,13 @@ Route::middleware(['auth', 'admin'])->group(function () {
         Route::delete('/{pelatihan}', [PelatihanController::class, 'destroy'])->name('destroy');
     });
 
-    // Surat Balasan
+    // 6. Manajemen Surat Balasan
     Route::prefix('surat-balasan')->name('surat-balasan.')->group(function () {
-        Route::get('/', [SuratBalasanController::class, 'index'])->name('index');
-        Route::get('/create', [SuratBalasanController::class, 'create'])->name('create');
-        Route::post('/', [SuratBalasanController::class, 'store'])->name('store');
-        Route::get('/{suratBalasan}/edit', [SuratBalasanController::class, 'edit'])->name('edit');
-        Route::put('/{suratBalasan}', [SuratBalasanController::class, 'update'])->name('update');
-        Route::delete('/{suratBalasan}', [SuratBalasanController::class, 'destroy'])->name('destroy');
+        Route::resource('/', SuratBalasanController::class)->except(['show']); // Shortcut resource
         Route::get('/{suratBalasan}/pdf', [SuratBalasanController::class, 'generatePdf'])->name('pdf');
     });
 
-    // MOU
+    // 7. Manajemen MOU
     Route::prefix('mou')->name('mou.')->group(function () {
         Route::get('/', [MouController::class, 'index'])->name('index');
         Route::get('/create', [MouController::class, 'create'])->name('create');
@@ -178,14 +162,13 @@ Route::middleware(['auth', 'admin'])->group(function () {
         Route::delete('/{mou}', [MouController::class, 'destroy'])->name('destroy');
     });
 
-    // Admin Utilities
-    Route::get('/mahasiswa/{id}/sertifikat', [MahasiswaController::class, 'generateSertifikat'])->name('mahasiswa.sertifikat');
+    // 8. Admin Utilities (Notes, Absensi Rekap, Users)
     Route::get('/notes', [NoteController::class, 'index'])->name('notes.index');
     Route::post('/notes', [NoteController::class, 'store'])->name('notes.store');
     Route::delete('/notes/{id}', [NoteController::class, 'destroy'])->name('notes.destroy');
+    
     Route::get('/absensi', [AbsensiController::class, 'index'])->name('absensi.index');
 
-    // Manajemen User
     Route::get('/users', [UserController::class, 'index'])->name('users.index');
     Route::post('/users/{id}/approve', [UserController::class, 'approve'])->name('users.approve');
     Route::delete('/users/{id}', [UserController::class, 'destroy'])->name('users.destroy');

@@ -297,25 +297,26 @@ class MahasiswaController extends Controller
 
     public function update(Request $request, $id)
     {
+        // Menggunakan return langsung dari hasil transaksi
         return DB::transaction(function () use ($request, $id) {
             $mahasiswa = Mahasiswa::findOrFail($id);
 
             $data = $request->validate([
-                'nm_mahasiswa' => 'required|string|max:255',
-                'mou_id' => 'nullable|exists:mous,id',
-                'prodi' => 'nullable|string|max:255',
-                'nm_ruangan' => 'nullable|string|max:255',
-                'ruangan_id' => 'nullable|exists:ruangans,id',
-                'tanggal_mulai' => 'required|date',
+                'nm_mahasiswa'   => 'required|string|max:255',
+                'mou_id'         => 'nullable|exists:mous,id',
+                'prodi'          => 'nullable|string|max:255',
+                'nm_ruangan'     => 'nullable|string|max:255',
+                'ruangan_id'     => 'nullable|exists:ruangans,id',
+                'tanggal_mulai'  => 'required|date',
                 'tanggal_berakhir' => 'required|date|after:tanggal_mulai',
-                'status' => 'required|in:aktif,nonaktif',
-                'weekend_aktif' => 'nullable|boolean',
-                'foto' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
+                'status'         => 'required|in:aktif,nonaktif',
+                'weekend_aktif'  => 'nullable|boolean',
+                'foto'           => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
             ]);
 
             $data['weekend_aktif'] = $request->boolean('weekend_aktif');
 
-            // Logic Ganti Foto
+            // --- Logic Ganti Foto ---
             if ($request->hasFile('foto')) {
                 if ($mahasiswa->foto_path && File::exists(public_path($mahasiswa->foto_path))) {
                     File::delete(public_path($mahasiswa->foto_path));
@@ -333,15 +334,21 @@ class MahasiswaController extends Controller
             // --- SKENARIO 1: STATUS BERUBAH JADI NONAKTIF ---
             if ($mahasiswa->status === 'aktif' && $data['status'] === 'nonaktif' && $oldRuanganId) {
                 $old = Ruangan::find($oldRuanganId);
+                // Gunakan lockForUpdate untuk mencegah race condition (opsional tapi disarankan)
                 $snap = RuanganKetersediaan::firstOrCreate(
                     ['ruangan_id' => $old->id, 'tanggal' => $today],
                     ['tersedia' => $old->kuota_ruangan]
                 );
                 $snap->increment('tersedia');
+
                 $data['ruangan_id'] = null;
                 $data['nm_ruangan'] = null;
+
                 $mahasiswa->update($data);
-                return redirect()->route('mahasiswa.index')->with('success', 'Mahasiswa dinonaktifkan & keluar ruangan.');
+
+                // Redirect khusus jika dinonaktifkan
+                return redirect()->route('mahasiswa.index')
+                    ->with('success', 'Mahasiswa dinonaktifkan & keluar ruangan.');
             }
 
             // --- SKENARIO 2: PINDAH RUANGAN ---
@@ -360,6 +367,10 @@ class MahasiswaController extends Controller
                 $tersedia = $new->kuota_ruangan - $terisi;
 
                 if ($tersedia <= 0) {
+                    // Karena di dalam transaction, kita throw exception atau return redirect with error
+                    // Note: return di sini akan membatalkan commit otomatis jika tidak dihandle, 
+                    // tapi karena ini return response object, Laravel menganggapnya sukses tereksekusi.
+                    // Sebaiknya gunakan redirect back.
                     return back()->withErrors(['ruangan_id' => 'Ruangan tujuan penuh.'])->withInput();
                 }
 
@@ -374,12 +385,27 @@ class MahasiswaController extends Controller
 
                 $data['nm_ruangan'] = $new->nm_ruangan;
             } elseif (!$newRuanganId) {
-                // Jika ruangan dikosongkan
+                // Jika ruangan dikosongkan manual (bukan karena nonaktif)
                 $data['nm_ruangan'] = null;
             }
 
+            // --- UPDATE UTAMA ---
             $mahasiswa->update($data);
-            return redirect()->route('mahasiswa.index')->with('success', 'Data berhasil diperbarui.');
+
+            // --- LOGIKA REDIRECT BERDASARKAN ROLE ---
+            // 1. Ambil user yang sedang login
+            $user = auth()->user();
+
+            // 2. Cek apakah user ada DAN role-nya admin
+            if ($user && $user->role === 'admin') {
+                return redirect()->route('mahasiswa.index')
+                    ->with('success', 'Data berhasil diperbarui (Admin).');
+            }
+
+            // 3. Jika bukan admin (misal mahasiswa itu sendiri)
+            // Redirect ke dashboard atau halaman profil, JANGAN ke index semua mahasiswa
+            return redirect()->route('mahasiswa.dashboard')
+                ->with('success', 'Profil Anda berhasil diperbarui.');
         });
     }
 

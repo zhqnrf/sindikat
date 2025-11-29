@@ -217,20 +217,39 @@
 
         <div class="d-flex align-items-center">
             @if (auth()->check())
-                <img src="https://ui-avatars.com/api/?name={{ urlencode(auth()->user()->name) }}&background=7c1316&color=fff"
-                    class="rounded-circle me-2" width="40" height="40" alt="User">
-                <div class="sidebar-text">
-                    <div class="fw-bold text-truncate" style="max-width: 140px;">{{ auth()->user()->name }}</div>
-                    <small>{{ ucfirst(auth()->user()->role ?? 'user') }}</small>
-                </div>
-            @else
-                <img src="https://ui-avatars.com/api/?name=Guest&background=7c1316&color=fff"
-                    class="rounded-circle me-2" width="40" height="40" alt="User">
-                <div class="sidebar-text">
-                    <div class="fw-bold">Guest</div>
-                    <small>Visitor</small>
-                </div>
-            @endif
+    @php
+        // Ambil data user
+        $user = auth()->user();
+        
+        // Cek apakah kolom foto_path terisi DAN filenya benar-benar ada di folder public
+        // Sesuaikan 'foto_path' dengan nama kolom di tabel users/mahasiswa kamu
+        $hasFoto = !empty($mahasiswa->foto_path) && file_exists(public_path($mahasiswa->foto_path));
+    @endphp
+
+    @if ($hasFoto)
+        {{-- Tampilkan Foto Upload User --}}
+        <img src="{{ asset($mahasiswa->foto_path) }}"
+            class="rounded-circle me-2 object-fit-cover" 
+            width="40" height="40" alt="User">
+    @else
+        {{-- Fallback ke Inisial Nama (UI Avatars) --}}
+        <img src="https://ui-avatars.com/api/?name={{ urlencode($user->name) }}&background=7c1316&color=fff"
+            class="rounded-circle me-2" width="40" height="40" alt="User">
+    @endif
+
+    <div class="sidebar-text">
+        <div class="fw-bold text-truncate" style="max-width: 140px;">{{ $user->name }}</div>
+        <small>{{ ucfirst($user->role ?? 'user') }}</small>
+    </div>
+@else
+    {{-- Tampilan untuk Guest --}}
+    <img src="https://ui-avatars.com/api/?name=Guest&background=7c1316&color=fff"
+        class="rounded-circle me-2" width="40" height="40" alt="Guest">
+    <div class="sidebar-text">
+        <div class="fw-bold">Guest</div>
+        <small>Visitor</small>
+    </div>
+@endif
         </div>
     </div>
 </div>

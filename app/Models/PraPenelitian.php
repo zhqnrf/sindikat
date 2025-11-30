@@ -38,6 +38,11 @@ class PraPenelitian extends Model
         return $this->belongsTo(User::class);
     }
 
+    public function presentasi()
+    {
+        return $this->hasOne(Presentasi::class);
+    }
+
     public function konsultasi()
     {
         return $this->hasMany(Konsultasi::class);

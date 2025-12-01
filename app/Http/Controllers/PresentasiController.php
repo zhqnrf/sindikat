@@ -156,19 +156,22 @@ class PresentasiController extends Controller
         return back()->with('success', 'Laporan berhasil diupload! Menunggu review dari admin.');
     }
 
-    /**
-     * CI: Form Penilaian (via Link Token)
-     */
     public function formPenilaian($token)
     {
-        // Token = presentasi_id (bisa dienkripsi untuk keamanan)
-        $presentasi = Presentasi::with('praPenelitian', 'user', 'pengajuan')->findOrFail($token);
+        $presentasi = Presentasi::with([
+            'praPenelitian.anggotas',
+            'user',
+            'pengajuan'
+        ])->findOrFail($token);
 
         if (!$presentasi->file_ppt) {
             return view('ci.belum-upload', compact('presentasi'));
         }
 
-        return view('ci.penilaian', compact('presentasi'));
+        return view('ci.penilaian', [
+            'presentasi' => $presentasi,
+            'praPenelitian' => $presentasi->praPenelitian,
+        ]);
     }
 
     /**

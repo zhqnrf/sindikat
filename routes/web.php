@@ -168,8 +168,8 @@ Route::middleware(['auth', 'admin'])->group(function () {
 
     // 6. Manajemen Surat Balasan
     Route::prefix('surat-balasan')->name('surat-balasan.')->group(function () {
-        Route::resource('/', SuratBalasanController::class)->except(['show']); // Shortcut resource
-        Route::get('/{suratBalasan}/pdf', [SuratBalasanController::class, 'generatePdf'])->name('pdf');
+        Route::resource('/', 'SuratBalasanController')->except(['show']);
+        Route::get('/{suratBalasan}/pdf', 'SuratBalasanController@generatePdf')->name('pdf');
     });
 
     // 7. Manajemen MOU

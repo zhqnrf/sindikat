@@ -326,13 +326,13 @@
 
                 {{-- Tambahkan setelah bagian Step 2: Verifikasi Pembayaran --}}
 
-{{-- Step 3: Set Jadwal Presentasi (Setelah pembayaran verified) --}}
+{{-- Step 4: Set Jadwal Presentasi (Setelah pembayaran verified) --}}
 @if ($pengajuan->status_pembayaran === 'verified')
     <div class="col-lg-12 mb-4">
         <div class="card border-0 shadow-sm">
             <div class="card-header" style="background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%); color: white;">
                 <h5 class="mb-0">
-                    <i class="bi bi-3-circle me-2"></i>Step 3: Jadwal Presentasi
+                    <i class="bi bi-4-circle me-2"></i>Step 4: Jadwal Presentasi
                 </h5>
             </div>
             <div class="card-body">

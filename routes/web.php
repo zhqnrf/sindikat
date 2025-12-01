@@ -188,6 +188,7 @@ Route::middleware(['auth', 'admin'])->group(function () {
         Route::get('/', [PresentasiController::class, 'adminIndex'])->name('index');
         Route::get('/create/{pengajuan}', [PresentasiController::class, 'create'])->name('create');
         Route::post('/{pengajuan}', [PresentasiController::class, 'store'])->name('store');
+        Route::get('/detail/{id}', [PresentasiController::class, 'detail'])->name('detail');
         Route::post('/{id}/review-laporan', [PresentasiController::class, 'reviewLaporan'])->name('review-laporan');
     });
 

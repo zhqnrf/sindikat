@@ -1,6 +1,6 @@
 {{-- Sidebar --}}
 <div class="sidebar">
-    <div>
+    <div class="sidebar-inner">
         <div class="sidebar-header">
             {{-- Pastikan file 'icon.png' ada di public folder --}}
             <img class="image-sidebar" src="{{ asset('icon.png') }}" alt="Logo">
@@ -29,7 +29,7 @@
             </a>
 
             {{-- ========================================== --}}
-            {{-- MENU KHUSUS ADMIN (Tidak Diubah)           --}}
+            {{-- MENU KHUSUS ADMIN                          --}}
             {{-- ========================================== --}}
             @if (auth()->check() && auth()->user()->role === 'admin')
                 <div class="sidebar-heading">
@@ -41,10 +41,16 @@
                     <span class="sidebar-text">Manajemen User</span>
                 </a>
 
-                <a class="nav-link {{ request()->is('pengajuan*') ? 'active' : '' }}"
+                <a class="nav-link {{ request()->is('admin/pengajuan*') ? 'active' : '' }}"
                     href="{{ route('admin.pengajuan.index') }}">
                     <i class="bi bi-hourglass-split"></i>
                     <span class="sidebar-text">Approval Pengajuan</span>
+                </a>
+
+                <a class="nav-link {{ request()->is('admin/presentasi*') ? 'active' : '' }}"
+                    href="{{ route('admin.presentasi.index') }}">
+                    <i class="bi bi-easel"></i>
+                    <span class="sidebar-text">Presentasi</span>
                 </a>
 
                 @php $isMouActive = request()->is('mou*'); @endphp
@@ -111,14 +117,13 @@
                             href="{{ route('pelatihan.index') }}">
                             <span class="sidebar-text">List Pelatihan</span>
                         </a>
-                        <a class="nav-link {{ request()->is('pelatihan') ? 'active' : '' }}"
-                            href="{{ route('public.pelatihan.index') }}">
+                        <a class="nav-link" href="{{ route('public.pelatihan.index') }}">
                             <span class="sidebar-text">Search Pelatihan</span>
                         </a>
                     </div>
                 </div>
 
-                @php $isPenelitianActive = request()->is('penelitian*'); @endphp
+                @php $isPenelitianActive = request()->is('pra-penelitian*'); @endphp
                 <div class="nav-item-dropdown">
                     <a class="nav-link {{ $isPenelitianActive ? 'active-parent' : '' }}" data-bs-toggle="collapse"
                         href="#menuPenelitian" role="button"
@@ -128,7 +133,7 @@
                         <i class="bi bi-chevron-down sidebar-arrow"></i>
                     </a>
                     <div class="collapse sub-menu {{ $isPenelitianActive ? 'show' : '' }}" id="menuPenelitian">
-                        <a class="nav-link {{ request()->is('penelitian*') ? 'active' : '' }}"
+                        <a class="nav-link {{ request()->is('pra-penelitian*') ? 'active' : '' }}"
                             href="{{ route('pra-penelitian.index') }}">
                             <span class="sidebar-text">Pra-Penelitian</span>
                         </a>
@@ -137,17 +142,14 @@
             @endif
 
             {{-- ========================================== --}}
-            {{-- MENU KHUSUS USER (LOGIKA BARU)             --}}
+            {{-- MENU KHUSUS USER                           --}}
             {{-- ========================================== --}}
             @if (auth()->check() && auth()->user()->role === 'user')
 
                 @php
-                    // PERBAIKAN: Jangan pakai 'use' di sini.
-                    // Gunakan langsung \App\Models\Pengajuan (pakai backslash)
-
                     $userId = auth()->id();
 
-                    // Ambil data spesifik
+                    // Ambil data pengajuan
                     $pra = \App\Models\Pengajuan::where('user_id', $userId)
                         ->where('jenis', 'pra_penelitian')
                         ->latest()
@@ -157,9 +159,15 @@
                         ->latest()
                         ->first();
 
-                    // Cek apakah user sudah punya akses (status approved)
+                    // Cek akses
                     $hasPraAccess = $pra && $pra->status === 'approved';
                     $hasMagangAccess = $magang && $magang->status === 'approved';
+
+                    // Cek apakah sudah dapat CI (untuk presentasi)
+                    $hasCIAccess = $hasPraAccess && $pra->ci_nama;
+
+                    // Cek apakah ada presentasi
+                    $presentasi = $hasCIAccess ? \App\Models\Presentasi::where('user_id', $userId)->first() : null;
                 @endphp
 
                 <div class="sidebar-heading">
@@ -167,15 +175,13 @@
                 </div>
 
                 {{-- 1. MENU STATUS & PENGAJUAN (Selalu Muncul) --}}
-                <a class="nav-link {{ request()->is('pengajuan*') ? 'active' : '' }}"
+                <a class="nav-link {{ request()->is('pengajuan') && !request()->is('pengajuan/detail*') ? 'active' : '' }}"
                     href="{{ route('pengajuan.index') }}">
                     <i class="bi bi-grid-1x2"></i>
                     <span class="sidebar-text">Pengajuan & Status</span>
                 </a>
 
-                {{-- 2. MENU AKSES (Hanya muncul jika Approved) --}}
-
-                {{-- Akses Magang --}}
+                {{-- 2. MENU AKSES MAGANG --}}
                 @if ($hasMagangAccess)
                     <div class="sidebar-heading mt-2">
                         <span class="sidebar-text">Aktivitas Magang</span>
@@ -183,73 +189,95 @@
                     <a class="nav-link {{ request()->routeIs('mahasiswa.dashboard') ? 'active' : '' }}"
                         href="{{ route('mahasiswa.dashboard') }}">
                         <i class="bi bi-briefcase"></i>
-                        <span class="sidebar-text">Dashboard Mahasiswa</span>
+                        <span class="sidebar-text">Dashboard Magang</span>
                     </a>
                 @endif
 
-                {{-- Akses Pra-Penelitian --}}
+                {{-- 3. MENU AKSES PRA-PENELITIAN --}}
                 @if ($hasPraAccess)
                     <div class="sidebar-heading mt-2">
                         <span class="sidebar-text">Aktivitas Penelitian</span>
                     </div>
-                    <a class="nav-link {{ request()->is('progres/penelitian*') ? 'active' : '' }}"
-                        href="{{ route('pengajuan.detail', ['id' => $pra->id, 'jenis' => 'pra_penelitian']) }}') }}">
+
+                    <a class="nav-link {{ request()->is('pengajuan/detail/pra_penelitian') ? 'active' : '' }}"
+                        href="{{ route('pengajuan.detail', 'pra_penelitian') }}">
                         <i class="bi bi-bar-chart-line"></i>
-                        <span class="sidebar-text">Progres Penelitian</span>
+                        <span class="sidebar-text">Detail Penelitian</span>
                     </a>
+
+                    @if ($hasCIAccess)
+                        <a class="nav-link {{ request()->is('konsultasi*') ? 'active' : '' }}"
+                            href="{{ route('konsultasi.index') }}">
+                            <i class="bi bi-chat-dots"></i>
+                            <span class="sidebar-text">Konsultasi</span>
+                        </a>
+                    @endif
+
+                    @if ($presentasi)
+                        <a class="nav-link {{ request()->is('presentasi*') ? 'active' : '' }}"
+                            href="{{ route('presentasi.show') }}">
+                            <i class="bi bi-easel"></i>
+                            <span class="sidebar-text">Presentasi</span>
+                        </a>
+                    @endif
                 @endif
             @endif
         </nav>
     </div>
 
-    {{-- User Profile di Bawah (Tetap sama) --}}
-    <div class="p-3 sidebar-user-profile">
-        <a class="nav-link logout-link" href="#"
-            onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
-            <i class="bi bi-box-arrow-right"></i>
-            <span class="sidebar-text">Logout</span>
-        </a>
-        <form id="logout-form" action="{{ route('logout') }}" method="POST" style="display: none;">
-            @csrf
-        </form>
+    {{-- User Profile di Bawah --}}
+    <div class="sidebar-footer">
+        <div class="p-3 sidebar-user-profile">
+            <a class="nav-link logout-link" href="#"
+                onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
+                <i class="bi bi-box-arrow-right"></i>
+                <span class="sidebar-text">Logout</span>
+            </a>
+            <form id="logout-form" action="{{ route('logout') }}" method="POST" style="display: none;">
+                @csrf
+            </form>
 
-        <hr class="logout-divider">
+            <hr class="logout-divider">
 
-        <div class="d-flex align-items-center">
-            @if (auth()->check())
-    @php
-        // Ambil data user
-        $user = auth()->user();
-        
-        // Cek apakah kolom foto_path terisi DAN filenya benar-benar ada di folder public
-        // Sesuaikan 'foto_path' dengan nama kolom di tabel users/mahasiswa kamu
-        $hasFoto = !empty($mahasiswa->foto_path) && file_exists(public_path($mahasiswa->foto_path));
-    @endphp
+            <div class="d-flex align-items-center">
+                @if (auth()->check())
+                    @php
+                        $user = auth()->user();
+                        
+                        // Cek foto untuk mahasiswa
+                        $mahasiswa = null;
+                        if ($user->role === 'user') {
+                            $mahasiswa = \App\Models\Mahasiswa::where('user_id', $user->id)->first();
+                        }
+                        
+                        $hasFoto = $mahasiswa && !empty($mahasiswa->foto_path) && file_exists(public_path($mahasiswa->foto_path));
+                    @endphp
 
-    @if ($hasFoto)
-        {{-- Tampilkan Foto Upload User --}}
-        <img src="{{ asset($mahasiswa->foto_path) }}"
-            class="rounded-circle me-2 object-fit-cover" 
-            width="40" height="40" alt="User">
-    @else
-        {{-- Fallback ke Inisial Nama (UI Avatars) --}}
-        <img src="https://ui-avatars.com/api/?name={{ urlencode($user->name) }}&background=7c1316&color=fff"
-            class="rounded-circle me-2" width="40" height="40" alt="User">
-    @endif
+                    @if ($hasFoto)
+                        {{-- Tampilkan Foto Upload User --}}
+                        <img src="{{ asset($mahasiswa->foto_path) }}"
+                            class="rounded-circle me-2 object-fit-cover" 
+                            width="40" height="40" alt="User">
+                    @else
+                        {{-- Fallback ke Inisial Nama (UI Avatars) --}}
+                        <img src="https://ui-avatars.com/api/?name={{ urlencode($user->name) }}&background=7c1316&color=fff"
+                            class="rounded-circle me-2" width="40" height="40" alt="User">
+                    @endif
 
-    <div class="sidebar-text">
-        <div class="fw-bold text-truncate" style="max-width: 140px;">{{ $user->name }}</div>
-        <small>{{ ucfirst($user->role ?? 'user') }}</small>
-    </div>
-@else
-    {{-- Tampilan untuk Guest --}}
-    <img src="https://ui-avatars.com/api/?name=Guest&background=7c1316&color=fff"
-        class="rounded-circle me-2" width="40" height="40" alt="Guest">
-    <div class="sidebar-text">
-        <div class="fw-bold">Guest</div>
-        <small>Visitor</small>
-    </div>
-@endif
+                    <div class="sidebar-text">
+                        <div class="fw-bold text-truncate" style="max-width: 140px;">{{ $user->name }}</div>
+                        <small>{{ ucfirst($user->role ?? 'user') }}</small>
+                    </div>
+                @else
+                    {{-- Tampilan untuk Guest --}}
+                    <img src="https://ui-avatars.com/api/?name=Guest&background=7c1316&color=fff"
+                        class="rounded-circle me-2" width="40" height="40" alt="Guest">
+                    <div class="sidebar-text">
+                        <div class="fw-bold">Guest</div>
+                        <small>Visitor</small>
+                    </div>
+                @endif
+            </div>
         </div>
     </div>
 </div>
@@ -364,9 +392,10 @@
         text-decoration: none !important;
     }
 
+    /* --- Sidebar Container (Flexbox + Scroll) --- */
     .sidebar {
         width: 250px;
-        min-height: 100vh;
+        height: 100vh;
         background: var(--sidebar-bg);
         color: var(--sidebar-text-color);
         box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
@@ -375,13 +404,49 @@
         left: 0;
         display: flex;
         flex-direction: column;
-        justify-content: space-between;
         z-index: 1000;
         transition: width var(--transition-speed) ease;
+        overflow: hidden;
     }
 
     .sidebar.collapsed {
         width: 80px;
+    }
+
+    /* --- Sidebar Inner (Scrollable Area) --- */
+    .sidebar-inner {
+        flex: 1;
+        overflow-y: auto;
+        overflow-x: hidden;
+        display: flex;
+        flex-direction: column;
+        scroll-behavior: smooth;
+    }
+
+    /* Custom Scrollbar */
+    .sidebar-inner::-webkit-scrollbar {
+        width: 6px;
+    }
+
+    .sidebar-inner::-webkit-scrollbar-track {
+        background: rgba(0, 0, 0, 0.2);
+        border-radius: 10px;
+    }
+
+    .sidebar-inner::-webkit-scrollbar-thumb {
+        background: rgba(255, 255, 255, 0.3);
+        border-radius: 10px;
+        transition: background 0.3s;
+    }
+
+    .sidebar-inner::-webkit-scrollbar-thumb:hover {
+        background: rgba(255, 255, 255, 0.5);
+    }
+
+    /* Firefox Scrollbar */
+    .sidebar-inner {
+        scrollbar-width: thin;
+        scrollbar-color: rgba(255, 255, 255, 0.3) rgba(0, 0, 0, 0.2);
     }
 
     /* --- Header & Logo --- */
@@ -394,6 +459,7 @@
         display: flex;
         align-items: center;
         justify-content: center;
+        flex-shrink: 0;
     }
 
     .image-sidebar {
@@ -412,7 +478,7 @@
     .sidebar-toggle {
         position: absolute;
         right: -15px;
-        top: 30px;
+        top: 50%;
         transform: translateY(-50%);
         background: #fff;
         border: 1px solid #e0e0e0;
@@ -437,7 +503,7 @@
         background: var(--maroon);
         color: white;
         border-color: var(--maroon);
-        transform: scale(1.1);
+        transform: translateY(-50%) scale(1.1);
     }
 
     .sidebar-toggle i {
@@ -451,6 +517,7 @@
     /* --- Search Bar --- */
     .sidebar-search {
         padding: 1rem;
+        flex-shrink: 0;
     }
 
     .search-container {
@@ -490,12 +557,11 @@
         display: none;
     }
 
-    /* --- Navigasi Container --- */
+    /* --- Navigasi Container (Scrollable) --- */
     .sidebar-nav-container {
         flex-grow: 1;
-        overflow-y: auto;
-        overflow-x: hidden;
-        padding: 0 1rem;
+        padding: 0 1rem 1rem 1rem;
+        overflow-y: visible;
     }
 
     /* Judul Grup */
@@ -532,6 +598,7 @@
         position: relative;
         white-space: nowrap;
         overflow: hidden;
+        text-decoration: none;
     }
 
     .nav-link i {
@@ -545,6 +612,7 @@
     .nav-link:hover {
         background: var(--sidebar-pill-hover);
         color: var(--sidebar-text-active);
+        text-decoration: none;
     }
 
     .nav-link.active {
@@ -648,10 +716,15 @@
         transform: translateY(-50%) scale(1.3);
     }
 
-    /* --- User Profile & Logout --- */
+    /* --- Sidebar Footer (Fixed at Bottom) --- */
+    .sidebar-footer {
+        flex-shrink: 0;
+        border-top: 1px solid rgba(255, 255, 255, 0.1);
+        background: var(--sidebar-bg);
+    }
+
     .sidebar-user-profile {
         padding: 1rem;
-        background: rgba(0, 0, 0, 0.1);
     }
 
     .sidebar.collapsed .sidebar-user-profile {
@@ -676,15 +749,62 @@
         color: var(--sidebar-text-color);
         font-weight: 500;
         margin-bottom: 0.5rem;
+        border-radius: 8px;
+        transition: all var(--transition-speed);
+        text-decoration: none;
+        display: flex;
+        align-items: center;
+    }
+
+    .logout-link i {
+        margin-right: 12px;
+        font-size: 1.2rem;
+    }
+
+    .sidebar.collapsed .logout-link i {
+        margin-right: 0;
     }
 
     .logout-link:hover {
         background: var(--sidebar-pill-hover);
         color: var(--sidebar-text-active);
+        text-decoration: none;
     }
 
     .logout-divider {
         border-color: rgba(255, 255, 255, 0.1);
         margin: 0.5rem 0 1rem;
+    }
+
+    /* --- Responsive: Mobile --- */
+    @media (max-width: 768px) {
+        .sidebar {
+            width: 80px;
+        }
+
+        .sidebar.collapsed {
+            width: 0;
+            transform: translateX(-100%);
+        }
+
+        .sidebar-toggle {
+            display: none;
+        }
+    }
+
+    /* --- Animation --- */
+    @keyframes fadeIn {
+        from {
+            opacity: 0;
+            transform: translateY(-10px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .nav-link {
+        animation: fadeIn 0.3s ease;
     }
 </style>

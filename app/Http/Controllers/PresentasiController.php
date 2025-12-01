@@ -18,17 +18,21 @@ class PresentasiController extends Controller
      */
     public function create($pengajuanId)
     {
-        $pengajuan = Pengajuan::with('user', 'praPenelitian')->findOrFail($pengajuanId);
-        
-        // Cek apakah sudah konsul minimal 2x
-        $praPenelitian = $pengajuan->user->praPenelitian ?? PraPenelitian::where('user_id', $pengajuan->user_id)->first();
+        $pengajuan = Pengajuan::with('user')->findOrFail($pengajuanId);
+
+        // ✅ Load pra penelitian dengan anggota
+        $praPenelitian = PraPenelitian::with(['anggotas', 'mou'])
+            ->where('user_id', $pengajuan->user_id)
+            ->first();
+
         if (!$praPenelitian) {
             return back()->with('error', 'Data pra penelitian tidak ditemukan.');
         }
 
         $totalKonsul = Konsultasi::where('pra_penelitian_id', $praPenelitian->id)->count();
+
         if ($totalKonsul < 2) {
-            return back()->with('error', 'Mahasiswa belum melakukan konsultasi minimal 2x.');
+            return back()->with('error', 'Mahasiswa belum melakukan konsultasi minimal 2x. Total konsul: ' . $totalKonsul);
         }
 
         return view('admin.presentasi.create', compact('pengajuan', 'praPenelitian'));
@@ -62,6 +66,18 @@ class PresentasiController extends Controller
         ]);
 
         return redirect()->route('admin.pengajuan.index')->with('success', 'Jadwal presentasi berhasil dibuat!');
+    }
+
+    /**
+     * Admin: Lihat detail presentasi
+     */
+    public function detail($id)
+    {
+        // ✅ BENAR: Load semua relasi yang ada
+        $presentasi = Presentasi::with(['user', 'praPenelitian', 'pengajuan'])
+            ->findOrFail($id);
+
+        return view('admin.presentasi.detail', compact('presentasi'));
     }
 
     /**
@@ -271,7 +287,8 @@ class PresentasiController extends Controller
      */
     public function adminIndex()
     {
-        $presentasi = Presentasi::with('user', 'praPenelitian', 'pengajuan')
+        // ✅ BENAR: Load relasi yang memang ada di tabel presentasi
+        $presentasi = Presentasi::with(['user', 'praPenelitian', 'pengajuan'])
             ->latest()
             ->paginate(15);
 

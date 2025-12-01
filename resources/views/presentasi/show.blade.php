@@ -63,12 +63,18 @@
                     </div>
 
                     <div>
-                        <small class="text-muted d-block">Link Penilaian CI</small>
-                        <a href="{{ route('ci.penilaian', $presentasi->id) }}" target="_blank" class="btn btn-sm btn-outline-primary w-100 mt-1">
-                            <i class="bi bi-link-45deg me-1"></i> Buka Link Penilaian
-                        </a>
-                        <small class="text-muted d-block mt-1">Kirim link ini ke CI Anda</small>
-                    </div>
+    <small class="text-muted d-block mb-1">Link Penilaian CI</small>
+    
+    <div class="input-group">
+        <input type="text" class="form-control form-control-sm" value="{{ route('ci.penilaian', $presentasi->id) }}" id="inputLinkPenilaian" readonly>
+        
+        <button class="btn btn-sm btn-outline-primary" type="button" onclick="copyLink()">
+            <i class="bi bi-clipboard" id="iconCopy"></i> <span id="textCopy">Salin</span>
+        </button>
+    </div>
+
+    <small class="text-muted d-block mt-1">Klik tombol salin dan kirim ke CI Anda</small>
+</div>
                 </div>
             </div>
         </div>
@@ -301,4 +307,33 @@
         </div>
     </div>
 </div>
+
+<script>
+    function copyLink() {
+        // 1. Ambil elemen input
+        var copyText = document.getElementById("inputLinkPenilaian");
+
+        // 2. Select teks di dalamnya
+        copyText.select();
+        copyText.setSelectionRange(0, 99999); // Untuk support mobile device
+
+        // 3. Salin ke clipboard
+        navigator.clipboard.writeText(copyText.value).then(function() {
+            // 4. Beri feedback (Ubah Ikon & Teks sementara)
+            var icon = document.getElementById("iconCopy");
+            var text = document.getElementById("textCopy");
+
+            icon.className = "bi bi-check-lg"; // Ganti ikon jadi centang
+            text.innerText = "Tersalin!";
+            
+            // Kembalikan ke semula setelah 2 detik
+            setTimeout(function() {
+                icon.className = "bi bi-clipboard";
+                text.innerText = "Salin";
+            }, 2000);
+        }, function(err) {
+            alert('Gagal menyalin link');
+        });
+    }
+</script>
 @endsection

@@ -32,6 +32,10 @@ Route::post('/chatbot', [PublicController::class, 'chatbot'])->name('chatbot.ask
 Route::get('/cek-data-pelatihan', [PelatihanController::class, 'publicIndex'])->name('public.pelatihan.index');
 Route::get('/input-data-pelatihan/{pelatihan}/edit', [PelatihanController::class, 'publicEdit'])->name('public.pelatihan.edit');
 Route::put('/input-data-pelatihan/{pelatihan}', [PelatihanController::class, 'publicUpdate'])->name('public.pelatihan.update');
+
+// --- PUBLIC ROUTES FOR MOU (CREATE-ONLY, NO SIDEBAR) ---
+Route::get('/input-data-mou/create', [MouController::class, 'publicCreate'])->name('public.mou.create');
+Route::post('/input-data-mou', [MouController::class, 'publicStore'])->name('public.mou.store');
 Route::get('/penilaian/{token}', [PresentasiController::class, 'formPenilaian'])->name('ci.penilaian');
 Route::post('/penilaian/{token}', [PresentasiController::class, 'submitPenilaian'])->name('ci.submit-penilaian');
 
@@ -68,7 +72,7 @@ Route::middleware(['auth'])->group(function () {
     // --- AKSES MAHASISWA / MAGANG (User Biasa) ---
     // Middleware 'magang' diasumsikan untuk user yang sudah diterima/aktif
     Route::middleware(['magang'])->prefix('mahasiswa')->name('mahasiswa.')->group(function () {
-        
+
         // 1. Dashboard Khusus Mahasiswa
         Route::get('/dashboard', [MahasiswaController::class, 'dashboard'])->name('dashboard');
 
@@ -81,7 +85,7 @@ Route::middleware(['auth'])->group(function () {
         // Pastikan Controller membatasi User A tidak bisa edit User B.
         Route::get('/{mahasiswa}/edit', [MahasiswaController::class, 'edit'])->name('edit');
         Route::put('/{mahasiswa}', [MahasiswaController::class, 'update'])->name('update');
-        
+
         // Create/Store (Jika pendaftaran dilakukan mandiri setelah login)
         Route::get('/create', [MahasiswaController::class, 'create'])->name('create');
         Route::post('/', [MahasiswaController::class, 'store'])->name('store');
@@ -199,7 +203,7 @@ Route::middleware(['auth', 'admin'])->group(function () {
     Route::get('/notes', [NoteController::class, 'index'])->name('notes.index');
     Route::post('/notes', [NoteController::class, 'store'])->name('notes.store');
     Route::delete('/notes/{id}', [NoteController::class, 'destroy'])->name('notes.destroy');
-    
+
     Route::get('/absensi', [AbsensiController::class, 'index'])->name('absensi.index');
 
     Route::get('/users', [UserController::class, 'index'])->name('users.index');

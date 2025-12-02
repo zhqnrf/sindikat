@@ -181,6 +181,10 @@
                 </button>
                 <div id="toolsDropdownMenu" class="dropdown-menu dropdown-menu-right shadow-sm border-0"
                     style="border-radius: 12px; position: absolute; right: 0; top: 110%; z-index: 2000; display: none; min-width: 200px; background: white;">
+                    <a class="dropdown-item py-2" href="javascript:void(0)" onclick="copyPublicMouUrl(); closeTools();">
+                        <i class="bi bi-link-45deg text-info me-2"></i> Salin URL
+                    </a>
+                    <div class="dropdown-divider"></div>
                     <a class="dropdown-item py-2" href="javascript:void(0)" onclick="exportMOU(); closeTools();">
                         <i class="bi bi-file-earmark-excel text-success me-2"></i> Export Excel
                     </a>
@@ -255,10 +259,10 @@
                     <tr>
                         <th class="text-center" width="5%">No</th>
                         <th>Instansi</th>
-                        <th>Durasi MOU</th>
-                        <th>Draft MoU</th>
-                        <th>Surat Permohonan</th>
-                        <th>Keterangan</th>
+                        <th>Jenis</th>
+                        <th>Durasi</th>
+                        <th>Dokumen</th>
+                        <th>Rencana Kerja Sama</th>
                         <th class="text-center" width="15%">Aksi</th>
                     </tr>
                 </thead>
@@ -271,37 +275,62 @@
                             </td>
                             <td>
                                 <span class="fw-bold text-dark d-block">{{ $mou->nama_instansi }}</span>
+                                @if($mou->alamat_instansi)
+                                    <small class="d-block text-muted">{{ $mou->alamat_instansi }}</small>
+                                @endif
+                                @if($mou->nama_pic_instansi)
+                                    <small class="d-block text-muted">PIC: {{ $mou->nama_pic_instansi }} @if($mou->nomor_kontak_pic) &middot; {{ $mou->nomor_kontak_pic }} @endif</small>
+                                @endif
+                            </td>
+                            <td>
+                                <span class="small text-dark d-block">{{ $mou->jenis_instansi ?? '-' }}
+                                @if($mou->jenis_instansi_lainnya && $mou->jenis_instansi === 'Lainnya')
+                                    <small class="text-muted d-block">( {{ $mou->jenis_instansi_lainnya }} )</small>
+                                @endif
+                                </span>
                             </td>
                             <td>
                                 <span class="badge bg-light text-dark border p-2">
-                                    {{ $mou->tanggal_masuk->format('d M Y') }}
+                                    {{ $mou->tanggal_masuk ? $mou->tanggal_masuk->format('d M Y') : '-' }}
                                 </span>
                                 <i class="bi bi-arrow-right mx-1 text-muted"></i>
                                 <span class="badge bg-light text-dark border p-2">
-                                    {{ $mou->tanggal_keluar->format('d M Y') }}
+                                    {{ $mou->tanggal_keluar ? $mou->tanggal_keluar->format('d M Y') : '-' }}
                                 </span>
                             </td>
                             <td>
-                                @if ($mou->draft_mou)
-                                    <a href="{{ Storage::url($mou->draft_mou) }}" target="_blank"
-                                        class="btn btn-sm btn-outline-dark rounded-pill px-3">
-                                        <i class="bi bi-file-earmark-pdf me-1"></i> Lihat
-                                    </a>
-                                @else
-                                    -
-                                @endif
+                                <div class="d-flex flex-wrap gap-2">
+                                    @if($mou->surat_permohonan)
+                                        <a href="{{ Storage::url($mou->surat_permohonan) }}" target="_blank" class="btn btn-sm btn-outline-dark rounded-pill px-2" title="Surat Permohonan">
+                                            <i class="bi bi-file-earmark-text"></i>
+                                        </a>
+                                    @endif
+                                    @if($mou->sk_pengangkatan_pimpinan)
+                                        <a href="{{ Storage::url($mou->sk_pengangkatan_pimpinan) }}" target="_blank" class="btn btn-sm btn-outline-dark rounded-pill px-2" title="SK Pengangkatan">
+                                            <i class="bi bi-journal-richtext"></i>
+                                        </a>
+                                    @endif
+                                    @if($mou->sertifikat_akreditasi_prodi)
+                                        <a href="{{ Storage::url($mou->sertifikat_akreditasi_prodi) }}" target="_blank" class="btn btn-sm btn-outline-dark rounded-pill px-2" title="Sertifikat Akreditasi">
+                                            <i class="bi bi-award"></i>
+                                        </a>
+                                    @endif
+                                    @if($mou->draft_mou)
+                                        <a href="{{ Storage::url($mou->draft_mou) }}" target="_blank" class="btn btn-sm btn-outline-dark rounded-pill px-2" title="Draft MoU">
+                                            <i class="bi bi-file-earmark-pdf"></i>
+                                        </a>
+                                    @endif
+                                    @if(!$mou->surat_permohonan && !$mou->sk_pengangkatan_pimpinan && !$mou->sertifikat_akreditasi_prodi && !$mou->draft_mou)
+                                        -
+                                    @endif
+                                </div>
                             </td>
                             <td>
-                                @if ($mou->surat_permohonan)
-                                    <a href="{{ Storage::url($mou->surat_permohonan) }}" target="_blank"
-                                        class="btn btn-sm btn-outline-dark rounded-pill px-3">
-                                        <i class="bi bi-file-earmark-image me-1"></i> Lihat
-                                    </a>
-                                @else
-                                    -
-                                @endif
+                                <div style="max-width: 18rem;">
+                                    {{ \Illuminate\Support\Str::limit($mou->rencana_kerja_sama ?? '', 80) }}
+                                </div>
                             </td>
-                            <td>{{ $mou->keterangan ?? '-' }}</td>
+                            {{-- Keterangan column intentionally removed --}}
                             <td class="text-center">
                                 {{-- Tombol Aksi (Style Baru) --}}
                                 <a href="{{ route('mou.edit', $mou->id) }}" class="action-btn" title="Edit">
@@ -542,7 +571,25 @@
             input.value = ''; // Reset file input
         }
 
-        // 6. Fungsi Delete Confirmation (SweetAlert)
+        // 6. Fungsi Copy URL Publik MOU
+        function copyPublicMouUrl() {
+            const publicUrl = '{{ route('public.mou.create') }}';
+
+            navigator.clipboard.writeText(publicUrl).then(() => {
+                showToast('URL publik berhasil disalin ke clipboard!', 'success');
+            }).catch(() => {
+                // Fallback untuk browser lama
+                const textarea = document.createElement('textarea');
+                textarea.value = publicUrl;
+                document.body.appendChild(textarea);
+                textarea.select();
+                document.execCommand('copy');
+                document.body.removeChild(textarea);
+                showToast('URL publik berhasil disalin ke clipboard!', 'success');
+            });
+        }
+
+        // 7. Fungsi Delete Confirmation (SweetAlert)
         document.addEventListener('DOMContentLoaded', () => {
             const deleteButtons = document.querySelectorAll('.btn-delete');
             deleteButtons.forEach(btn => {

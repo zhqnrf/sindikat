@@ -172,6 +172,15 @@
             </div>
         </div>
 
+         <div class="mb-3">
+            <label class="form-label">No HP <span class="text-danger">*</span></label>
+            <div class="input-group">
+                <span class="input-group-text"><i class="bi bi-person"></i></span>
+                <input type="text" name="no_hp" class="form-control"
+                    value="{{ old('no_hp') }}" placeholder="Contoh: 123456789" required>
+            </div>
+        </div>
+
         {{-- Input Foto (Tetap sama) --}}
         <div class="mb-4">
             <label class="form-label">Pas Foto 3x4 (Opsional)</label>

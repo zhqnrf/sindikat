@@ -3,221 +3,403 @@
 @section('title', 'Konsultasi Penelitian')
 @section('page-title', 'Konsultasi dengan CI')
 
-{{-- Tambahkan CSS Summernote di head --}}
+{{-- Tambahkan CSS Summernote & Custom Styles --}}
 @push('styles')
 <link href="https://cdn.jsdelivr.net/npm/summernote@0.8.18/dist/summernote-lite.min.css" rel="stylesheet">
 <style>
+    :root {
+        --custom-maroon: #7c1316;
+        --custom-maroon-light: #a3191d;
+        --custom-maroon-subtle: #fcf0f1;
+        --text-dark: #2c3e50;
+        --text-muted: #64748b;
+        --card-radius: 16px;
+        --transition: 0.3s ease;
+        --timeline-color: #e2e8f0;
+    }
+
+    /* --- Header --- */
+    .page-header-wrapper {
+        background: #fff;
+        border-radius: var(--card-radius);
+        padding: 1.5rem;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.03);
+        margin-bottom: 2rem;
+        border-left: 5px solid var(--custom-maroon);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    /* --- Cards --- */
+    .custom-card {
+        background: #fff;
+        border: none;
+        border-radius: var(--card-radius);
+        box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+        overflow: hidden;
+        margin-bottom: 1.5rem;
+    }
+
+    .card-header-maroon {
+        background: var(--custom-maroon);
+        color: white;
+        padding: 1rem 1.5rem;
+        font-weight: 600;
+        display: flex; align-items: center; gap: 0.5rem;
+    }
+    
+    .card-header-light {
+        background: #fff;
+        border-bottom: 1px solid #f1f5f9;
+        padding: 1.2rem 1.5rem;
+        font-weight: 700;
+        color: var(--text-dark);
+    }
+
+    /* --- Typography --- */
+    .info-label {
+        font-size: 0.75rem; text-transform: uppercase; color: var(--text-muted);
+        font-weight: 600; margin-bottom: 0.2rem; letter-spacing: 0.5px;
+    }
+    .info-value {
+        font-size: 0.95rem; color: var(--text-dark); font-weight: 500; margin-bottom: 1rem;
+    }
+
+    /* --- Timeline Styles (Riwayat) --- */
+    .timeline {
+        position: relative;
+        padding-left: 20px;
+        margin-top: 10px;
+    }
+    .timeline::before {
+        content: '';
+        position: absolute;
+        left: 0; top: 0; bottom: 0;
+        width: 2px;
+        background: var(--timeline-color);
+    }
+    .timeline-item {
+        position: relative;
+        padding-left: 25px;
+        margin-bottom: 2rem;
+    }
+    .timeline-item::after {
+        content: '';
+        position: absolute;
+        left: -4px;
+        top: 5px;
+        width: 10px; height: 10px;
+        border-radius: 50%;
+        background: var(--custom-maroon);
+        border: 2px solid white;
+        box-shadow: 0 0 0 2px var(--custom-maroon-subtle);
+    }
+    .timeline-date {
+        font-size: 0.85rem;
+        color: var(--text-muted);
+        margin-bottom: 0.5rem;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+    }
+    .timeline-content {
+        background: #f8fafc;
+        border-radius: 12px;
+        padding: 1.2rem;
+        border: 1px solid #f1f5f9;
+        font-size: 0.95rem;
+        line-height: 1.6;
+        color: var(--text-dark);
+    }
+
+    /* --- Summernote Tweaks --- */
     .note-editor.note-frame {
-        border: 1px solid #dee2e6;
-        border-radius: 0.375rem;
+        border: 1px solid #e2e8f0;
+        border-radius: 12px;
+        overflow: hidden;
     }
-    .note-editor.note-frame.is-invalid {
-        border-color: #dc3545;
+    .note-toolbar {
+        background: #f8fafc !important;
+        border-bottom: 1px solid #e2e8f0 !important;
     }
-    .hasil-konsul {
-        line-height: 1.8;
+    .note-btn {
+        background: white !important;
+        border: 1px solid #e2e8f0 !important;
+        color: #64748b !important;
     }
-    .hasil-konsul p {
-        margin-bottom: 0.5rem;
+    .note-btn:hover { background: #e2e8f0 !important; }
+
+    /* --- Buttons --- */
+    .btn-maroon {
+        background-color: var(--custom-maroon); color: #fff; border: none;
+        border-radius: 8px; padding: 0.6rem 1.5rem; font-weight: 600; transition: var(--transition);
     }
-    .hasil-konsul ul, .hasil-konsul ol {
-        margin-left: 1.5rem;
-        margin-bottom: 0.5rem;
+    .btn-maroon:hover { background-color: var(--custom-maroon-light); color: white; transform: translateY(-2px); }
+
+    .btn-outline-custom {
+        border: 1px solid #e2e8f0; color: var(--text-dark); background: white;
+        border-radius: 8px; padding: 0.5rem 1.2rem; font-weight: 500; transition: var(--transition);
+        text-decoration: none;
     }
+    .btn-outline-custom:hover { background: #f8f9fa; border-color: #cbd5e1; }
+
+    .btn-action-icon {
+        width: 30px; height: 30px; display: inline-flex; align-items: center; justify-content: center;
+        border-radius: 6px; transition: var(--transition); border: none;
+    }
+    .btn-edit-icon { background: #e0f2fe; color: #0284c7; }
+    .btn-edit-icon:hover { background: #bae6fd; }
+    .btn-del-icon { background: #fee2e2; color: #dc2626; }
+    .btn-del-icon:hover { background: #fecaca; }
+
+    .animate-up { animation: fadeInUp 0.6s cubic-bezier(0.4, 0, 0.2, 1) forwards; opacity: 0; transform: translateY(20px); }
+    @keyframes fadeInUp { to { opacity: 1; transform: translateY(0); } }
 </style>
 @endpush
 
 @section('content')
     <div class="container py-4">
-        {{-- Alert --}}
-        @if (session('success'))
-            <div class="alert alert-success alert-dismissible fade show" role="alert">
-                <i class="bi bi-check-circle-fill me-2"></i> {{ session('success') }}
-                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        
+        {{-- Header --}}
+        <div class="page-header-wrapper animate-up">
+            <div>
+                <h4 class="fw-bold mb-1" style="color: var(--custom-maroon);">Konsultasi Penelitian</h4>
+                <small class="text-muted">Catat hasil bimbingan Anda dengan Pembimbing Lapangan.</small>
             </div>
-        @endif
-
-        @if (session('error'))
-            <div class="alert alert-danger alert-dismissible fade show" role="alert">
-                <i class="bi bi-exclamation-triangle-fill me-2"></i> {{ session('error') }}
-                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            <div>
+                <a href="{{ route('pengajuan.index') }}" class="btn btn-outline-custom shadow-sm">
+                    <i class="bi bi-arrow-left me-1"></i> Kembali
+                </a>
             </div>
-        @endif
-
-        {{-- Back Button --}}
-        <div class="mb-4">
-            <a href="{{ route('pengajuan.detail', 'pra_penelitian') }}" class="btn btn-outline-secondary btn-sm">
-                <i class="bi bi-arrow-left me-1"></i> Kembali ke Detail
-            </a>
         </div>
 
+        {{-- Alerts (Fallback if SweetAlert fails) --}}
+        @if (session('error'))
+            <div class="alert alert-danger animate-up">{{ session('error') }}</div>
+        @endif
+
         <div class="row g-4">
-            {{-- Info CI Card --}}
-            <div class="col-lg-4">
-                <div class="card border-0 shadow-sm">
-                    <div class="card-header bg-maroon text-white">
-                        <h5 class="mb-0"><i class="bi bi-person-badge me-2"></i>Pembimbing (CI)</h5>
+            {{-- KOLOM KIRI: Info Pembimbing --}}
+            <div class="col-lg-4 animate-up" style="animation-delay: 0.1s;">
+                <div class="custom-card">
+                    <div class="card-header-maroon">
+                        <i class="bi bi-person-vcard-fill"></i> Info Pembimbing (CI)
                     </div>
-                    <div class="card-body">
-                        <div class="mb-3">
-                            <small class="text-muted d-block">Nama</small>
-                            <strong>{{ $pengajuan->ci_nama }}</strong>
+                    <div class="p-4">
+                        <div class="d-flex align-items-center mb-4">
+                            <div class="bg-light rounded-circle p-3 me-3 text-center" style="width: 60px; height: 60px;">
+                                <i class="bi bi-person-badge fs-3 text-secondary"></i>
+                            </div>
+                            <div>
+                                <div class="fw-bold text-dark">{{ $pengajuan->ci_nama }}</div>
+                                <small class="text-muted">{{ $pengajuan->ci_bidang }}</small>
+                            </div>
                         </div>
-                        <div class="mb-3">
-                            <small class="text-muted d-block">No. HP</small>
-                            <a href="tel:{{ $pengajuan->ci_no_hp }}" class="text-decoration-none fw-bold">
-                                <i class="bi bi-telephone-fill me-1"></i>{{ $pengajuan->ci_no_hp }}
+                        
+                        <div class="info-label">Kontak (WhatsApp)</div>
+                        <div class="info-value">
+                            <a href="https://wa.me/{{ preg_replace('/[^0-9]/', '', $pengajuan->ci_no_hp) }}" target="_blank" class="text-decoration-none text-success fw-bold">
+                                <i class="bi bi-whatsapp me-1"></i> {{ $pengajuan->ci_no_hp }}
                             </a>
                         </div>
-                        <div class="mb-3">
-                            <small class="text-muted d-block">Bidang</small>
-                            <strong>{{ $pengajuan->ci_bidang }}</strong>
-                        </div>
-                        <div>
-                            <small class="text-muted d-block">Ruangan</small>
-                            <strong class="text-maroon">{{ $pengajuan->ruangan }}</strong>
+
+                        <div class="info-label">Lokasi Ruangan</div>
+                        <div class="info-value">
+                            <span class="badge bg-light text-dark border"><i class="bi bi-door-open me-1"></i> {{ $pengajuan->ruangan }}</span>
                         </div>
 
-                        <hr>
+                        <hr class="border-light my-3">
 
-                        <div class="alert alert-info small mb-0">
-                            <i class="bi bi-info-circle me-1"></i>
-                            <strong>Minimal konsultasi: {{ $minKonsul }}x</strong><br>
-                            Total konsultasi Anda: <strong class="{{ $totalKonsul >= $minKonsul ? 'text-success' : 'text-danger' }}">{{ $totalKonsul }}x</strong>
-                            @if ($totalKonsul < $minKonsul)
-                                <br><small class="text-danger">Kurang {{ $minKonsul - $totalKonsul }}x lagi</small>
-                            @else
-                                <br><small class="text-success">✓ Target tercapai!</small>
-                            @endif
+                        {{-- Progress Konsultasi --}}
+                        <div class="p-3 rounded-3" style="background-color: {{ $totalKonsul >= $minKonsul ? '#f0fdf4' : '#fff7ed' }}; border: 1px solid {{ $totalKonsul >= $minKonsul ? '#bbf7d0' : '#ffedd5' }};">
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <small class="fw-bold text-uppercase {{ $totalKonsul >= $minKonsul ? 'text-success' : 'text-warning' }}">
+                                    Progres Bimbingan
+                                </small>
+                                <span class="badge bg-white text-dark shadow-sm border">{{ $totalKonsul }} / {{ $minKonsul }}</span>
+                            </div>
+                            
+                            <div class="progress" style="height: 6px;">
+                                <div class="progress-bar {{ $totalKonsul >= $minKonsul ? 'bg-success' : 'bg-warning' }}" 
+                                     role="progressbar" 
+                                     style="width: {{ min(($totalKonsul / $minKonsul) * 100, 100) }}%">
+                                </div>
+                            </div>
+                            
+                            <div class="mt-2 small">
+                                @if ($totalKonsul < $minKonsul)
+                                    <span class="text-muted">Kurang <strong>{{ $minKonsul - $totalKonsul }}</strong> kali lagi.</span>
+                                @else
+                                    <span class="text-success fw-bold"><i class="bi bi-check-circle-fill me-1"></i> Target tercapai!</span>
+                                @endif
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
 
-            {{-- Form & History --}}
-            <div class="col-lg-8">
-                {{-- Form Input Konsultasi --}}
-                <div class="card border-0 shadow-sm mb-4">
-                    <div class="card-header" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white;">
-                        <h5 class="mb-0">
-                            <i class="bi bi-journal-plus me-2"></i>Input Hasil Konsultasi
-                        </h5>
+            {{-- KOLOM KANAN: Form & History --}}
+            <div class="col-lg-8 animate-up" style="animation-delay: 0.2s;">
+                
+                {{-- Form Input --}}
+                <div class="custom-card">
+                    <div class="card-header-light">
+                        <i class="bi bi-journal-plus me-2 text-primary"></i> Catat Hasil Konsultasi Baru
                     </div>
-                    <div class="card-body">
+                    <div class="p-4">
                         <form action="{{ route('konsultasi.store') }}" method="POST" id="formKonsultasi">
                             @csrf
-                            <div class="mb-3">
-                                <label class="form-label fw-bold">Tanggal Konsultasi</label>
-                                <input type="date" name="tanggal_konsul" class="form-control @error('tanggal_konsul') is-invalid @enderror" value="{{ old('tanggal_konsul', date('Y-m-d')) }}" required>
-                                @error('tanggal_konsul')
-                                    <div class="invalid-feedback">{{ $message }}</div>
-                                @enderror
+                            <div class="mb-4">
+                                <label class="form-label fw-bold small text-uppercase text-muted">Tanggal Konsultasi</label>
+                                <input type="date" name="tanggal_konsul" class="form-control" value="{{ old('tanggal_konsul', date('Y-m-d')) }}" required>
                             </div>
 
-                            <div class="mb-3">
-                                <label class="form-label fw-bold">Hasil Konsultasi</label>
-                                <textarea name="hasil_konsul" id="summernote" class="form-control @error('hasil_konsul') is-invalid @enderror">{{ old('hasil_konsul') }}</textarea>
-                                @error('hasil_konsul')
-                                    <div class="invalid-feedback d-block">{{ $message }}</div>
-                                @enderror
-                                <small class="text-muted">Gunakan toolbar untuk format teks (bold, italic, list, dll)</small>
+                            <div class="mb-4">
+                                <label class="form-label fw-bold small text-uppercase text-muted">Hasil Diskusi / Revisi</label>
+                                <textarea name="hasil_konsul" id="summernote" class="form-control">{{ old('hasil_konsul') }}</textarea>
+                                <div class="form-text">Catat poin-poin penting, revisi, atau saran dari pembimbing.</div>
                             </div>
 
-                            <button type="submit" class="btn btn-maroon">
-                                <i class="bi bi-save me-1"></i> Simpan Hasil Konsultasi
-                            </button>
+                            <div class="text-end">
+                                <button type="submit" class="btn btn-maroon">
+                                    <i class="bi bi-send-fill me-2"></i> Simpan Catatan
+                                </button>
+                            </div>
                         </form>
                     </div>
                 </div>
 
-                {{-- History Konsultasi --}}
-                <div class="card border-0 shadow-sm">
-                    <div class="card-header bg-white border-0 pt-3">
-                        <h5 class="fw-bold mb-0"><i class="bi bi-clock-history me-2"></i>Riwayat Konsultasi</h5>
+                {{-- Timeline History --}}
+                <div class="custom-card">
+                    <div class="card-header-light">
+                        <i class="bi bi-clock-history me-2 text-info"></i> Riwayat Bimbingan
                     </div>
-                    <div class="card-body">
+                    <div class="p-4">
                         @if ($konsultasi->count() > 0)
                             <div class="timeline">
                                 @foreach ($konsultasi as $k)
-                                    <div class="card mb-3 border-0 shadow-sm">
-                                        <div class="card-body">
-                                            <div class="d-flex justify-content-between align-items-start mb-2">
-                                                <div>
-                                                    <h6 class="fw-bold mb-1">
-                                                        <i class="bi bi-calendar-check text-primary me-1"></i>
-                                                        {{ \Carbon\Carbon::parse($k->tanggal_konsul)->format('d F Y') }}
-                                                    </h6>
-                                                    <small class="text-muted">
-                                                        Dibuat: {{ $k->created_at->diffForHumans() }}
-                                                    </small>
-                                                </div>
-                                                <div class="btn-group" role="group">
-                                                    <a href="{{ route('konsultasi.edit', $k->id) }}" class="btn btn-sm btn-outline-primary">
-                                                        <i class="bi bi-pencil"></i>
-                                                    </a>
-                                                    <form action="{{ route('konsultasi.destroy', $k->id) }}" method="POST" class="d-inline">
-                                                        @csrf
-                                                        @method('DELETE')
-                                                        <button type="submit" class="btn btn-sm btn-outline-danger" onclick="return confirm('Hapus konsultasi ini?')">
-                                                            <i class="bi bi-trash"></i>
-                                                        </button>
-                                                    </form>
-                                                </div>
+                                    <div class="timeline-item">
+                                        <div class="timeline-date">
+                                            <span class="fw-bold text-dark">
+                                                <i class="bi bi-calendar-event me-1"></i> {{ \Carbon\Carbon::parse($k->tanggal_konsul)->format('d F Y') }}
+                                            </span>
+                                            <div class="d-flex gap-2">
+                                                <a href="{{ route('konsultasi.edit', $k->id) }}" class="btn-action-icon btn-edit-icon" title="Edit">
+                                                    <i class="bi bi-pencil-square"></i>
+                                                </a>
+                                                <form action="{{ route('konsultasi.destroy', $k->id) }}" method="POST" class="d-inline delete-form">
+                                                    @csrf @method('DELETE')
+                                                    <button type="button" class="btn-action-icon btn-del-icon btn-delete" title="Hapus">
+                                                        <i class="bi bi-trash"></i>
+                                                    </button>
+                                                </form>
                                             </div>
-                                            <hr>
-                                            <div class="hasil-konsul">{!! $k->hasil_konsul !!}</div>
+                                        </div>
+                                        <div class="timeline-content">
+                                            {!! $k->hasil_konsul !!}
+                                            <div class="mt-2 text-end">
+                                                <small class="text-muted fst-italic" style="font-size: 0.75rem;">
+                                                    Dicatat: {{ $k->created_at->diffForHumans() }}
+                                                </small>
+                                            </div>
                                         </div>
                                     </div>
                                 @endforeach
                             </div>
                         @else
                             <div class="text-center py-5">
-                                <i class="bi bi-inbox display-4 text-muted opacity-50"></i>
-                                <p class="text-muted mt-3">Belum ada riwayat konsultasi</p>
-                                <small class="text-muted">Mulai konsultasi dengan mengisi form di atas</small>
+                                <div class="mb-3">
+                                    <i class="bi bi-journal-x display-4 text-muted opacity-50"></i>
+                                </div>
+                                <h5 class="fw-bold text-muted">Belum ada catatan</h5>
+                                <p class="text-muted small">Mulai bimbingan dan catat hasilnya di formulir atas.</p>
                             </div>
                         @endif
                     </div>
                 </div>
+
             </div>
         </div>
     </div>
 @endsection
 
-{{-- Tambahkan Scripts Summernote --}}
 @push('scripts')
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/summernote@0.8.18/dist/summernote-lite.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
 <script>
     $(document).ready(function() {
+        // Init Summernote
         $('#summernote').summernote({
-            placeholder: 'Tulis hasil diskusi, saran dari pembimbing, catatan penting, dll...',
-            height: 300,
+            placeholder: 'Tulis hasil diskusi, saran, revisi...',
+            tabsize: 2,
+            height: 200,
             toolbar: [
                 ['style', ['style']],
-                ['font', ['bold', 'italic', 'underline', 'clear']],
-                ['fontsize', ['fontsize']],
+                ['font', ['bold', 'underline', 'clear']],
                 ['color', ['color']],
                 ['para', ['ul', 'ol', 'paragraph']],
-                ['height', ['height']],
-                ['table', ['table']],
                 ['insert', ['link']],
-                ['view', ['fullscreen', 'codeview', 'help']]
-            ],
-            fontSizes: ['8', '9', '10', '11', '12', '14', '16', '18', '20', '24', '36'],
-            styleTags: ['p', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6'],
+                ['view', ['fullscreen', 'help']]
+            ]
         });
 
-        // Validasi form sebelum submit
+        // SweetAlert Notifikasi
+        @if(session('success'))
+            Swal.fire({
+                icon: 'success',
+                title: 'Berhasil!',
+                text: '{{ session("success") }}',
+                timer: 2000,
+                showConfirmButton: false
+            });
+        @endif
+
+        @if(session('error'))
+            Swal.fire({
+                icon: 'error',
+                title: 'Gagal',
+                text: '{{ session("error") }}'
+            });
+        @endif
+
+        // Konfirmasi Hapus
+        $('.btn-delete').on('click', function(e) {
+            e.preventDefault();
+            let form = $(this).closest('form');
+            
+            Swal.fire({
+                title: 'Hapus catatan ini?',
+                text: "Data yang dihapus tidak dapat dikembalikan.",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#d33',
+                cancelButtonColor: '#3085d6',
+                confirmButtonText: 'Ya, hapus!',
+                cancelButtonText: 'Batal'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    form.submit();
+                }
+            });
+        });
+
+        // Validasi Form Submit
         $('#formKonsultasi').on('submit', function(e) {
             var content = $('#summernote').summernote('code');
-            var text = $('<div>').html(content).text().trim();
+            // Strip tags untuk cek kosong
+            var text = $("<div>").html(content).text().trim();
             
-            if (text.length < 10) {
+            if (text.length < 5) {
                 e.preventDefault();
-                alert('Hasil konsultasi harus minimal 10 karakter!');
-                $('#summernote').summernote('focus');
-                return false;
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Isi Kosong',
+                    text: 'Mohon isi hasil konsultasi dengan lengkap.',
+                    confirmButtonColor: '#7c1316'
+                });
             }
         });
     });

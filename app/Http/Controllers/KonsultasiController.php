@@ -20,7 +20,7 @@ class KonsultasiController extends Controller
         // Ambil data pengajuan (untuk cek CI sudah di-assign)
         $pengajuan = Pengajuan::where('user_id', auth()->id())
             ->where('jenis', 'pra_penelitian')
-            ->first();
+            ->orderBy('created_at', 'desc')->first();
 
         // Cek apakah CI sudah di-assign
         if (!$pengajuan || !$pengajuan->ci_nama) {

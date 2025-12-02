@@ -38,6 +38,7 @@
             text-align: center;
             padding: 2rem;
             border: 1px solid #f0f0f0;
+            height: 100%;
         }
         
         .status-icon-wrapper {
@@ -68,7 +69,7 @@
             border-color: var(--custom-maroon-light);
         }
 
-        /* Garis vertikal konektor antar step (Opsional, visual saja) */
+        /* Garis vertikal konektor antar step */
         .step-card::after {
             content: ''; position: absolute; left: 24px; top: 100%; height: 20px; 
             border-left: 2px dashed #cbd5e1; z-index: 0;
@@ -158,25 +159,38 @@
             @php
                 $praPenelitian = App\Models\PraPenelitian::where('user_id', auth()->id())->first();
                 
-                // Helper untuk menentukan class step
-                // Step 1: Form
-                $step1Class = $praPenelitian ? ($praPenelitian->status == 'Approved' ? 'done' : ($praPenelitian->status == 'Rejected' ? 'active' : 'active')) : 'active';
-                $step1Icon  = $praPenelitian && $praPenelitian->status == 'Approved' ? '<i class="bi bi-check-lg"></i>' : '1';
-                
-                // Step 2: Galasan
-                $step2Class = '';
-                $step2Icon = '2';
-                if ($praPenelitian && $praPenelitian->status == 'Approved') {
-                    $step2Class = $pengajuan->status_galasan == 'sent' ? 'done' : 'active';
-                    $step2Icon = $pengajuan->status_galasan == 'sent' ? '<i class="bi bi-check-lg"></i>' : '2';
+                // Helper Logic untuk class CSS step (Visualisasi Progress)
+                // Step 1: Form Biodata
+                $step1Class = 'active'; 
+                $step1Icon = '1';
+                if ($praPenelitian) {
+                    if ($praPenelitian->status == 'Approved') { $step1Class = 'done'; $step1Icon = '<i class="bi bi-check-lg"></i>'; }
+                    elseif ($praPenelitian->status == 'Rejected') { $step1Class = 'active'; } // Tetap active agar bisa diedit
+                    else { $step1Class = 'active'; } // Pending
                 }
 
-                // Step 3: Pembayaran & Penempatan
+                // Step 2: Galasan (Surat & Invoice)
+                $step2Class = ''; 
+                $step2Icon = '2';
+                if ($praPenelitian && $praPenelitian->status == 'Approved') {
+                    if ($pengajuan->status_galasan == 'sent') {
+                        $step2Class = 'done';
+                        $step2Icon = '<i class="bi bi-check-lg"></i>';
+                    } else {
+                        $step2Class = 'active';
+                    }
+                }
+
+                // Step 3: Pembayaran & Info CI
                 $step3Class = '';
                 $step3Icon = '3';
                 if ($pengajuan->status_galasan == 'sent') {
-                    $step3Class = $pengajuan->status_pembayaran == 'verified' ? 'done' : 'active';
-                    $step3Icon = $pengajuan->status_pembayaran == 'verified' ? '<i class="bi bi-check-lg"></i>' : '3';
+                    if ($pengajuan->status_pembayaran == 'verified') {
+                        $step3Class = 'done';
+                        $step3Icon = '<i class="bi bi-check-lg"></i>';
+                    } else {
+                        $step3Class = 'active';
+                    }
                 }
             @endphp
 
@@ -246,7 +260,7 @@
                                     </div>
                                 </div>
                             @elseif ($praPenelitian->status === 'Rejected')
-                                <div class="alert alert-danger border-0 d-flex align-items-center">
+                                <div class="alert alert-danger border-0 d-flex align-items-center mb-3">
                                     <i class="bi bi-x-circle-fill me-3 fs-4"></i>
                                     <div>
                                         <strong>Formulir Ditolak</strong><br>
@@ -356,7 +370,7 @@
                                         </div>
                                     </div>
                                     
-                                    {{-- INFO CI --}}
+                                    {{-- INFO CI & LINK KONSULTASI --}}
                                     @if ($pengajuan->ci_nama)
                                         <div class="card border-0 shadow-sm" style="background: #f8f9fa;">
                                             <div class="card-body">
@@ -381,6 +395,18 @@
                                                         <strong>{{ $pengajuan->ci_bidang }}</strong>
                                                     </div>
                                                 </div>
+                                                
+                                                <hr>
+
+                                                {{-- TOMBOL MULAI KONSULTASI (Baru) --}}
+                                                <div class="alert alert-info mb-3 border-0">
+                                                    <i class="bi bi-info-circle-fill me-2"></i> 
+                                                    Silakan lakukan konsultasi minimal 2x dengan pembimbing Anda.
+                                                </div>
+                                                <a href="{{ route('konsultasi.index') }}" class="btn btn-maroon w-100 shadow-sm">
+                                                    <i class="bi bi-chat-dots-fill me-2"></i> Mulai Konsultasi
+                                                </a>
+
                                             </div>
                                         </div>
                                     @endif
@@ -389,55 +415,10 @@
                             </div>
                         </div>
                     @endif
-                    {{-- Step 3: Info CI & Ruangan --}}
-@if ($pengajuan->status_pembayaran === 'verified' && $pengajuan->ci_nama)
-    <div class="card border-0 shadow-sm">
-        <div class="card-header" style="background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%); color: white;">
-            <h5 class="mb-0">
-                <i class="bi bi-3-circle me-2"></i>Step 3: Informasi Pembimbing & Konsultasi
-            </h5>
-        </div>
-        <div class="card-body">
-            <div class="row g-3">
-                <div class="col-md-6">
-                    <small class="text-muted d-block">Nama Pembimbing (CI)</small>
-                    <strong>{{ $pengajuan->ci_nama }}</strong>
-                </div>
-                <div class="col-md-6">
-                    <small class="text-muted d-block">No. HP</small>
-                    <a href="tel:{{ $pengajuan->ci_no_hp }}" class="text-decoration-none fw-bold">
-                        <i class="bi bi-telephone-fill me-1"></i>{{ $pengajuan->ci_no_hp }}
-                    </a>
-                </div>
-                <div class="col-md-6">
-                    <small class="text-muted d-block">Bidang</small>
-                    <strong>{{ $pengajuan->ci_bidang }}</strong>
-                </div>
-                <div class="col-md-6">
-                    <small class="text-muted d-block">Ruangan</small>
-                    <strong class="text-maroon">{{ $pengajuan->ruangan }}</strong>
-                </div>
-            </div>
-            
-            <hr>
-            
-            {{-- Link ke Halaman Konsultasi --}}
-            <div class="alert alert-info mb-3">
-                <i class="bi bi-info-circle me-2"></i> 
-                Silakan lakukan konsultasi minimal 2x dengan pembimbing Anda
-            </div>
-            
-            <a href="{{ route('konsultasi.index') }}" class="btn btn-primary w-100">
-                <i class="bi bi-chat-dots me-1"></i> Mulai Konsultasi
-            </a>
-        </div>
-    </div>
-@endif
-                </div>
-            </div>
-            @endif
-            
-            {{-- (Optional: Tambahkan else untuk jenis Magang jika diperlukan) --}}
 
+                </div>
+            </div>
+        @endif
     </div>
 @endsection
+

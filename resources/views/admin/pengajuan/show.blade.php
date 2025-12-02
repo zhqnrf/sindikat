@@ -324,6 +324,58 @@
                     </div>
                 @endif
 
+                {{-- Tambahkan setelah bagian Step 2: Verifikasi Pembayaran --}}
+
+{{-- Step 4: Set Jadwal Presentasi (Setelah pembayaran verified) --}}
+@if ($pengajuan->status_pembayaran === 'verified')
+    <div class="col-lg-12 mb-4">
+        <div class="card border-0 shadow-sm">
+            <div class="card-header" style="background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%); color: white;">
+                <h5 class="mb-0">
+                    <i class="bi bi-4-circle me-2"></i>Step 4: Jadwal Presentasi
+                </h5>
+            </div>
+            <div class="card-body">
+                @php
+                    $praPenelitian = App\Models\PraPenelitian::where('user_id', $pengajuan->user_id)->first();
+                    $totalKonsul = $praPenelitian ? App\Models\Konsultasi::where('pra_penelitian_id', $praPenelitian->id)->count() : 0;
+                    $presentasi = App\Models\Presentasi::where('pengajuan_id', $pengajuan->id)->first();
+                @endphp
+
+                @if (!$presentasi)
+                    @if ($totalKonsul >= 2)
+                        <div class="alert alert-success">
+                            <i class="bi bi-check-circle-fill me-2"></i>
+                            Mahasiswa sudah melakukan konsultasi {{ $totalKonsul }}x. Siap untuk presentasi!
+                        </div>
+                        <a href="{{ route('admin.presentasi.create', $pengajuan->id) }}" class="btn btn-primary">
+                            <i class="bi bi-calendar-plus me-1"></i> Set Jadwal Presentasi
+                        </a>
+                    @else
+                        <div class="alert alert-warning">
+                            <i class="bi bi-exclamation-triangle me-2"></i>
+                            Mahasiswa baru konsultasi {{ $totalKonsul }}x. Minimal 2x konsultasi sebelum presentasi.
+                        </div>
+                    @endif
+                @else
+                    <div class="alert alert-info">
+                        <i class="bi bi-calendar-check me-2"></i>
+                        Jadwal presentasi sudah dibuat.
+                    </div>
+                    <div class="mb-3">
+                        <strong>Tanggal:</strong> {{ $presentasi->tanggal_presentasi->format('d F Y') }}<br>
+                        <strong>Waktu:</strong> {{ $presentasi->waktu_mulai }} - {{ $presentasi->waktu_selesai }}<br>
+                        <strong>Tempat:</strong> {{ $presentasi->tempat }}
+                    </div>
+                    <a href="{{ route('admin.presentasi.detail', $presentasi->id) }}" class="btn btn-outline-primary">
+                        <i class="bi bi-eye me-1"></i> Lihat Detail Presentasi
+                    </a>
+                @endif
+            </div>
+        </div>
+    </div>
+@endif
+
                 {{-- STEP 3: Verifikasi Pembayaran (Aktif jika Step 2 Sent) --}}
                 @if($pengajuan->status_galasan == 'sent')
                     <div class="process-card {{ $pengajuan->status_pembayaran != 'verified' ? 'active' : '' }}">

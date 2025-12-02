@@ -13,6 +13,7 @@ use App\Http\Controllers\NoteController;
 use App\Http\Controllers\SuratBalasanController;
 use App\Http\Controllers\MouController;
 use App\Http\Controllers\PengajuanController;
+use App\Http\Controllers\PresentasiController;
 use App\Http\Controllers\ProgresController;
 use App\Http\Controllers\UserController;
 
@@ -28,6 +29,9 @@ Route::get('/', fn() => redirect()->route('login'));
 Route::get('/cek-data-pelatihan', [PelatihanController::class, 'publicIndex'])->name('public.pelatihan.index');
 Route::get('/input-data-pelatihan/{pelatihan}/edit', [PelatihanController::class, 'publicEdit'])->name('public.pelatihan.edit');
 Route::put('/input-data-pelatihan/{pelatihan}', [PelatihanController::class, 'publicUpdate'])->name('public.pelatihan.update');
+Route::get('/penilaian/{token}', [PresentasiController::class, 'formPenilaian'])->name('ci.penilaian');
+Route::post('/penilaian/{token}', [PresentasiController::class, 'submitPenilaian'])->name('ci.submit-penilaian');
+
 
 // Authentication
 Route::get('/login', [AuthController::class, 'showLoginForm'])->name('login');
@@ -95,6 +99,13 @@ Route::middleware(['auth'])->group(function () {
         Route::put('/{id}', [KonsultasiController::class, 'update'])->name('update');
         Route::delete('/{id}', [KonsultasiController::class, 'destroy'])->name('destroy');
     });
+
+    // Akses Presentasi
+        Route::prefix('presentasi')->name('presentasi.')->group(function () {
+        Route::get('/', [PresentasiController::class, 'show'])->name('show');
+        Route::post('/{id}/upload-ppt', [PresentasiController::class, 'uploadPpt'])->name('upload-ppt');
+        Route::post('/{id}/upload-laporan', [PresentasiController::class, 'uploadLaporan'])->name('upload-laporan');
+    });
 });
 
 
@@ -157,8 +168,8 @@ Route::middleware(['auth', 'admin'])->group(function () {
 
     // 6. Manajemen Surat Balasan
     Route::prefix('surat-balasan')->name('surat-balasan.')->group(function () {
-        Route::resource('/', SuratBalasanController::class)->except(['show']); // Shortcut resource
-        Route::get('/{suratBalasan}/pdf', [SuratBalasanController::class, 'generatePdf'])->name('pdf');
+        Route::resource('/', 'SuratBalasanController')->except(['show']);
+        Route::get('/{suratBalasan}/pdf', 'SuratBalasanController@generatePdf')->name('pdf');
     });
 
     // 7. Manajemen MOU
@@ -171,6 +182,14 @@ Route::middleware(['auth', 'admin'])->group(function () {
         Route::get('/{mou}/edit', [MouController::class, 'edit'])->name('edit');
         Route::put('/{mou}', [MouController::class, 'update'])->name('update');
         Route::delete('/{mou}', [MouController::class, 'destroy'])->name('destroy');
+    });
+
+    Route::prefix('admin/presentasi')->name('admin.presentasi.')->group(function () {
+        Route::get('/', [PresentasiController::class, 'adminIndex'])->name('index');
+        Route::get('/create/{pengajuan}', [PresentasiController::class, 'create'])->name('create');
+        Route::post('/{pengajuan}', [PresentasiController::class, 'store'])->name('store');
+        Route::get('/detail/{id}', [PresentasiController::class, 'detail'])->name('detail');
+        Route::post('/{id}/review-laporan', [PresentasiController::class, 'reviewLaporan'])->name('review-laporan');
     });
 
     // 8. Admin Utilities (Notes, Absensi Rekap, Users)

@@ -27,4 +27,9 @@ class Pengajuan extends Model
     {
         return $this->belongsTo(User::class);
     }
+
+    public function presentasi()
+    {
+        return $this->hasOne(Presentasi::class);
+    }
 }

@@ -15,6 +15,7 @@ use App\Http\Controllers\MouController;
 use App\Http\Controllers\PengajuanController;
 use App\Http\Controllers\PresentasiController;
 use App\Http\Controllers\ProgresController;
+use App\Http\Controllers\PublicController;
 use App\Http\Controllers\UserController;
 
 /*
@@ -23,7 +24,9 @@ use App\Http\Controllers\UserController;
 |--------------------------------------------------------------------------
 */
 
-Route::get('/', fn() => redirect()->route('login'));
+Route::get('/', [PublicController::class, 'landing'])->name('landing');
+
+Route::post('/chatbot', [PublicController::class, 'chatbot'])->name('chatbot.ask');
 
 // --- PUBLIC ROUTES (Pelatihan & Auth) ---
 Route::get('/cek-data-pelatihan', [PelatihanController::class, 'publicIndex'])->name('public.pelatihan.index');

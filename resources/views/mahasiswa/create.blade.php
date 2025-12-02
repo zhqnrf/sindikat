@@ -196,21 +196,21 @@
         {{-- --}}
         <div class="row">
             <div class="col-md-6 mb-3">
-                <label class="form-label">Asal Universitas <span class="text-danger">*</span></label>
+                <label class="form-label">Asal Instansi <span class="text-danger">*</span></label>
                 <div class="input-group">
                     {{-- Icon Universitas --}}
-                    <span class="input-group-text"><i class="bi bi-building"></i></span> 
+                    <span class="input-group-text"><i class="bi bi-building"></i></span>
                     <select name="mou_id" class="form-select" required>
-                        <option value="">-- Pilih Universitas --</option>
+                        <option value="">-- Pilih Instansi --</option>
                         @foreach ($mous as $mou)
                             <option value="{{ $mou->id }}" {{ old('mou_id') == $mou->id ? 'selected' : '' }}>
-                                {{ $mou->nama_universitas }}
+                                {{ $mou->nama_instansi ?? $mou->nama_universitas }}
                             </option>
                         @endforeach
                     </select>
                 </div>
             </div>
-            
+
             <div class="col-md-6 mb-3">
                 <label class="form-label">Program Studi</label>
                 <div class="input-group">

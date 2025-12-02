@@ -4,7 +4,7 @@
 @section('page-title', 'Data MOU') {{-- Ini mungkin tidak terpakai oleh style baru --}}
 
 @section('content')
-    {{-- 
+    {{--
       =====================================================
       STYLE KUSTOM (DARI CONTOH 'Pelatihan Dasar')
       =====================================================
@@ -117,7 +117,7 @@
             color: #555;
             border-bottom: 1px solid #f0f0f0;
         }
-        
+
         .table-hover tbody tr:hover {
             background-color: #fff5f6; /* custom-maroon-subtle */
         }
@@ -161,7 +161,7 @@
     {{-- ================= END STYLE ================= --}}
 
 
-    {{-- 
+    {{--
       =====================================================
       STRUKTUR HTML BARU UNTUK LIST MOU
       =====================================================
@@ -212,11 +212,11 @@
             <form id="filterForm" method="GET" action="{{ route('mou.index') }}">
                 <div class="row">
                     <div class="col-md-4 mb-3 mb-md-0">
-                        <label class="small text-muted fw-bold text-uppercase">Cari Nama Universitas</label>
+                        <label class="small text-muted fw-bold text-uppercase">Cari Nama Instansi</label>
                         <div class="input-group shadow-sm">
                             <span class="input-group-text bg-light border-0 border-end-0"><i class="bi bi-search"></i></span>
                             <input type="text" class="form-control bg-light border-0" name="search"
-                                placeholder="Nama universitas..." value="{{ request('search') }}">
+                                placeholder="Nama instansi..." value="{{ request('search') }}">
                         </div>
                     </div>
                     <div class="col-md-4 mb-3 mb-md-0">
@@ -254,10 +254,10 @@
                 <thead>
                     <tr>
                         <th class="text-center" width="5%">No</th>
-                        <th>Universitas</th>
+                        <th>Instansi</th>
                         <th>Durasi MOU</th>
-                        <th>File MOU</th>
-                        <th>Surat Keterangan</th>
+                        <th>Draft MoU</th>
+                        <th>Surat Permohonan</th>
                         <th>Keterangan</th>
                         <th class="text-center" width="15%">Aksi</th>
                     </tr>
@@ -270,7 +270,7 @@
                                 {{ ($mous->currentPage() - 1) * $mous->perPage() + $index + 1 }}
                             </td>
                             <td>
-                                <span class="fw-bold text-dark d-block">{{ $mou->nama_universitas }}</span>
+                                <span class="fw-bold text-dark d-block">{{ $mou->nama_instansi }}</span>
                             </td>
                             <td>
                                 <span class="badge bg-light text-dark border p-2">
@@ -282,16 +282,24 @@
                                 </span>
                             </td>
                             <td>
-                                <a href="{{ Storage::url($mou->file_mou) }}" target="_blank"
-                                    class="btn btn-sm btn-outline-dark rounded-pill px-3">
-                                    <i class="bi bi-file-earmark-pdf me-1"></i> Lihat
-                                </a>
+                                @if ($mou->draft_mou)
+                                    <a href="{{ Storage::url($mou->draft_mou) }}" target="_blank"
+                                        class="btn btn-sm btn-outline-dark rounded-pill px-3">
+                                        <i class="bi bi-file-earmark-pdf me-1"></i> Lihat
+                                    </a>
+                                @else
+                                    -
+                                @endif
                             </td>
                             <td>
-                                <a href="{{ Storage::url($mou->surat_keterangan) }}" target="_blank"
-                                    class="btn btn-sm btn-outline-dark rounded-pill px-3">
-                                    <i class="bi bi-file-earmark-image me-1"></i> Lihat
-                                </a>
+                                @if ($mou->surat_permohonan)
+                                    <a href="{{ Storage::url($mou->surat_permohonan) }}" target="_blank"
+                                        class="btn btn-sm btn-outline-dark rounded-pill px-3">
+                                        <i class="bi bi-file-earmark-image me-1"></i> Lihat
+                                    </a>
+                                @else
+                                    -
+                                @endif
                             </td>
                             <td>{{ $mou->keterangan ?? '-' }}</td>
                             <td class="text-center">
@@ -338,7 +346,7 @@
     </div>
 
 
-    {{-- 
+    {{--
       =====================================================
       SCRIPT UNTUK SWEETALERT (Menggantikan alert biasa)
       =====================================================
@@ -375,7 +383,7 @@
 @endsection
 
 @section('scripts')
-    {{-- 
+    {{--
       =====================================================
       SEMUA SCRIPT DARI 'Pelatihan Dasar'
       =====================================================
@@ -429,27 +437,31 @@
         function exportMOU() {
             try {
                 // Ambil data $mous dari Laravel
-                const rawData = @json($mous); 
+                const rawData = @json($mous);
                 const dataList = rawData.data ? rawData.data : rawData;
 
                 if (!dataList || dataList.length === 0) {
                     showToast("Tidak ada data untuk diexport", "error");
                     return;
                 }
-                
+
                 // Mapping data MOU
                 const data = dataList.map(mou => {
                     return [
-                        mou.nama_universitas || '',
+                        mou.nama_instansi || mou.nama_universitas || '',
                         mou.tanggal_masuk ? mou.tanggal_masuk.split('T')[0] : '', // Format YYYY-MM-DD
                         mou.tanggal_keluar ? mou.tanggal_keluar.split('T')[0] : '', // Format YYYY-MM-DD
+                        mou.surat_permohonan || '',
+                        mou.sk_pengangkatan_pimpinan || '',
+                        mou.sertifikat_akreditasi_prodi || '',
+                        mou.draft_mou || '',
                         mou.keterangan || ''
                     ];
                 });
 
                 // Buat worksheet
                 const ws = XLSX.utils.aoa_to_sheet([
-                    ['Nama Universitas', 'Tanggal Masuk', 'Tanggal Keluar', 'Keterangan']
+                    ['Nama Instansi', 'Tanggal Masuk', 'Tanggal Keluar', 'Surat Permohonan', 'SK Pengangkatan Pimpinan', 'Sertifikat Akreditasi Prodi', 'Draft MoU', 'Keterangan']
                 ].concat(data));
 
                 const wb = XLSX.utils.book_new();
@@ -466,8 +478,8 @@
         // 4. Fungsi Download Template (Diadaptasi untuk MOU)
         function downloadTemplateMOU() {
             const ws = XLSX.utils.aoa_to_sheet([
-                ['Nama Universitas', 'Tanggal Masuk (YYYY-MM-DD)', 'Tanggal Keluar (YYYY-MM-DD)', 'Keterangan'],
-                ['Universitas Contoh', '2025-01-01', '2025-12-31', 'Kerjasama penelitian'],
+                ['Nama Instansi', 'Tanggal Masuk (YYYY-MM-DD)', 'Tanggal Keluar (YYYY-MM-DD)', 'Keterangan'],
+                    ['Universitas Contoh', '2025-01-01', '2025-12-31', 'Kerjasama penelitian', 'Surat Permohonan', 'SK Pengangkatan Pimpinan', 'Sertifikat Akreditasi Prodi', 'Draft MoU'],
                 ['Institut Teknologi Kedua', '2024-06-15', '2025-06-14', '']
             ]);
             const wb = XLSX.utils.book_new();
@@ -501,7 +513,7 @@
                     showToast("Sedang memproses data...", "info");
 
                     // Pastikan route 'mou.import_excel' ada di web.php
-                    fetch('{{ route('mou.import_excel') }}', { 
+                    fetch('{{ route('mou.import_excel') }}', {
                         method: 'POST',
                         body: fd,
                         headers: { 'Accept': 'application/json' }
@@ -554,7 +566,7 @@
                     });
                 });
             });
-            
+
             // Hapus inisialisasi Popover karena tidak dipakai di tabel MOU
         });
     </script>

@@ -669,7 +669,6 @@
     </script>
 
     @stack('scripts')
-    {{-- Backwards compatibility: some views still use @section('scripts') instead of @push('scripts') --}}
     @yield('scripts')
 </body>
 
